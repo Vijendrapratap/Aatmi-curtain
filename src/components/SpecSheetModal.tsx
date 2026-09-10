@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CurtainTemplate, Fabric, FabricAssignment } from '../types/curtain';
-import { X, Download, Printer, CheckCircle, Sparkles, FileText } from 'lucide-react';
+import { X, Download, Printer, CheckCircle, Sparkles, FileText, Building2, User, Scissors, Calculator, Copy, Check } from 'lucide-react';
 
 interface SpecSheetModalProps {
   isOpen: boolean;
@@ -19,34 +19,81 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
   fabrics,
   currentPreviewImage,
 }) => {
+  const [fullnessMultiplier, setFullnessMultiplier] = useState<number>(2.5); // 2.0x, 2.5x, 3.0x
+  const [clientName, setClientName] = useState<string>('The Bel-Air Residence · Master Salon');
+  const [designerName, setDesignerName] = useState<string>('Elena Vance (Trade Designer ID #AT-882)');
+  const [copied, setCopied] = useState<boolean>(false);
+
   if (!isOpen) return null;
 
   const fabricMap = new Map<string, Fabric>();
   fabrics.forEach((f) => fabricMap.set(f.id, f));
 
-  // Yardage calculation heuristics based on region type
+  // Yardage calculation heuristics based on region type and fullness multiplier
   const calculateYardage = (regionName: string) => {
     const lower = regionName.toLowerCase();
+    const ratio = fullnessMultiplier / 2.5; // base benchmark is 2.5x
     if (lower.includes('main') || lower.includes('body') || lower.includes('drop')) {
-      return { yards: '12.5 yards', meter: '11.4 m', cuts: '3 full drops (54" width)' };
+      const y = (12.5 * ratio).toFixed(1);
+      const m = (11.4 * ratio).toFixed(1);
+      return { yards: `${y} yds`, meter: `${m} m`, baseNum: parseFloat(y), cuts: `${Math.ceil(3 * ratio)} full drops (54" width)` };
     }
     if (lower.includes('band') || lower.includes('decorative')) {
-      return { yards: '2.5 yards', meter: '2.3 m', cuts: '1 continuous width cut' };
+      const y = (2.5 * ratio).toFixed(1);
+      const m = (2.3 * ratio).toFixed(1);
+      return { yards: `${y} yds`, meter: `${m} m`, baseNum: parseFloat(y), cuts: '1 continuous width cut' };
     }
     if (lower.includes('hem') || lower.includes('bottom')) {
-      return { yards: '3.0 yards', meter: '2.7 m', cuts: 'Weighted double-fold hem' };
+      const y = (3.0 * ratio).toFixed(1);
+      const m = (2.7 * ratio).toFixed(1);
+      return { yards: `${y} yds`, meter: `${m} m`, baseNum: parseFloat(y), cuts: 'Weighted double-fold hem' };
     }
     if (lower.includes('valance') || lower.includes('swag')) {
-      return { yards: '4.5 yards', meter: '4.1 m', cuts: 'Swag template pattern' };
+      const y = (4.5 * ratio).toFixed(1);
+      const m = (4.1 * ratio).toFixed(1);
+      return { yards: `${y} yds`, meter: `${m} m`, baseNum: parseFloat(y), cuts: 'Swag template pattern' };
     }
     if (lower.includes('border') || lower.includes('trim') || lower.includes('flank')) {
-      return { yards: '3.8 yards', meter: '3.5 m', cuts: 'Leading edge border strip' };
+      const y = (3.8 * ratio).toFixed(1);
+      const m = (3.5 * ratio).toFixed(1);
+      return { yards: `${y} yds`, meter: `${m} m`, baseNum: parseFloat(y), cuts: 'Leading edge border strip' };
     }
-    return { yards: '2.0 yards', meter: '1.8 m', cuts: 'Custom accent cut' };
+    const y = (2.0 * ratio).toFixed(1);
+    const m = (1.8 * ratio).toFixed(1);
+    return { yards: `${y} yds`, meter: `${m} m`, baseNum: parseFloat(y), cuts: 'Custom accent cut' };
   };
+
+  // Calculate total yardage
+  let totalYards = 0;
+  template.regions.forEach((reg) => {
+    totalYards += calculateYardage(reg.name).baseNum;
+  });
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleCopySummary = () => {
+    const summaryLines = [
+      `AATMI COUTURE DRAPERY SPECIFICATION DOCKET`,
+      `Project: ${clientName}`,
+      `Designer: ${designerName}`,
+      `Curtain Design: ${template.name} (${template.style_code})`,
+      `Heading Pleat: ${template.metadata.pinch_style || 'Tailored Double Pinch Pleat'}`,
+      `Fullness Multiplier: ${fullnessMultiplier}x Fullness`,
+      `Total Estimated Yardage: ${totalYards.toFixed(1)} yards`,
+      `---------------------------------------`,
+      ...template.regions.map((reg, idx) => {
+        const assignment = assignments.find((a) => a.region_id === reg.id);
+        const fab = assignment ? fabricMap.get(assignment.fabric_id) : null;
+        const yardage = calculateYardage(reg.name);
+        return `Zone ${idx + 1} [${reg.display_name}]: ${fab ? fab.name : 'Default'} (${fab ? fab.category : ''}) - ${yardage.yards}`;
+      }),
+    ];
+
+    navigator.clipboard.writeText(summaryLines.join('\n'));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -70,8 +117,17 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
 
           <div className="flex items-center gap-2">
             <button
+              onClick={handleCopySummary}
+              className="flex items-center gap-1.5 text-xs bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 px-3 py-1.5 rounded-lg border border-amber-500/40 transition cursor-pointer"
+              title="Copy formatted specification docket to clipboard"
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-amber-400" />}
+              <span>{copied ? 'Copied!' : 'Copy Spec'}</span>
+            </button>
+
+            <button
               onClick={handlePrint}
-              className="flex items-center gap-1 text-xs bg-stone-800 hover:bg-stone-700 text-stone-200 px-3 py-1.5 rounded-lg border border-stone-700 transition cursor-pointer"
+              className="flex items-center gap-1.5 text-xs bg-stone-800 hover:bg-stone-700 text-stone-200 px-3 py-1.5 rounded-lg border border-stone-700 transition cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print Spec</span>
@@ -88,6 +144,61 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
 
         {/* Docket Body */}
         <div className="p-6 flex-1 overflow-y-auto space-y-6 bg-[#FAFAF8]" id="printable-spec-sheet">
+          {/* Client & Designer Docket Header */}
+          <div className="bg-stone-900 text-stone-100 p-4 rounded-xl border border-stone-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-amber-400" />
+                <span className="text-[10px] text-stone-400 uppercase tracking-wider font-semibold">Client Project:</span>
+              </div>
+              <input
+                type="text"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                className="bg-stone-800/80 border border-stone-700 text-stone-100 text-xs px-2.5 py-1 rounded font-medium focus:ring-1 focus:ring-amber-400 outline-none w-full sm:w-72"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-emerald-400" />
+                <span className="text-[10px] text-stone-400 uppercase tracking-wider font-semibold">Designer / Trade ID:</span>
+              </div>
+              <input
+                type="text"
+                value={designerName}
+                onChange={(e) => setDesignerName(e.target.value)}
+                className="bg-stone-800/80 border border-stone-700 text-stone-100 text-xs px-2.5 py-1 rounded font-medium focus:ring-1 focus:ring-amber-400 outline-none w-full sm:w-72"
+              />
+            </div>
+
+            {/* Drapery Fullness Toggle */}
+            <div className="space-y-1">
+              <span className="text-[10px] text-stone-400 uppercase tracking-wider font-semibold block">
+                Pleat Fullness Ratio:
+              </span>
+              <div className="flex items-center gap-1 bg-stone-800 p-1 rounded-lg border border-stone-700">
+                {[
+                  { ratio: 2.0, label: '2.0x Casual' },
+                  { ratio: 2.5, label: '2.5x Tailored' },
+                  { ratio: 3.0, label: '3.0x Opulent' },
+                ].map((item) => (
+                  <button
+                    key={item.ratio}
+                    onClick={() => setFullnessMultiplier(item.ratio)}
+                    className={`text-[11px] px-2 py-1 rounded font-medium transition cursor-pointer ${
+                      fullnessMultiplier === item.ratio
+                        ? 'bg-amber-500 text-stone-950 font-bold shadow-xs'
+                        : 'text-stone-300 hover:text-white'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {/* Top metadata grid */}
           <div className="bg-white p-5 rounded-xl border border-stone-200/80 shadow-xs grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div>
@@ -111,15 +222,15 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
                 Heading Pleat Style
               </span>
               <span className="text-xs font-semibold text-stone-800">
-                {template.metadata.pinch_style || 'Pinch Pleat'}
+                {template.metadata.pinch_style || 'Tailored Pinch Pleat'}
               </span>
             </div>
             <div>
               <span className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider block">
-                Total Redesign Zones
+                Total Estimated Yardage
               </span>
-              <span className="text-xs font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full inline-block">
-                {template.regions.length} Replaceable Zones
+              <span className="text-xs font-bold text-amber-900 bg-amber-100/90 border border-amber-300/60 px-2.5 py-0.5 rounded-full inline-block font-mono">
+                {totalYards.toFixed(1)} yards ({fullnessMultiplier}x)
               </span>
             </div>
           </div>
