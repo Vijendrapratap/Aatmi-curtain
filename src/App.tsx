@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CurtainTemplate, Fabric, FabricAssignment } from './types/curtain';
 import { DEFAULT_TEMPLATES, DEFAULT_FABRICS } from './data/defaultCatalog';
 import { rasterizeToPngBase64, getTemplateRealPhotoUrl } from './utils/fabricRenderer';
-import { executeMaskedPipeline } from './utils/maskedPipeline';
+import { generateSequentialRedesign } from './utils/maskedPipeline';
 import { executeSequentialInpainting, InpaintingStepEvent } from './lib/sequential-inpainting';
 import { useStudioStore } from './lib/store';
 import { Header } from './components/Header';
@@ -135,57 +135,35 @@ export default function App() {
 
   // Sequential Masked Inpainting Pipeline: "The Secret Sauce"
   const handleTriggerAiGeneration = async () => {
-    if (!selectedTemplate) return;
     setIsGeneratingAi(true);
-    setSequentialStepEvent(null);
     setGenerationNotice(null);
-
     try {
-      // Execute the multi-region sequential loop
-      const result = await executeSequentialInpainting({
+      const result = await generateSequentialRedesign({
         template: selectedTemplate,
-        fabrics,
         assignments,
-        onStepProgress: (event) => {
-          setSequentialStepEvent(event);
-          setAiGenerationStep(event.message);
-          if (event.currentCompositeUrl) {
-            setAiGeneratedImageUrl(event.currentCompositeUrl);
-          }
-        },
+        fabrics,
+        onStep: setAiGenerationStep,
+        callEdit: (payload) =>
+          fetch('/api/generate-curtain-fabric', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          }).then((r) => r.json()),
       });
-
-      if (result.finalImageUrl) {
-        setAiGeneratedImageUrl(result.finalImageUrl);
-        setGenerationNotice({
-          type: 'success',
-          text: `Sequential inpainting completed via ${result.providerUsed.toUpperCase()} across ${result.stepsExecuted} drapery zones with fold depth preserved!`,
-        });
-
-        // Record job in Supabase queue state
-        addJob({
-          id: 'job-' + Date.now(),
-          templateId: selectedTemplate.id,
-          templateName: selectedTemplate.name,
-          type: 'sequential_composite',
-          status: 'completed',
-          providerUsed: result.providerUsed,
-          outputUrl: result.finalImageUrl,
-          createdAt: new Date().toLocaleTimeString(),
-          stepsCompleted: result.stepsExecuted,
-          stepsTotal: result.stepsExecuted,
-        });
-      }
-    } catch (err: any) {
-      console.warn('Sequential inpainting note:', err.message);
-      // Fallback to client-side photorealistic renderer if needed
+      setAiGeneratedImageUrl(result.imageUrl);
       setGenerationNotice({
-        type: 'info',
-        text: err.message || 'Interactive high-fidelity fabric draping is active with authentic lighting and fold transfer.',
+        type: 'success',
+        text: 'AI photorealistic redesign generated (sequential masked pass).',
+      });
+    } catch (err: any) {
+      setGenerationNotice({
+        type: err?.needsPaidKey ? 'warning' : 'info',
+        text: err?.needsPaidKey
+          ? 'Image generation requires a billed Gemini key. Canvas preview remains active.'
+          : err?.message || 'AI generation unavailable. Canvas preview remains active.',
       });
     } finally {
       setIsGeneratingAi(false);
-      setSequentialStepEvent(null);
       setAiGenerationStep('');
     }
   };
