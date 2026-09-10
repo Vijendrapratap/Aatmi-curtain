@@ -1,0 +1,7 @@
+{
+  "name": "Aatmi — Curtain Design & Fabric Studio",
+  "description": "AI template-based curtain design platform to visualize custom fabrics on multi-region curtain styles with realistic drapery and lighting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
