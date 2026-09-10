@@ -113,72 +113,74 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/75 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-      <div className="bg-stone-900 border border-stone-800 text-stone-100 rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-stone-800 flex items-center justify-between bg-stone-950">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 font-semibold">
-              Tour · {currentStep + 1} of {steps.length}
-            </span>
-            <span className="text-xs text-stone-400">Designer & Brand Guide</span>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-stone-400 hover:text-stone-200 p-1.5 rounded-lg hover:bg-stone-800 transition cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Content Body */}
-        <div className="p-6 sm:p-8 space-y-5">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-stone-800 border border-stone-700 flex items-center justify-center shrink-0 shadow-md">
-              <StepIcon className={`w-6 h-6 ${current.iconColor}`} />
-            </div>
-            <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-amber-300">
-                {current.badge}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/80 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200">
+      <div className="bg-stone-900 border-0 sm:border border-stone-800 text-stone-100 sm:rounded-2xl shadow-2xl max-w-xl w-full h-full sm:h-auto max-h-[100vh] sm:max-h-[92vh] overflow-y-auto flex flex-col justify-between">
+        <div>
+          {/* Header */}
+          <div className="px-4 sm:px-6 py-3.5 border-b border-stone-800 flex items-center justify-between bg-stone-950">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 font-semibold">
+                Tour · {currentStep + 1} of {steps.length}
               </span>
-              <h3 className="font-serif text-xl sm:text-2xl font-semibold text-stone-100 mt-1 leading-snug">
-                {current.title}
-              </h3>
-              <p className="text-xs text-stone-400 font-sans mt-0.5">
-                {current.subtitle}
-              </p>
+              <span className="text-[11px] sm:text-xs text-stone-400">Haute Couture Guide</span>
             </div>
+            <button
+              onClick={onClose}
+              className="text-stone-400 hover:text-stone-200 p-1.5 rounded-lg hover:bg-stone-800 transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
-          <p className="text-stone-300 text-sm leading-relaxed bg-stone-850 p-4 rounded-xl border border-stone-800">
-            {current.description}
-          </p>
-
-          <div className="space-y-2">
-            <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider block">
-              Key Capabilities:
-            </span>
-            {current.points.map((pt, idx) => (
-              <div key={idx} className="flex items-center gap-2.5 text-xs text-stone-200">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>{pt}</span>
+          {/* Content Body */}
+          <div className="p-4 sm:p-7 space-y-4 sm:space-y-5">
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-stone-800 border border-stone-700 flex items-center justify-center shrink-0 shadow-md">
+                <StepIcon className={`w-5 h-5 sm:w-6 sm:h-6 ${current.iconColor}`} />
               </div>
-            ))}
-          </div>
+              <div>
+                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-amber-300">
+                  {current.badge}
+                </span>
+                <h3 className="font-serif text-lg sm:text-2xl font-semibold text-stone-100 mt-0.5 sm:mt-1 leading-snug">
+                  {current.title}
+                </h3>
+                <p className="text-[11px] sm:text-xs text-stone-400 font-sans mt-0.5">
+                  {current.subtitle}
+                </p>
+              </div>
+            </div>
 
-          {/* Step Progress Indicators */}
-          <div className="flex items-center justify-center gap-2 pt-2">
-            {steps.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setCurrentStep(i)}
-                className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                  i === currentStep ? 'w-8 bg-amber-400' : 'w-2 bg-stone-700 hover:bg-stone-600'
-                }`}
-                title={`Jump to step ${i + 1}`}
-              />
-            ))}
+            <p className="text-stone-300 text-xs sm:text-sm leading-relaxed bg-stone-850 p-3.5 sm:p-4 rounded-xl border border-stone-800">
+              {current.description}
+            </p>
+
+            <div className="space-y-2">
+              <span className="text-[10px] sm:text-[11px] font-semibold text-stone-400 uppercase tracking-wider block">
+                Key Capabilities:
+              </span>
+              {current.points.map((pt, idx) => (
+                <div key={idx} className="flex items-center gap-2 text-[11px] sm:text-xs text-stone-200">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>{pt}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Step Progress Indicators */}
+            <div className="flex items-center justify-center gap-2 pt-2">
+              {steps.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setCurrentStep(i)}
+                  className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                    i === currentStep ? 'w-8 bg-amber-400' : 'w-2 bg-stone-700 hover:bg-stone-600'
+                  }`}
+                  title={`Jump to step ${i + 1}`}
+                />
+              ))}
+            </div>
           </div>
         </div>
 

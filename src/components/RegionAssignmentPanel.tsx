@@ -112,11 +112,13 @@ export const RegionAssignmentPanel: React.FC<RegionAssignmentPanelProps> = ({
       />
 
       {/* Header section */}
-      <div className="p-5 border-b border-stone-100 bg-stone-50/70">
-        <div className="flex items-center justify-between mb-1">
+      <div className="p-4 sm:p-5 border-b border-stone-100 bg-[#FAF9F6]">
+        <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-amber-700" />
-            <h2 className="font-serif font-semibold text-stone-900 text-sm tracking-wide">
+            <div className="w-6 h-6 rounded bg-amber-100 text-amber-900 flex items-center justify-center">
+              <Layers className="w-3.5 h-3.5 text-amber-800" />
+            </div>
+            <h2 className="font-serif font-bold text-stone-900 text-sm tracking-wide">
               Fabric Zone Assignment
             </h2>
           </div>
@@ -124,18 +126,19 @@ export const RegionAssignmentPanel: React.FC<RegionAssignmentPanelProps> = ({
             {onReturnToPreview && (
               <button
                 onClick={onReturnToPreview}
-                className="lg:hidden text-xs bg-amber-600 hover:bg-amber-500 text-white font-semibold px-2.5 py-1 rounded shadow-xs cursor-pointer"
+                className="lg:hidden text-[11px] bg-gradient-to-r from-amber-700 to-amber-800 hover:from-amber-800 hover:to-amber-900 text-amber-100 font-semibold px-3 py-1.5 rounded-lg shadow-xs cursor-pointer flex items-center gap-1"
               >
-                View Live Preview
+                <span>View Curtain</span>
+                <span>→</span>
               </button>
             )}
-            <span className="text-[11px] font-semibold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded-full">
+            <span className="text-[11px] font-semibold text-amber-900 bg-amber-100/90 border border-amber-300/60 px-2 py-0.5 rounded-full font-mono">
               {assignments.length}/{template.regions.length}
             </span>
           </div>
         </div>
-        <p className="text-xs text-stone-500 leading-relaxed">
-          Select any curtain section below to assign luxury fabrics or upload your own swatch image.
+        <p className="text-[11px] sm:text-xs text-stone-500 leading-relaxed">
+          Assign luxury fabrics to each drape zone below or fine-tune weave scale and rotation.
         </p>
       </div>
 
@@ -324,16 +327,16 @@ export const RegionAssignmentPanel: React.FC<RegionAssignmentPanelProps> = ({
       </div>
 
       {/* Quick Swatch Bar at bottom of panel */}
-      <div className="p-4 border-t border-stone-200/80 bg-stone-50/50">
+      <div className="p-4 border-t border-stone-200/80 bg-[#FAF9F6]">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[11px] font-semibold text-stone-700 uppercase tracking-wider">
-            Quick Swatch Pick for Zone {activeRegion.order}
+            Quick Swatch for {activeRegion?.display_name || `Zone ${activeRegion?.order}`}
           </span>
           <button
             onClick={onOpenFabricLibrary}
-            className="text-[11px] text-amber-800 hover:text-amber-950 font-medium cursor-pointer"
+            className="text-[11px] text-amber-800 hover:text-amber-950 font-medium cursor-pointer underline underline-offset-2"
           >
-            View All ({fabrics.length})
+            Full Catalog ({fabrics.length})
           </button>
         </div>
 
@@ -372,10 +375,10 @@ export const RegionAssignmentPanel: React.FC<RegionAssignmentPanelProps> = ({
           id="btn-redesign-with-ai"
           onClick={onTriggerAiGeneration}
           disabled={isGeneratingAi}
-          className="w-full py-2.5 px-4 bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 hover:from-amber-950 hover:to-stone-900 text-amber-300 font-semibold text-xs rounded-lg shadow-sm border border-amber-500/30 flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-50"
+          className="w-full py-2.5 px-4 bg-gradient-to-r from-[#8C5D36] via-[#754C28] to-[#5C3B1E] hover:from-[#9C693E] hover:to-[#6C4524] text-stone-100 font-semibold text-xs rounded-xl shadow-md border border-amber-500/30 flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-50"
         >
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>{isGeneratingAi ? 'Synthesizing Fabric Redesign...' : 'Generate Curtain with Choosed Fabrics'}</span>
+          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+          <span>{isGeneratingAi ? 'Synthesizing Drapery Redesign...' : 'Synthesize Drapery with AI'}</span>
         </button>
       </div>
     </aside>

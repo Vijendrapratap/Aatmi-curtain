@@ -31,42 +31,52 @@ export const TactileLoupeModal: React.FC<TactileLoupeModalProps> = ({
     setLensPos({ x, y });
   };
 
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 0) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = Math.max(0, Math.min(100, ((touch.clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((touch.clientY - rect.top) / rect.height) * 100));
+    setLensPos({ x, y });
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/75 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-      <div className="bg-stone-900 border border-stone-800 text-stone-100 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/80 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200">
+      <div className="bg-stone-900 border-0 sm:border border-stone-800 text-stone-100 sm:rounded-2xl shadow-2xl max-w-2xl w-full h-full sm:h-auto max-h-[100vh] sm:max-h-[92vh] overflow-y-auto flex flex-col">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-stone-800 flex items-center justify-between bg-stone-950">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-stone-800 border border-stone-700 flex items-center justify-center">
+        <div className="px-4 sm:px-6 py-3.5 border-b border-stone-800 flex items-center justify-between bg-stone-950 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-stone-800 border border-stone-700 flex items-center justify-center shrink-0">
               <ZoomIn className="w-4 h-4 text-amber-400" />
             </div>
-            <div>
-              <h3 className="font-serif font-semibold text-stone-100 text-base flex items-center gap-2">
-                {fabric.name}
-                <span className="text-[10px] uppercase font-sans font-semibold tracking-wider bg-stone-800 text-stone-300 px-2 py-0.5 rounded border border-stone-700">
+            <div className="truncate">
+              <h3 className="font-serif font-semibold text-stone-100 text-sm sm:text-base flex items-center gap-2 truncate">
+                <span className="truncate">{fabric.name}</span>
+                <span className="text-[9px] sm:text-[10px] uppercase font-sans font-semibold tracking-wider bg-stone-800 text-amber-300 px-1.5 py-0.5 rounded border border-stone-700 shrink-0">
                   {fabric.category}
                 </span>
               </h3>
-              <p className="text-xs text-stone-400 font-sans">
-                Tactile Weave & Yarn Surface Loupe · 40x Macro Optical Inspection
+              <p className="text-[10px] sm:text-xs text-stone-400 font-sans truncate">
+                Tactile Weave & Yarn Surface Loupe · 40x Macro Inspection
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-stone-400 hover:text-stone-200 p-1.5 rounded-lg hover:bg-stone-800 transition cursor-pointer"
+            className="text-stone-400 hover:text-stone-200 p-1.5 rounded-lg hover:bg-stone-800 transition cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <div className="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 items-start">
           {/* Left: Interactive Macro Magnifier Viewport */}
           <div className="flex flex-col gap-3">
             <div
               onMouseMove={handleMouseMove}
-              className="relative aspect-square w-full rounded-xl overflow-hidden border border-stone-700 bg-stone-950 cursor-crosshair group shadow-inner"
+              onTouchMove={handleTouchMove}
+              className="relative aspect-square w-full rounded-xl overflow-hidden border border-stone-700 bg-stone-950 cursor-crosshair group shadow-inner touch-none select-none"
             >
               {/* Swatch Background Image with optical transform */}
               <div

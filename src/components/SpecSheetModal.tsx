@@ -97,40 +97,40 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/75 backdrop-blur-xs">
-      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-stone-950/80 backdrop-blur-xs">
+      <div className="bg-white sm:rounded-2xl shadow-2xl border-0 sm:border border-stone-200 w-full sm:max-w-4xl h-full sm:h-auto sm:max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in duration-200">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-900 text-stone-100">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-stone-950 font-serif font-bold text-sm">
+        <div className="px-4 sm:px-6 py-3.5 border-b border-stone-800 flex items-center justify-between bg-stone-900 text-stone-100">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-stone-950 font-serif font-bold text-xs sm:text-sm shrink-0">
               A
             </div>
-            <div>
-              <h3 className="font-serif text-base font-bold tracking-wide">
-                AATMI HAUTE COUTURE DRAPERY
+            <div className="truncate">
+              <h3 className="font-serif text-sm sm:text-base font-bold tracking-wide truncate">
+                AATMI SPECIFICATION
               </h3>
-              <p className="text-[11px] text-stone-400">
-                Design Specification & Fabric Yardage Docket
+              <p className="text-[10px] sm:text-[11px] text-stone-400 truncate">
+                Curtain Specification & Yardage Docket
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={handleCopySummary}
-              className="flex items-center gap-1.5 text-xs bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 px-3 py-1.5 rounded-lg border border-amber-500/40 transition cursor-pointer"
+              className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 px-2.5 sm:px-3 py-1.5 rounded-lg border border-amber-500/40 transition cursor-pointer"
               title="Copy formatted specification docket to clipboard"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-amber-400" />}
-              <span>{copied ? 'Copied!' : 'Copy Spec'}</span>
+              <span className="hidden xs:inline">{copied ? 'Copied!' : 'Copy Spec'}</span>
             </button>
 
             <button
               onClick={handlePrint}
-              className="flex items-center gap-1.5 text-xs bg-stone-800 hover:bg-stone-700 text-stone-200 px-3 py-1.5 rounded-lg border border-stone-700 transition cursor-pointer"
+              className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-stone-800 hover:bg-stone-700 text-stone-200 px-2.5 sm:px-3 py-1.5 rounded-lg border border-stone-700 transition cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>Print Spec</span>
+              <span className="hidden xs:inline">Print</span>
             </button>
 
             <button
@@ -143,9 +143,9 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
         </div>
 
         {/* Docket Body */}
-        <div className="p-6 flex-1 overflow-y-auto space-y-6 bg-[#FAFAF8]" id="printable-spec-sheet">
+        <div className="p-4 sm:p-6 flex-1 overflow-y-auto space-y-4 sm:space-y-6 bg-[#FAFAF8]" id="printable-spec-sheet">
           {/* Client & Designer Docket Header */}
-          <div className="bg-stone-900 text-stone-100 p-4 rounded-xl border border-stone-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="bg-stone-900 text-stone-100 p-3.5 sm:p-4 rounded-xl border border-stone-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-amber-400" />
@@ -155,7 +155,7 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
                 type="text"
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
-                className="bg-stone-800/80 border border-stone-700 text-stone-100 text-xs px-2.5 py-1 rounded font-medium focus:ring-1 focus:ring-amber-400 outline-none w-full sm:w-72"
+                className="bg-stone-800/80 border border-stone-700 text-stone-100 text-xs px-2.5 py-1 rounded font-medium focus:ring-1 focus:ring-amber-400 outline-none w-full sm:w-64"
               />
             </div>
 
@@ -168,7 +168,7 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
                 type="text"
                 value={designerName}
                 onChange={(e) => setDesignerName(e.target.value)}
-                className="bg-stone-800/80 border border-stone-700 text-stone-100 text-xs px-2.5 py-1 rounded font-medium focus:ring-1 focus:ring-amber-400 outline-none w-full sm:w-72"
+                className="bg-stone-800/80 border border-stone-700 text-stone-100 text-xs px-2.5 py-1 rounded font-medium focus:ring-1 focus:ring-amber-400 outline-none w-full sm:w-64"
               />
             </div>
 
@@ -177,7 +177,7 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
               <span className="text-[10px] text-stone-400 uppercase tracking-wider font-semibold block">
                 Pleat Fullness Ratio:
               </span>
-              <div className="flex items-center gap-1 bg-stone-800 p-1 rounded-lg border border-stone-700">
+              <div className="flex items-center gap-1 bg-stone-800 p-1 rounded-lg border border-stone-700 overflow-x-auto scrollbar-none">
                 {[
                   { ratio: 2.0, label: '2.0x Casual' },
                   { ratio: 2.5, label: '2.5x Tailored' },
@@ -186,7 +186,7 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
                   <button
                     key={item.ratio}
                     onClick={() => setFullnessMultiplier(item.ratio)}
-                    className={`text-[11px] px-2 py-1 rounded font-medium transition cursor-pointer ${
+                    className={`text-[10px] sm:text-[11px] px-2 py-1 rounded font-medium transition cursor-pointer whitespace-nowrap ${
                       fullnessMultiplier === item.ratio
                         ? 'bg-amber-500 text-stone-950 font-bold shadow-xs'
                         : 'text-stone-300 hover:text-white'
@@ -274,10 +274,10 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
                 return (
                   <div
                     key={region.id}
-                    className="bg-white p-3.5 rounded-xl border border-stone-200/80 shadow-xs flex items-center gap-3"
+                    className="bg-white p-2.5 sm:p-3.5 rounded-xl border border-stone-200/80 shadow-xs flex items-center gap-2.5 sm:gap-3"
                   >
                     {/* Swatch Image */}
-                    <div className="w-14 h-14 rounded-lg overflow-hidden border border-stone-200 shrink-0 bg-stone-100 shadow-2xs">
+                    <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-lg overflow-hidden border border-stone-200 shrink-0 bg-stone-100 shadow-2xs">
                       {fabric ? (
                         <img
                           src={fabric.image_url}
@@ -294,7 +294,7 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
 
                     {/* Description */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
                         <span
                           className="w-2.5 h-2.5 rounded-full shrink-0"
                           style={{ backgroundColor: region.accent_color || '#4F46E5' }}
@@ -303,26 +303,23 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
                           {region.display_name}
                         </h4>
                       </div>
-                      <p className="text-xs text-amber-900 font-semibold mt-0.5 truncate">
+                      <p className="text-[11px] sm:text-xs text-amber-900 font-semibold mt-0.5 truncate">
                         {fabric ? fabric.name : 'Default Style Spec'}
                       </p>
-                      <p className="text-[11px] text-stone-500">
+                      <p className="text-[10px] sm:text-[11px] text-stone-500 truncate">
                         {fabric
-                          ? `${fabric.category} • ${fabric.metadata.weave} • ${fabric.metadata.composition}`
+                          ? `${fabric.category} • ${fabric.metadata.weave}`
                           : region.description}
                       </p>
                     </div>
 
                     {/* Yardage estimate */}
                     <div className="text-right shrink-0 pl-2 border-l border-stone-100">
-                      <span className="text-xs font-bold text-stone-900 block font-mono">
+                      <span className="text-[11px] sm:text-xs font-bold text-stone-900 block font-mono">
                         {yardage.yards}
                       </span>
-                      <span className="text-[10px] text-stone-500 block">
+                      <span className="text-[9px] sm:text-[10px] text-stone-500 block">
                         ({yardage.meter})
-                      </span>
-                      <span className="text-[9px] text-stone-400 block max-w-[110px] truncate">
-                        {yardage.cuts}
                       </span>
                     </div>
                   </div>

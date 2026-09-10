@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CurtainTemplate, Fabric, FabricAssignment } from './types/curtain';
 import { DEFAULT_TEMPLATES, DEFAULT_FABRICS } from './data/defaultCatalog';
 import { rasterizeToPngBase64, getTemplateRealPhotoUrl } from './utils/fabricRenderer';
+import { executeMaskedPipeline } from './utils/maskedPipeline';
 import { Header } from './components/Header';
 import { CurtainCanvas } from './components/CurtainCanvas';
 import { RegionAssignmentPanel } from './components/RegionAssignmentPanel';
@@ -114,96 +115,52 @@ export default function App() {
     });
   };
 
-  // AI Photorealistic Generation Trigger
+  // AI Photorealistic Generation Trigger via Masked Pipeline
   const handleTriggerAiGeneration = async () => {
+    if (!selectedTemplate) return;
     setIsGeneratingAi(true);
-    setAiGenerationStep('Analyzing curtain structure, pleat depth & ambient room light...');
+    setAiGenerationStep('Initializing high-resolution curtain plate and fabric swatches...');
     setGenerationNotice(null);
 
-    const fabricMap = new Map<string, Fabric>();
-    fabrics.forEach((f) => fabricMap.set(f.id, f));
-
-    // Prepare assignment descriptors and images with client-side rasterization
-    const assignmentPayload = await Promise.all(
-      assignments.map(async (asg) => {
-        const reg = selectedTemplate.regions.find((r) => r.id === asg.region_id);
-        const fab = fabricMap.get(asg.fabric_id);
-        let rasterBase64 = '';
-        if (fab?.image_url) {
-          rasterBase64 = await rasterizeToPngBase64(fab.image_url, 256, 256);
-        }
-        return {
-          regionName: reg?.name || 'region',
-          regionDisplayName: reg?.display_name || 'Curtain Zone',
-          fabricName: fab?.name || 'Luxe Fabric',
-          fabricWeave: fab?.metadata.weave || 'woven',
-          fabricColorHex: fab?.color_hex || '#D4AF37',
-          fabricCategory: fab?.category || 'Drapery',
-          fabricImageBase64: rasterBase64,
-        };
-      })
-    );
-
-    // Prepare template image, ensuring it is a valid raster base64
-    let templateImageBase64 = currentCanvasUrl;
-    if (!templateImageBase64 && selectedTemplate) {
-      templateImageBase64 = getTemplateRealPhotoUrl(selectedTemplate, 800, 1000);
-    }
-    if (
-      templateImageBase64 &&
-      !templateImageBase64.startsWith('data:image/png;base64,') &&
-      !templateImageBase64.startsWith('data:image/jpeg;base64,')
-    ) {
-      templateImageBase64 = await rasterizeToPngBase64(templateImageBase64, 800, 1000);
-    }
-
     try {
-      // Step 1: Notify step
-      setTimeout(() => {
-        setAiGenerationStep('Injecting micro-weave textures into multi-region masks...');
-      }, 1200);
+      const result = await executeMaskedPipeline(
+        selectedTemplate,
+        assignments,
+        fabrics,
+        (step) => setAiGenerationStep(step)
+      );
 
-      const response = await fetch('/api/generate-curtain-fabric', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          templateName: selectedTemplate.name,
-          templateImage: templateImageBase64,
-          assignments: assignmentPayload,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.imageUrl) {
-        setAiGeneratedImageUrl(data.imageUrl);
+      if (result.success && result.imageUrl) {
+        setAiGeneratedImageUrl(result.imageUrl);
         setGenerationNotice({
           type: 'success',
-          text: 'AI photorealistic fabric redesign generated successfully! Use the view toggle to compare.',
+          text: 'AI photorealistic fabric redesign generated with zero background drift and preserved folds! Use the Final / Compare view to inspect.',
         });
-      } else {
-        // Handle gracefully when API key is missing or quota is restricted
-        console.warn('AI endpoint response:', data.error);
-        if (data.needsPaidKey) {
-          setGenerationNotice({
-            type: 'warning',
-            text: 'Image generation requires a Gemini API key with billing enabled. Photorealistic canvas draping is active in real time.',
-          });
-        } else {
-          setGenerationNotice({
-            type: 'info',
-            text: data.error?.includes('GEMINI_API_KEY')
-              ? 'API key required for server-side inpainting. High-fidelity drape canvas rendering is active in real time.'
-              : (data.error || 'AI image generation unavailable. Showing photorealistic interactive canvas drape.'),
-          });
-        }
       }
     } catch (err: any) {
-      console.error('AI generation error:', err);
-      setGenerationNotice({
-        type: 'info',
-        text: 'Interactive high-fidelity fabric draping is active on canvas. Gemini AI inpainter can be rerun anytime.',
-      });
+      console.warn('AI generation pipeline note:', err.message);
+      const isPaidKeyError =
+        err.message?.includes('paid') ||
+        err.message?.includes('quota') ||
+        err.message?.includes('RESOURCE_EXHAUSTED') ||
+        err.message?.includes('billing');
+
+      if (isPaidKeyError) {
+        setGenerationNotice({
+          type: 'warning',
+          text: 'High-resolution AI image synthesis requires a Gemini API key with billing enabled. Photorealistic canvas draping with authentic photographic luminance transfer is active in real time.',
+        });
+      } else if (err.message?.includes('GEMINI_API_KEY')) {
+        setGenerationNotice({
+          type: 'info',
+          text: 'Server GEMINI_API_KEY required for server-side inpainting. High-fidelity canvas drape rendering is active in real time.',
+        });
+      } else {
+        setGenerationNotice({
+          type: 'info',
+          text: err.message || 'Interactive high-fidelity fabric draping is active with authentic lighting and fold transfer.',
+        });
+      }
     } finally {
       setIsGeneratingAi(false);
       setAiGenerationStep('');
@@ -271,43 +228,43 @@ export default function App() {
         </div>
       )}
 
-      {/* Studio View Switcher for screens under 1024px (Mobile, Tablet, and AI Studio Preview Frames) */}
-      <div className="lg:hidden bg-stone-900 border-b border-stone-800 px-4 py-2 flex items-center justify-between z-20 shrink-0 shadow-sm">
-        <div className="flex items-center gap-1.5 p-1 bg-stone-800/90 rounded-lg border border-stone-700/80">
+      {/* Studio View Switcher for screens under 1024px (Mobile & Tablet) */}
+      <div className="lg:hidden bg-[#181615] border-b border-stone-800/80 px-3 sm:px-4 py-2 flex items-center justify-between z-20 shrink-0 shadow-sm gap-2">
+        <div className="flex items-center gap-1 p-1 bg-stone-900/90 rounded-lg border border-stone-800">
           <button
             id="mobile-tab-preview"
             onClick={() => setMobileTab('preview')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-medium transition cursor-pointer ${
               mobileTab === 'preview'
-                ? 'bg-amber-500 text-stone-950 font-semibold shadow-xs'
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 font-bold shadow-xs'
                 : 'text-stone-300 hover:text-white'
             }`}
           >
             <Eye className="w-3.5 h-3.5" />
-            <span>Curtain Preview</span>
+            <span>Preview</span>
           </button>
           <button
             id="mobile-tab-regions"
             onClick={() => setMobileTab('regions')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-medium transition cursor-pointer ${
               mobileTab === 'regions'
-                ? 'bg-amber-500 text-stone-950 font-semibold shadow-xs'
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 font-bold shadow-xs'
                 : 'text-stone-300 hover:text-white'
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>Fabric Zones ({selectedTemplate.regions.length})</span>
+            <span>Zones ({selectedTemplate.regions.length})</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
           <select
             value={selectedTemplate.id}
             onChange={(e) => {
               const t = templates.find((tpl) => tpl.id === e.target.value);
               if (t) setSelectedTemplate(t);
             }}
-            className="bg-stone-800 text-stone-200 border border-stone-700 text-xs py-1 px-2 rounded focus:outline-none cursor-pointer max-w-[150px] truncate"
+            className="bg-stone-900 text-stone-200 border border-stone-800 text-[11px] sm:text-xs py-1.5 px-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500/50 cursor-pointer max-w-[130px] sm:max-w-[170px] truncate"
           >
             {templates.map((tpl) => (
               <option key={tpl.id} value={tpl.id}>

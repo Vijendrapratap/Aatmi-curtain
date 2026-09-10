@@ -11,6 +11,11 @@ export interface Region {
   location: string;
   order: number;
   polygon_coords: RegionCoords[];
+  bbox?: { x: number; y: number; width: number; height: number }; // percentage bbox
+  mask_url?: string;
+  multi_component?: boolean;
+  replaceable?: boolean;
+  sheer?: boolean;
   suggested_sam_prompt?: string;
   default_fabric_id?: string | null;
   default_color?: string;
