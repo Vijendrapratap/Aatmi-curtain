@@ -3,6 +3,8 @@ import { CurtainTemplate, Fabric, FabricAssignment } from './types/curtain';
 import { DEFAULT_TEMPLATES, DEFAULT_FABRICS } from './data/defaultCatalog';
 import { rasterizeToPngBase64, getTemplateRealPhotoUrl } from './utils/fabricRenderer';
 import { executeMaskedPipeline } from './utils/maskedPipeline';
+import { executeSequentialInpainting, InpaintingStepEvent } from './lib/sequential-inpainting';
+import { useStudioStore } from './lib/store';
 import { Header } from './components/Header';
 import { CurtainCanvas } from './components/CurtainCanvas';
 import { RegionAssignmentPanel } from './components/RegionAssignmentPanel';
@@ -13,11 +15,24 @@ import { AuthModal } from './components/AuthModal';
 import { OnboardingTourModal } from './components/OnboardingTourModal';
 import { TactileLoupeModal } from './components/TactileLoupeModal';
 import { RoomLightingControls } from './components/RoomLightingControls';
+import { AIProviderSettingsModal } from './components/AIProviderSettingsModal';
+import { DatabaseSchemaModal } from './components/DatabaseSchemaModal';
+import { SequentialProgressOverlay } from './components/SequentialProgressOverlay';
+import { RoomVizStudio } from './components/RoomVizStudio';
+import { CatalogLibraryView } from './components/CatalogLibraryView';
 import { UserProfile, RoomLightingId, RoomSettingId } from './types/auth';
 import { DEMO_USERS } from './data/roomSettings';
 import { Sparkles, AlertTriangle, CheckCircle, Info, Eye, Layers } from 'lucide-react';
 
 export default function App() {
+  const {
+    activeTab,
+    setActiveTab,
+    activeProviderId,
+    renderedImageUrl,
+    addJob,
+  } = useStudioStore();
+
   const [templates, setTemplates] = useState<CurtainTemplate[]>(DEFAULT_TEMPLATES);
   const [selectedTemplate, setSelectedTemplate] = useState<CurtainTemplate>(DEFAULT_TEMPLATES[0]);
   const [fabrics, setFabrics] = useState<Fabric[]>(DEFAULT_FABRICS);
@@ -49,10 +64,11 @@ export default function App() {
   const [tactileFabric, setTactileFabric] = useState<Fabric | null>(null);
   const [isTactileLoupeOpen, setIsTactileLoupeOpen] = useState<boolean>(false);
 
-  // AI Generation state
+  // AI Generation state & Sequential loop
   const [aiGeneratedImageUrl, setAiGeneratedImageUrl] = useState<string | null>(null);
   const [isGeneratingAi, setIsGeneratingAi] = useState<boolean>(false);
   const [aiGenerationStep, setAiGenerationStep] = useState<string>('');
+  const [sequentialStepEvent, setSequentialStepEvent] = useState<InpaintingStepEvent | null>(null);
   const [generationNotice, setGenerationNotice] = useState<{ type: 'success' | 'info' | 'warning'; text: string } | null>(null);
   const [currentCanvasUrl, setCurrentCanvasUrl] = useState<string>('');
 
@@ -60,6 +76,8 @@ export default function App() {
   const [isFabricLibraryOpen, setIsFabricLibraryOpen] = useState<boolean>(false);
   const [isNewTemplateModalOpen, setIsNewTemplateModalOpen] = useState<boolean>(false);
   const [isSpecModalOpen, setIsSpecModalOpen] = useState<boolean>(false);
+  const [isAiSettingsOpen, setIsAiSettingsOpen] = useState<boolean>(false);
+  const [isDbSchemaOpen, setIsDbSchemaOpen] = useState<boolean>(false);
 
   // Initialize assignments when selectedTemplate changes
   useEffect(() => {
@@ -115,54 +133,59 @@ export default function App() {
     });
   };
 
-  // AI Photorealistic Generation Trigger via Masked Pipeline
+  // Sequential Masked Inpainting Pipeline: "The Secret Sauce"
   const handleTriggerAiGeneration = async () => {
     if (!selectedTemplate) return;
     setIsGeneratingAi(true);
-    setAiGenerationStep('Initializing high-resolution curtain plate and fabric swatches...');
+    setSequentialStepEvent(null);
     setGenerationNotice(null);
 
     try {
-      const result = await executeMaskedPipeline(
-        selectedTemplate,
-        assignments,
+      // Execute the multi-region sequential loop
+      const result = await executeSequentialInpainting({
+        template: selectedTemplate,
         fabrics,
-        (step) => setAiGenerationStep(step)
-      );
+        assignments,
+        onStepProgress: (event) => {
+          setSequentialStepEvent(event);
+          setAiGenerationStep(event.message);
+          if (event.currentCompositeUrl) {
+            setAiGeneratedImageUrl(event.currentCompositeUrl);
+          }
+        },
+      });
 
-      if (result.success && result.imageUrl) {
-        setAiGeneratedImageUrl(result.imageUrl);
+      if (result.finalImageUrl) {
+        setAiGeneratedImageUrl(result.finalImageUrl);
         setGenerationNotice({
           type: 'success',
-          text: 'AI photorealistic fabric redesign generated with zero background drift and preserved folds! Use the Final / Compare view to inspect.',
+          text: `Sequential inpainting completed via ${result.providerUsed.toUpperCase()} across ${result.stepsExecuted} drapery zones with fold depth preserved!`,
+        });
+
+        // Record job in Supabase queue state
+        addJob({
+          id: 'job-' + Date.now(),
+          templateId: selectedTemplate.id,
+          templateName: selectedTemplate.name,
+          type: 'sequential_composite',
+          status: 'completed',
+          providerUsed: result.providerUsed,
+          outputUrl: result.finalImageUrl,
+          createdAt: new Date().toLocaleTimeString(),
+          stepsCompleted: result.stepsExecuted,
+          stepsTotal: result.stepsExecuted,
         });
       }
     } catch (err: any) {
-      console.warn('AI generation pipeline note:', err.message);
-      const isPaidKeyError =
-        err.message?.includes('paid') ||
-        err.message?.includes('quota') ||
-        err.message?.includes('RESOURCE_EXHAUSTED') ||
-        err.message?.includes('billing');
-
-      if (isPaidKeyError) {
-        setGenerationNotice({
-          type: 'warning',
-          text: 'High-resolution AI image synthesis requires a Gemini API key with billing enabled. Photorealistic canvas draping with authentic photographic luminance transfer is active in real time.',
-        });
-      } else if (err.message?.includes('GEMINI_API_KEY')) {
-        setGenerationNotice({
-          type: 'info',
-          text: 'Server GEMINI_API_KEY required for server-side inpainting. High-fidelity canvas drape rendering is active in real time.',
-        });
-      } else {
-        setGenerationNotice({
-          type: 'info',
-          text: err.message || 'Interactive high-fidelity fabric draping is active with authentic lighting and fold transfer.',
-        });
-      }
+      console.warn('Sequential inpainting note:', err.message);
+      // Fallback to client-side photorealistic renderer if needed
+      setGenerationNotice({
+        type: 'info',
+        text: err.message || 'Interactive high-fidelity fabric draping is active with authentic lighting and fold transfer.',
+      });
     } finally {
       setIsGeneratingAi(false);
+      setSequentialStepEvent(null);
       setAiGenerationStep('');
     }
   };
@@ -182,7 +205,7 @@ export default function App() {
   const activeAssignment = assignments.find((a) => a.region_id === activeRegionId);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FBFBF9] text-stone-900 font-sans">
+    <div className="min-h-screen flex flex-col bg-[#0A0B0E] text-[#F9F6F0] font-sans antialiased">
       {/* Top Navigation Header */}
       <Header
         templates={templates}
@@ -196,31 +219,33 @@ export default function App() {
         currentUser={currentUser}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onOpenTourModal={() => setIsOnboardingTourOpen(true)}
+        onOpenAiSettings={() => setIsAiSettingsOpen(true)}
+        onOpenDbSchema={() => setIsDbSchemaOpen(true)}
       />
 
-      {/* Generation Notification Banner (if any) */}
+      {/* Generation Notification Banner */}
       {generationNotice && (
         <div
           className={`px-4 py-2 text-xs flex items-center justify-between border-b transition-all ${
             generationNotice.type === 'success'
-              ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+              ? 'bg-emerald-950/70 text-emerald-200 border-emerald-500/40'
               : generationNotice.type === 'warning'
-              ? 'bg-amber-50 text-amber-900 border-amber-200'
-              : 'bg-stone-100 text-stone-800 border-stone-200'
+              ? 'bg-amber-950/70 text-amber-200 border-amber-500/40'
+              : 'bg-[#15171F] text-[#C5C8D4] border-[#2A2D3A]'
           }`}
         >
           <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
             <div className="flex items-center gap-2">
               {generationNotice.type === 'success' ? (
-                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
               ) : (
-                <Info className="w-4 h-4 text-stone-500 shrink-0" />
+                <Info className="w-4 h-4 text-[#D4AF37] shrink-0" />
               )}
               <span>{generationNotice.text}</span>
             </div>
             <button
               onClick={() => setGenerationNotice(null)}
-              className="text-[11px] underline hover:no-underline text-stone-500 cursor-pointer ml-4"
+              className="text-[11px] underline hover:no-underline text-[#8C909A] hover:text-[#F9F6F0] cursor-pointer ml-4"
             >
               Dismiss
             </button>
@@ -228,127 +253,152 @@ export default function App() {
         </div>
       )}
 
-      {/* Studio View Switcher for screens under 1024px (Mobile & Tablet) */}
-      <div className="lg:hidden bg-[#181615] border-b border-stone-800/80 px-3 sm:px-4 py-2 flex items-center justify-between z-20 shrink-0 shadow-sm gap-2">
-        <div className="flex items-center gap-1 p-1 bg-stone-900/90 rounded-lg border border-stone-800">
-          <button
-            id="mobile-tab-preview"
-            onClick={() => setMobileTab('preview')}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-medium transition cursor-pointer ${
-              mobileTab === 'preview'
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 font-bold shadow-xs'
-                : 'text-stone-300 hover:text-white'
-            }`}
-          >
-            <Eye className="w-3.5 h-3.5" />
-            <span>Preview</span>
-          </button>
-          <button
-            id="mobile-tab-regions"
-            onClick={() => setMobileTab('regions')}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-medium transition cursor-pointer ${
-              mobileTab === 'regions'
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 font-bold shadow-xs'
-                : 'text-stone-300 hover:text-white'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Zones ({selectedTemplate.regions.length})</span>
-          </button>
-        </div>
+      {/* Studio Tab Router: Room Viz / Catalog / Atelier Canvas */}
+      {activeTab === 'room_viz' ? (
+        <RoomVizStudio />
+      ) : activeTab === 'catalog' || activeTab === 'catalogs' ? (
+        <CatalogLibraryView />
+      ) : (
+        /* Design Studio (Split Screen Atelier) */
+        <div className="flex-1 flex flex-col overflow-hidden relative">
+          {/* Sequential Inpainting Progress Overlay ("The Secret Sauce" In-Flight) */}
+          {isGeneratingAi && sequentialStepEvent && (
+            <SequentialProgressOverlay progress={sequentialStepEvent} />
+          )}
 
-        <div className="flex items-center gap-1.5 min-w-0">
-          <select
-            value={selectedTemplate.id}
-            onChange={(e) => {
-              const t = templates.find((tpl) => tpl.id === e.target.value);
-              if (t) setSelectedTemplate(t);
-            }}
-            className="bg-stone-900 text-stone-200 border border-stone-800 text-[11px] sm:text-xs py-1.5 px-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500/50 cursor-pointer max-w-[130px] sm:max-w-[170px] truncate"
-          >
-            {templates.map((tpl) => (
-              <option key={tpl.id} value={tpl.id}>
-                {tpl.name.split(' (')[0]}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+          {/* Studio View Switcher for screens under 1024px (Mobile & Tablet) */}
+          <div className="lg:hidden bg-[#101217] border-b border-[#22242F] px-3 sm:px-4 py-2 flex items-center justify-between z-20 shrink-0 shadow-sm gap-2">
+            <div className="flex items-center gap-1 p-1 bg-[#171922] rounded-lg border border-[#272A36]">
+              <button
+                id="mobile-tab-preview"
+                onClick={() => setMobileTab('preview')}
+                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-medium transition cursor-pointer ${
+                  mobileTab === 'preview'
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#B59128] text-[#0A0B0E] font-bold shadow-xs'
+                    : 'text-[#8C909A] hover:text-[#F9F6F0]'
+                }`}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span>Preview</span>
+              </button>
+              <button
+                id="mobile-tab-regions"
+                onClick={() => setMobileTab('regions')}
+                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-medium transition cursor-pointer ${
+                  mobileTab === 'regions'
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#B59128] text-[#0A0B0E] font-bold shadow-xs'
+                    : 'text-[#8C909A] hover:text-[#F9F6F0]'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>Zones ({selectedTemplate.regions.length})</span>
+              </button>
+            </div>
 
-      {/* Main Studio Body: Region Assignment Panel on Left, Viewport on Right */}
-      <main className="flex-1 flex flex-col lg:flex-row overflow-hidden relative min-h-0">
-        {/* Left: Region Assignment Panel */}
-        <div
-          className={`w-full lg:w-96 lg:h-full lg:flex lg:flex-col shrink-0 ${
-            mobileTab === 'regions' ? 'flex flex-col h-full flex-1 overflow-y-auto' : 'hidden'
-          }`}
-        >
-          <RegionAssignmentPanel
-            template={selectedTemplate}
-            assignments={assignments}
-            fabrics={fabrics}
-            activeRegionId={activeRegionId}
-            onSelectRegion={setActiveRegionId}
-            onAssignFabric={handleAssignFabric}
-            onUpdateAssignmentControls={handleUpdateAssignmentControls}
-            onOpenFabricUploadForRegion={(regionId) => {
-              setActiveRegionId(regionId);
-              setIsFabricLibraryOpen(true);
-            }}
-            onOpenFabricLibrary={() => setIsFabricLibraryOpen(true)}
-            onTriggerAiGeneration={handleTriggerAiGeneration}
-            isGeneratingAi={isGeneratingAi}
-            onReturnToPreview={() => setMobileTab('preview')}
-            onOpenTactileLoupe={(fab) => {
-              setTactileFabric(fab);
-              setIsTactileLoupeOpen(true);
-            }}
-          />
-        </div>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <select
+                value={selectedTemplate.id}
+                onChange={(e) => {
+                  const t = templates.find((tpl) => tpl.id === e.target.value);
+                  if (t) setSelectedTemplate(t);
+                }}
+                className="bg-[#171922] text-[#E0E2EB] border border-[#272A36] text-[11px] sm:text-xs py-1.5 px-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 cursor-pointer max-w-[130px] sm:max-w-[170px] truncate"
+              >
+                {templates.map((tpl) => (
+                  <option key={tpl.id} value={tpl.id}>
+                    {tpl.name.split(' (')[0]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-        {/* Center: Curtain Visualizer Stage with Environmental Lighting Bar */}
-        <div
-          className={`flex-1 h-full min-h-0 ${
-            mobileTab === 'preview' ? 'flex flex-col flex-1' : 'hidden lg:flex lg:flex-col'
-          }`}
-        >
-          {/* Room Lighting & Setting Controls Bar */}
-          <RoomLightingControls
-            currentLighting={roomLighting}
-            onSelectLighting={setRoomLighting}
-            currentSetting={roomSetting}
-            onSelectSetting={setRoomSetting}
-            isPresentationMode={isPresentationMode}
-            onTogglePresentationMode={() => setIsPresentationMode(!isPresentationMode)}
-          />
+          {/* Main Studio Body: Region Assignment Panel on Left, Viewport on Right */}
+          <main className="flex-1 flex flex-col lg:flex-row overflow-hidden relative min-h-0 bg-[#0D0E12]">
+            {/* Left: Region Assignment Panel */}
+            <div
+              className={`w-full lg:w-96 lg:h-full lg:flex lg:flex-col shrink-0 ${
+                mobileTab === 'regions' ? 'flex flex-col h-full flex-1 overflow-y-auto' : 'hidden'
+              }`}
+            >
+              <RegionAssignmentPanel
+                template={selectedTemplate}
+                assignments={assignments}
+                fabrics={fabrics}
+                activeRegionId={activeRegionId}
+                onSelectRegion={setActiveRegionId}
+                onAssignFabric={handleAssignFabric}
+                onUpdateAssignmentControls={handleUpdateAssignmentControls}
+                onOpenFabricUploadForRegion={(regionId) => {
+                  setActiveRegionId(regionId);
+                  setIsFabricLibraryOpen(true);
+                }}
+                onOpenFabricLibrary={() => setIsFabricLibraryOpen(true)}
+                onTriggerAiGeneration={handleTriggerAiGeneration}
+                isGeneratingAi={isGeneratingAi}
+                onReturnToPreview={() => setMobileTab('preview')}
+                onOpenTactileLoupe={(fab) => {
+                  setTactileFabric(fab);
+                  setIsTactileLoupeOpen(true);
+                }}
+              />
+            </div>
 
-          {/* Interactive Fabric Canvas */}
-          <CurtainCanvas
-            template={selectedTemplate}
-            assignments={assignments}
-            fabrics={fabrics}
-            activeRegionId={activeRegionId}
-            onSelectRegion={setActiveRegionId}
-            aiGeneratedImageUrl={aiGeneratedImageUrl}
-            isGeneratingAi={isGeneratingAi}
-            aiGenerationStep={aiGenerationStep}
-            onTriggerAiGeneration={handleTriggerAiGeneration}
-            onCanvasRendered={setCurrentCanvasUrl}
-            onOpenFabricPicker={() => setIsFabricLibraryOpen(true)}
-            onOpenRegionsTab={() => setMobileTab('regions')}
-            onAssignFabric={handleAssignFabric}
-            roomLighting={roomLighting}
-            roomSetting={roomSetting}
-            isPresentationMode={isPresentationMode}
-            onOpenTactileLoupe={(fab) => {
-              setTactileFabric(fab);
-              setIsTactileLoupeOpen(true);
-            }}
-          />
+            {/* Center: Curtain Visualizer Stage with Environmental Lighting Bar */}
+            <div
+              className={`flex-1 h-full min-h-0 ${
+                mobileTab === 'preview' ? 'flex flex-col flex-1' : 'hidden lg:flex lg:flex-col'
+              }`}
+            >
+              {/* Room Lighting & Setting Controls Bar */}
+              <RoomLightingControls
+                currentLighting={roomLighting}
+                onSelectLighting={setRoomLighting}
+                currentSetting={roomSetting}
+                onSelectSetting={setRoomSetting}
+                isPresentationMode={isPresentationMode}
+                onTogglePresentationMode={() => setIsPresentationMode(!isPresentationMode)}
+              />
+
+              {/* Interactive Fabric Canvas */}
+              <CurtainCanvas
+                template={selectedTemplate}
+                assignments={assignments}
+                fabrics={fabrics}
+                activeRegionId={activeRegionId}
+                onSelectRegion={setActiveRegionId}
+                aiGeneratedImageUrl={aiGeneratedImageUrl}
+                isGeneratingAi={isGeneratingAi}
+                aiGenerationStep={aiGenerationStep}
+                onTriggerAiGeneration={handleTriggerAiGeneration}
+                onCanvasRendered={setCurrentCanvasUrl}
+                onOpenFabricPicker={() => setIsFabricLibraryOpen(true)}
+                onOpenRegionsTab={() => setMobileTab('regions')}
+                onAssignFabric={handleAssignFabric}
+                roomLighting={roomLighting}
+                roomSetting={roomSetting}
+                isPresentationMode={isPresentationMode}
+                onOpenTactileLoupe={(fab) => {
+                  setTactileFabric(fab);
+                  setIsTactileLoupeOpen(true);
+                }}
+              />
+            </div>
+          </main>
         </div>
-      </main>
+      )}
 
       {/* Modals */}
+      <AIProviderSettingsModal
+        isOpen={isAiSettingsOpen}
+        onClose={() => setIsAiSettingsOpen(false)}
+      />
+
+      <DatabaseSchemaModal
+        isOpen={isDbSchemaOpen}
+        onClose={() => setIsDbSchemaOpen(false)}
+      />
+
       <FabricLibraryModal
         isOpen={isFabricLibraryOpen}
         onClose={() => setIsFabricLibraryOpen(false)}
