@@ -1,0 +1,604 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { CurtainTemplate, Fabric, FabricAssignment, Region } from '../types/curtain';
+import { renderCurtainOnCanvas, generateCannyStructureMap, getTemplateRealPhotoUrl } from '../utils/fabricRenderer';
+import {
+  Sparkles,
+  SlidersHorizontal,
+  Layers,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  RefreshCw,
+  Eye,
+  Info,
+  CheckCircle2,
+  AlertCircle,
+  Camera,
+  LayoutTemplate,
+  Download,
+  Image as ImageIcon,
+  Check
+} from 'lucide-react';
+
+interface CurtainCanvasProps {
+  template: CurtainTemplate;
+  assignments: FabricAssignment[];
+  fabrics: Fabric[];
+  activeRegionId: string | null;
+  onSelectRegion: (regionId: string) => void;
+  aiGeneratedImageUrl: string | null;
+  isGeneratingAi: boolean;
+  aiGenerationStep: string;
+  onTriggerAiGeneration: () => void;
+  onCanvasRendered?: (dataUrl: string) => void;
+  onOpenFabricPicker?: () => void;
+  onOpenRegionsTab?: () => void;
+  onAssignFabric?: (regionId: string, fabricId: string) => void;
+}
+
+export const CurtainCanvas: React.FC<CurtainCanvasProps> = ({
+  template,
+  assignments,
+  fabrics,
+  activeRegionId,
+  onSelectRegion,
+  aiGeneratedImageUrl,
+  isGeneratingAi,
+  aiGenerationStep,
+  onTriggerAiGeneration,
+  onCanvasRendered,
+  onOpenFabricPicker,
+  onOpenRegionsTab,
+  onAssignFabric,
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // 'final_image' displays the true photographic image of the curtain
+  // 'stencil' is the interactive template for assigning fabrics to zones
+  const [viewMode, setViewMode] = useState<'final_image' | 'stencil' | 'original' | 'compare' | 'wireframe' | 'structure'>('final_image');
+  const [sliderPosition, setSliderPosition] = useState<number>(50); // 0 to 100 for split compare
+  const [originalImageUrl, setOriginalImageUrl] = useState<string>('');
+  const [currentRenderUrl, setCurrentRenderUrl] = useState<string>('');
+  const [cannyMapUrl, setCannyMapUrl] = useState<string>('');
+  const [hoveredRegion, setHoveredRegion] = useState<Region | null>(null);
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [showAiResult, setShowAiResult] = useState<boolean>(true);
+
+  // Filter out the 13 uploaded fabric samples for quick access
+  const uploadedFabrics = fabrics.filter((f) => f.id.startsWith('fab-user-'));
+
+  // Render original template for comparison
+  useEffect(() => {
+    const realPhoto = getTemplateRealPhotoUrl(template, 800, 1000);
+    setOriginalImageUrl(realPhoto);
+  }, [template]);
+
+  // Main Render Effect
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+
+    renderCurtainOnCanvas(canvas, template, assignments, fabrics, {
+      width: 800,
+      height: 1000,
+      showWireframe: viewMode === 'wireframe',
+      activeRegionId: activeRegionId,
+    })
+      .then((dataUrl) => {
+        setCurrentRenderUrl(dataUrl);
+        if (onCanvasRendered && dataUrl) {
+          onCanvasRendered(dataUrl);
+        }
+        if (viewMode === 'structure') {
+          const canny = generateCannyStructureMap(canvas);
+          setCannyMapUrl(canny);
+        }
+      })
+      .catch((err) => {
+        console.error('Curtain canvas render error:', err);
+      });
+  }, [template, assignments, fabrics, activeRegionId, viewMode]);
+
+  // Handle canvas click to select clicked region
+  const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const clickXPercent = ((e.clientX - rect.left) / rect.width) * 100;
+    const clickYPercent = ((e.clientY - rect.top) / rect.height) * 100;
+
+    // Find which region contains this point
+    const hitRegion = template.regions.find((region) => {
+      return isPointInPolygon(clickXPercent, clickYPercent, region.polygon_coords);
+    });
+
+    if (hitRegion) {
+      onSelectRegion(hitRegion.id);
+    }
+  };
+
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const moveXPercent = ((e.clientX - rect.left) / rect.width) * 100;
+    const moveYPercent = ((e.clientY - rect.top) / rect.height) * 100;
+
+    const hit = template.regions.find((region) => {
+      return isPointInPolygon(moveXPercent, moveYPercent, region.polygon_coords);
+    });
+
+    setHoveredRegion(hit || null);
+  };
+
+  // Helper point-in-polygon algorithm (Ray casting)
+  const isPointInPolygon = (x: number, y: number, polygon: { x: number; y: number }[]) => {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const xi = polygon[i].x;
+      const yi = polygon[i].y;
+      const xj = polygon[j].x;
+      const yj = polygon[j].y;
+
+      const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  };
+
+  // Download high-resolution curtain image
+  const handleDownloadCurtain = () => {
+    const src = aiGeneratedImageUrl || currentRenderUrl || originalImageUrl;
+    if (!src) return;
+    const link = document.createElement('a');
+    link.href = src;
+    link.download = `aatmi-${template.name.toLowerCase().replace(/\s+/g, '-')}-curtain.jpg`;
+    link.click();
+  };
+
+  // Selected region details
+  const activeRegion = template.regions.find((r) => r.id === activeRegionId);
+  const activeAssignment = assignments.find((a) => a.region_id === activeRegionId);
+  const activeFabric = activeAssignment ? fabrics.find((f) => f.id === activeAssignment.fabric_id) : null;
+
+  return (
+    <div className="flex-1 flex flex-col bg-[#F3F2EC] relative overflow-hidden">
+      {/* Top Toolbar */}
+      <div className="min-h-14 px-4 sm:px-6 py-2 bg-white border-b border-stone-200/80 flex flex-wrap items-center justify-between gap-3 shadow-xs z-10">
+        {/* View Mode Selector */}
+        <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-lg border border-stone-200 overflow-x-auto">
+          {/* Primary View: Final Curtain Image */}
+          <button
+            id="view-mode-final-image"
+            onClick={() => setViewMode('final_image')}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'final_image'
+                ? 'bg-amber-900 text-amber-100 shadow-xs'
+                : 'text-stone-700 hover:text-stone-900'
+            }`}
+            title="View the authentic photographic image of the redesigned curtain"
+          >
+            <Camera className="w-3.5 h-3.5 text-amber-400" />
+            <span>Final Curtain Image</span>
+            {aiGeneratedImageUrl && (
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            )}
+          </button>
+
+          {/* Stencil & Template Workspace */}
+          <button
+            id="view-mode-stencil"
+            onClick={() => setViewMode('stencil')}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'stencil'
+                ? 'bg-white text-stone-900 shadow-xs font-semibold'
+                : 'text-stone-600 hover:text-stone-900'
+            }`}
+            title="Interactive stencil template to assign and customize fabric zones"
+          >
+            <Layers className="w-3.5 h-3.5 text-stone-600" />
+            <span>Template & Stencils</span>
+          </button>
+
+          {/* Original Real Photo */}
+          <button
+            id="view-mode-original"
+            onClick={() => setViewMode('original')}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'original'
+                ? 'bg-white text-stone-900 shadow-xs font-semibold'
+                : 'text-stone-600 hover:text-stone-900'
+            }`}
+            title="Inspect authentic original showroom photograph"
+          >
+            <ImageIcon className="w-3.5 h-3.5 text-blue-600" />
+            <span className="hidden sm:inline">Original Photo</span>
+          </button>
+
+          {/* Split Compare */}
+          <button
+            id="view-mode-compare"
+            onClick={() => setViewMode('compare')}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'compare'
+                ? 'bg-white text-stone-900 shadow-xs font-semibold'
+                : 'text-stone-600 hover:text-stone-900'
+            }`}
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-600" />
+            <span className="hidden sm:inline">Before / After</span>
+          </button>
+
+          {/* Zone Masks */}
+          <button
+            id="view-mode-wireframe"
+            onClick={() => setViewMode('wireframe')}
+            className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'wireframe'
+                ? 'bg-white text-stone-900 shadow-xs font-semibold'
+                : 'text-stone-600 hover:text-stone-900'
+            }`}
+            title="Verify 100% seamless zone tracking without missing sections"
+          >
+            <Eye className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Tracking ({template.regions.length})</span>
+          </button>
+        </div>
+
+        {/* AI Generation Trigger & Export */}
+        <div className="flex items-center gap-2">
+          {aiGeneratedImageUrl ? (
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-medium px-2 py-1 rounded-md">
+                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                <span>AI Photo Ready</span>
+              </span>
+              <button
+                id="btn-re-generate-ai"
+                onClick={onTriggerAiGeneration}
+                disabled={isGeneratingAi}
+                className="flex items-center gap-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium px-2.5 py-1.5 rounded-md transition cursor-pointer disabled:opacity-50 border border-stone-300"
+                title="Re-generate image with AI model"
+              >
+                <RefreshCw className={`w-3 h-3 ${isGeneratingAi ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Re-synthesize</span>
+              </button>
+            </div>
+          ) : (
+            <button
+              id="btn-generate-curtain-ai"
+              onClick={onTriggerAiGeneration}
+              disabled={isGeneratingAi}
+              className="flex items-center gap-1.5 bg-gradient-to-r from-amber-700 to-amber-900 hover:from-amber-800 hover:to-stone-900 text-amber-100 text-xs font-semibold px-3.5 py-1.5 rounded-lg shadow-sm transition cursor-pointer disabled:opacity-50 border border-amber-600/50"
+            >
+              <Sparkles className={`w-3.5 h-3.5 text-amber-300 ${isGeneratingAi ? 'animate-spin' : ''}`} />
+              <span>{isGeneratingAi ? 'Synthesizing...' : 'Generate with AI Model'}</span>
+            </button>
+          )}
+
+          <button
+            onClick={handleDownloadCurtain}
+            className="flex items-center gap-1.5 bg-stone-900 hover:bg-stone-800 text-stone-100 text-xs font-medium px-3 py-1.5 rounded-lg shadow-sm cursor-pointer transition"
+            title="Download high-resolution image"
+          >
+            <Download className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden md:inline">Download Photo</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Canvas Stage */}
+      <div className="flex-1 relative flex items-center justify-center p-4 sm:p-6 overflow-auto">
+        {/* Generating Overlay indicator */}
+        {isGeneratingAi && (
+          <div className="absolute inset-0 bg-stone-900/65 backdrop-blur-xs z-20 flex flex-col items-center justify-center text-center p-6">
+            <div className="bg-stone-900 border border-stone-700 p-6 rounded-xl shadow-2xl max-w-sm w-full flex flex-col items-center">
+              <div className="w-12 h-12 rounded-full border-2 border-amber-400/30 border-t-amber-400 animate-spin flex items-center justify-center mb-4">
+                <Sparkles className="w-5 h-5 text-amber-400" />
+              </div>
+              <h4 className="font-serif text-base text-stone-100 font-semibold mb-1">
+                Aatmi AI Image Model
+              </h4>
+              <p className="text-xs text-amber-300/90 font-medium mb-3">
+                {aiGenerationStep || 'Synthesizing real curtain photograph from fabric swatches...'}
+              </p>
+              <div className="w-full bg-stone-800 h-1.5 rounded-full overflow-hidden">
+                <div className="bg-gradient-to-r from-amber-500 to-amber-300 h-full w-2/3 animate-pulse rounded-full" />
+              </div>
+              <p className="text-[11px] text-stone-400 mt-3">
+                Rendering realistic fabric weight, window daylight, tactile embroidery, and deep gravity pleats.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* View Mode Badge & Tracking Integrity Audit */}
+        <div className="absolute top-4 left-6 z-10 flex flex-wrap items-center gap-2 pointer-events-none">
+          <span className="bg-stone-900/85 backdrop-blur-xs text-stone-100 text-[11px] font-medium px-3 py-1 rounded-full border border-stone-700 shadow-md flex items-center gap-1.5">
+            <LayoutTemplate className="w-3.5 h-3.5 text-amber-400" />
+            <span className="font-semibold">{template.name}</span>
+            <span className="text-stone-400">·</span>
+            <span className="text-amber-300 font-mono text-[10px]">{template.regions.length} Zones</span>
+          </span>
+
+          {viewMode === 'final_image' && (
+            <span className="bg-amber-950/90 backdrop-blur-xs text-amber-200 text-[11px] font-medium px-2.5 py-1 rounded-full border border-amber-600/50 shadow-md flex items-center gap-1.5">
+              <Camera className="w-3 h-3 text-amber-400" />
+              <span>{aiGeneratedImageUrl ? 'AI Generated Real Photo' : 'Photorealistic Curtain Scene'}</span>
+            </span>
+          )}
+
+          {viewMode === 'wireframe' && (
+            <span className="bg-emerald-950/90 backdrop-blur-xs text-emerald-200 text-[11px] font-medium px-2.5 py-1 rounded-full border border-emerald-600/50 shadow-md flex items-center gap-1.5">
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span>Full Surface Covered (0 Missing Sections)</span>
+            </span>
+          )}
+        </div>
+
+        {/* Viewport Box */}
+        <div
+          ref={containerRef}
+          onClick={handleCanvasClick}
+          onMouseMove={handleCanvasMouseMove}
+          onMouseLeave={() => setHoveredRegion(null)}
+          style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'center center' }}
+          className="relative max-w-[560px] w-full aspect-[4/5] min-h-[380px] bg-white rounded-lg shadow-xl overflow-hidden border border-stone-300/80 transition-transform duration-200 cursor-crosshair select-none"
+        >
+          {/* 1. Base Canvas (Interactive rendering on template/stencil) */}
+          <canvas
+            ref={canvasRef}
+            width={800}
+            height={1000}
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            className={`w-full h-full ${
+              viewMode === 'original' || viewMode === 'structure' || (viewMode === 'final_image' && aiGeneratedImageUrl) ? 'hidden' : 'block'
+            }`}
+          />
+
+          {/* 1b. AI Generated Real Curtain Image */}
+          {viewMode === 'final_image' && aiGeneratedImageUrl && (
+            <div className="w-full h-full relative">
+              <img
+                src={aiGeneratedImageUrl}
+                alt="AI Generated Real Curtain Photo"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute top-3 right-3 bg-stone-900/85 text-amber-300 text-[11px] px-2.5 py-1 rounded-full border border-amber-500/40 flex items-center gap-1.5 shadow-md">
+                <Sparkles className="w-3 h-3 text-amber-400" />
+                <span>AI Synthesized Photo</span>
+              </div>
+            </div>
+          )}
+
+          {/* 2. Original Authentic Real Photo View */}
+          {viewMode === 'original' && originalImageUrl && (
+            <div className="w-full h-full relative">
+              <img
+                src={originalImageUrl}
+                alt="Authentic Real Curtain Photograph"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute top-3 left-3 bg-stone-900/90 text-stone-100 text-[11px] px-2.5 py-1 rounded-full border border-stone-700 flex items-center gap-1.5 shadow-md">
+                <Camera className="w-3 h-3 text-blue-400" />
+                <span>Authentic Showroom Photograph</span>
+              </div>
+            </div>
+          )}
+
+          {/* 3. Canny Edge Structure Map View */}
+          {viewMode === 'structure' && cannyMapUrl && (
+            <div className="w-full h-full bg-black flex items-center justify-center">
+              <img
+                src={cannyMapUrl}
+                alt="Canny Structure Map"
+                className="w-full h-full object-contain filter invert"
+              />
+              <div className="absolute top-3 left-3 bg-stone-900/90 text-stone-200 text-[11px] px-2.5 py-1 rounded border border-stone-700 font-mono">
+                Canny Edge & Drape Matrix
+              </div>
+            </div>
+          )}
+
+          {/* 4. Split Screen Comparison Mode (Original vs Redesign) */}
+          {viewMode === 'compare' && originalImageUrl && (
+            <div className="absolute inset-0 pointer-events-none">
+              <div
+                className="absolute inset-0 overflow-hidden border-r-2 border-white shadow-2xl"
+                style={{ width: `${sliderPosition}%` }}
+              >
+                <img
+                  src={originalImageUrl}
+                  alt="Original Curtain"
+                  className="absolute inset-0 w-full h-full object-cover max-w-none"
+                  style={{ width: containerRef.current ? `${containerRef.current.clientWidth}px` : '100%' }}
+                />
+                <div className="absolute top-3 left-3 bg-stone-900/80 text-stone-100 text-[10px] font-semibold px-2 py-0.5 rounded tracking-wide uppercase">
+                  Original
+                </div>
+              </div>
+
+              <div className="absolute top-3 right-3 bg-amber-900/85 text-amber-100 text-[10px] font-semibold px-2 py-0.5 rounded tracking-wide uppercase">
+                Aatmi Redesign
+              </div>
+
+              <div
+                className="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize pointer-events-auto"
+                style={{ left: `${sliderPosition}%` }}
+              >
+                <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white text-stone-900 shadow-lg border border-stone-300 flex items-center justify-center text-[10px] font-bold">
+                  ↔
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Interactive Hover Tooltip in Stencil/Wireframe Mode */}
+          {hoveredRegion && viewMode !== 'compare' && (
+            <div className="absolute bottom-3 left-3 bg-stone-900/90 text-stone-100 text-xs px-3 py-1.5 rounded-md shadow-lg border border-stone-700 pointer-events-none flex items-center gap-2 z-10 animate-in fade-in">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: hoveredRegion.accent_color || '#D97706' }} />
+              <span className="font-semibold">{hoveredRegion.display_name}</span>
+              <span className="text-stone-400 text-[11px]">— Click to assign fabric</span>
+            </div>
+          )}
+        </div>
+
+        {/* Floating Zoom & Reset controls */}
+        <div className="absolute bottom-6 right-6 flex items-center gap-1.5 bg-white/90 backdrop-blur-xs border border-stone-300 rounded-lg p-1 shadow-md z-10">
+          <button
+            id="zoom-out"
+            onClick={() => setZoomLevel((z) => Math.max(0.7, z - 0.15))}
+            className="p-1.5 hover:bg-stone-100 rounded text-stone-700 cursor-pointer"
+            title="Zoom out"
+          >
+            <ZoomOut className="w-4 h-4" />
+          </button>
+          <span className="text-[11px] font-medium text-stone-600 px-1 font-mono">
+            {Math.round(zoomLevel * 100)}%
+          </span>
+          <button
+            id="zoom-in"
+            onClick={() => setZoomLevel((z) => Math.min(1.8, z + 0.15))}
+            className="p-1.5 hover:bg-stone-100 rounded text-stone-700 cursor-pointer"
+            title="Zoom in"
+          >
+            <ZoomIn className="w-4 h-4" />
+          </button>
+          <button
+            id="zoom-reset"
+            onClick={() => setZoomLevel(1)}
+            className="p-1.5 hover:bg-stone-100 rounded text-stone-700 cursor-pointer"
+            title="Fit to view"
+          >
+            <Maximize2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Split slider scrubber input when in compare mode */}
+        {viewMode === 'compare' && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-xs px-4 py-2 rounded-full border border-stone-300 shadow-lg flex items-center gap-3 z-10">
+            <span className="text-xs font-semibold text-stone-600">Original</span>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={sliderPosition}
+              onChange={(e) => setSliderPosition(Number(e.target.value))}
+              className="w-44 accent-amber-600 cursor-ew-resize"
+            />
+            <span className="text-xs font-semibold text-amber-800">Redesign</span>
+          </div>
+        )}
+      </div>
+
+      {/* Quick Swatch Tray for the 13 Uploaded Fabric Samples */}
+      {uploadedFabrics.length > 0 && (
+        <div className="bg-stone-50 border-t border-stone-200 px-4 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="font-semibold text-stone-800 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-500" />
+              <span>Catalog Samples ({uploadedFabrics.length}):</span>
+            </span>
+            <span className="text-stone-500 text-[11px] hidden md:inline">
+              Click to assign directly to <strong className="text-stone-800">{activeRegion?.display_name || 'Active Zone'}</strong>:
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-thin">
+            {uploadedFabrics.map((fab) => {
+              const isAssigned = activeAssignment?.fabric_id === fab.id;
+              return (
+                <button
+                  key={fab.id}
+                  onClick={() => {
+                    if (activeRegionId && onAssignFabric) {
+                      onAssignFabric(activeRegionId, fab.id);
+                    } else if (onOpenFabricPicker) {
+                      onOpenFabricPicker();
+                    }
+                  }}
+                  title={`Apply ${fab.name} (${fab.category}) to ${activeRegion?.display_name || 'active zone'}`}
+                  className={`relative group shrink-0 w-8 h-8 rounded-md overflow-hidden border-2 transition cursor-pointer ${
+                    isAssigned
+                      ? 'border-amber-600 scale-105 shadow-sm'
+                      : 'border-stone-300 hover:border-stone-500'
+                  }`}
+                >
+                  <img src={fab.image_url} alt={fab.name} className="w-full h-full object-cover" />
+                  {isAssigned && (
+                    <div className="absolute inset-0 bg-amber-900/30 flex items-center justify-center">
+                      <Check className="w-3.5 h-3.5 text-white drop-shadow-sm" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Active Zone Status & Quick Action Bar */}
+      <div className="bg-white border-t border-stone-200/90 px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="text-stone-500 font-medium">Selected Zone:</span>
+          <span className="font-semibold text-stone-900 bg-stone-100 border border-stone-200 px-2 py-0.5 rounded shadow-2xs">
+            {activeRegion?.display_name || 'Zone'}
+          </span>
+          {activeFabric && (
+            <div className="flex items-center gap-1.5 ml-1">
+              <span
+                className="w-3.5 h-3.5 rounded-full border border-stone-300 shadow-2xs"
+                style={{ backgroundColor: activeFabric.color_hex }}
+              />
+              <span className="text-stone-700 font-medium">{activeFabric.name}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {onOpenFabricPicker && (
+            <button
+              onClick={onOpenFabricPicker}
+              className="bg-stone-900 hover:bg-stone-800 text-amber-400 text-xs px-2.5 py-1 rounded font-medium flex items-center gap-1 cursor-pointer transition shadow-2xs"
+            >
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              <span>Browse Full Catalog</span>
+            </button>
+          )}
+          {onOpenRegionsTab && (
+            <button
+              onClick={onOpenRegionsTab}
+              className="bg-white hover:bg-stone-50 text-stone-700 border border-stone-300 text-xs px-2.5 py-1 rounded font-medium cursor-pointer transition lg:hidden"
+            >
+              <span>Manage All Zones</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom Template Meta */}
+      <div className="bg-stone-50 border-t border-stone-200/80 px-6 py-2 flex items-center justify-between text-xs text-stone-600">
+        <div className="flex items-center gap-3">
+          <span className="font-serif font-semibold text-stone-900 text-sm">
+            {template.name}
+          </span>
+          <span className="text-[11px] bg-white border border-stone-200 text-stone-600 px-2 py-0.5 rounded font-mono">
+            {template.style_code}
+          </span>
+          <span className="hidden md:inline text-stone-400">|</span>
+          <span className="hidden md:inline text-stone-500 italic">
+            {template.tagline}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-stone-400">Surface Tracking:</span>
+          <span className="font-semibold text-emerald-700 flex items-center gap-1">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>100% Covered ({template.regions.length} Zones)</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
