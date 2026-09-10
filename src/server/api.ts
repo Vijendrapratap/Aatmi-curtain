@@ -113,22 +113,27 @@ apiApp.post('/api/analyze-curtain', async (req, res) => {
       return res.status(400).json({ error: 'imageBase64 must be a valid base64 encoded raster image (JPEG/PNG/WEBP)' });
     }
 
-    const prompt = `Analyze this curtain drapery photograph with extreme precision.
+    const prompt = `Analyze this curtain drapery photograph with extreme architectural precision.
 Identify every distinct fabric region and design zone that can receive a custom fabric, stencil, or trim (main drape panels, vertical borders, horizontal accent bands, ribbon trims, pleated headers, valance, bottom hems, etc.).
 
 CRITICAL ACCURACY RULES:
-1. FULL TRACKING COVERAGE: Do NOT miss or skip small sections, narrow ribbon trims, accent borders, or lower skirts. Every single portion of the curtain drapery must be captured.
-2. SEAMLESS SNAPPING: Boundaries of adjacent regions must snap tightly together with zero gaps between them.
-3. POLYGON INTEGRITY: Return ordered clockwise perimeter coordinates { "x": number, "y": number } as percentages from 0 to 100. The coordinates must form a clean, non-self-intersecting polygon.
+1. FULL COVERAGE & TOPOLOGICAL ORDER: Order regions hierarchically from largest panels (order: 1) to smaller accent bands (order: 2-3) and fine borders/hems (order: 4-5).
+2. BOUNDING BOX & POLYGON: For each region, provide both a normalized bounding box { "x": number, "y": number, "width": number, "height": number } (0-100%) and ordered clockwise perimeter polygon coordinates { "x": number, "y": number } from 0 to 100.
+3. SEAMLESS SNAPPING: Boundaries of adjacent regions must snap tightly together with zero gaps between them.
 4. DETAIL GRANULARITY: Identify 2 to 6 distinct regions covering 100% of the curtain fabric surface.
+5. FLAGS: Mark multi_component: true if a zone repeats symmetrically (e.g. left & right panels, or matching flank borders). Mark replaceable: true for curtain fabric, and false for rigid hardware/rods.
 
 For each region return:
-- name: snake_case identifier (e.g. "left_main_panel", "horizontal_accent_band", "upper_ribbon_trim", "lower_ribbon_trim", "lower_skirt")
-- display_name: clear title (e.g. "Left Chevron Panel", "Inset Accent Band", "Upper Gold Ribbon Trim", "Lower Skirt")
+- name: snake_case identifier (e.g. "main_drape_panel", "horizontal_accent_band", "leading_edge_border", "bottom_weighted_hem")
+- display_name: clear title (e.g. "Main Drapery Panel", "Inset Accent Band", "Leading Edge Border", "Weighted Bottom Hem")
 - description: visual description of the weave, fold structure, and position
-- location: position description (e.g. "Left panel 5% to 47% width", "Mid band 25% to 35% height")
-- suggested_sam_prompt: precise visual prompt for segmentation
+- location: position description (e.g. "Central drape 15% to 85% width", "Lower 12% height")
+- order: integer (1 for primary drapes, 2 for side borders, 3 for accent bands, 4 for hems/trims)
+- multi_component: boolean
+- replaceable: boolean
+- bbox: { "x": number, "y": number, "width": number, "height": number }
 - polygon_coords: array of 4 to 8 ordered clockwise points [{ "x": number, "y": number }] from 0 to 100
+- suggested_sam_prompt: precise visual segmentation prompt
 
 Output ONLY a valid JSON array of these region objects. Do not include markdown or explanations.`;
 
@@ -153,7 +158,9 @@ Output ONLY a valid JSON array of these region objects. Do not include markdown 
 
     try {
       const parsed = JSON.parse(rawText);
-      const regions = Array.isArray(parsed) ? parsed : (parsed.regions || []);
+      let regions = Array.isArray(parsed) ? parsed : (parsed.regions || []);
+      // Ensure sorted by order
+      regions.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
       return res.json({ regions, source: 'gemini_vlm' });
     } catch (parseErr) {
       console.warn('VLM JSON parse failed, returning fallback regions', rawText);
@@ -162,9 +169,13 @@ Output ONLY a valid JSON array of these region objects. Do not include markdown 
           {
             name: 'main_panel',
             display_name: 'Main Curtain Panel',
-            description: 'Central body of curtain drapery',
+            description: 'Central body of curtain drapery with vertical pleats',
             location: 'Central 70%',
+            order: 1,
+            multi_component: false,
+            replaceable: true,
             suggested_sam_prompt: 'main drapery panel with vertical folds',
+            bbox: { x: 10, y: 5, width: 80, height: 75 },
             polygon_coords: [
               { x: 10, y: 5 }, { x: 90, y: 5 }, { x: 90, y: 80 }, { x: 10, y: 80 }
             ]
@@ -174,7 +185,11 @@ Output ONLY a valid JSON array of these region objects. Do not include markdown 
             display_name: 'Bottom Border',
             description: 'Lower architectural hem border',
             location: 'Lower 20%',
+            order: 2,
+            multi_component: false,
+            replaceable: true,
             suggested_sam_prompt: 'bottom hem border',
+            bbox: { x: 10, y: 80, width: 80, height: 18 },
             polygon_coords: [
               { x: 10, y: 80 }, { x: 90, y: 80 }, { x: 90, y: 98 }, { x: 10, y: 98 }
             ]
@@ -191,14 +206,14 @@ Output ONLY a valid JSON array of these region objects. Do not include markdown 
 
 /**
  * Endpoint: Generate realistic curtain with applied fabrics using Gemini Generative AI
- * Implements Section 6.2 & 6.3 of the specification.
+ * Implements Section 6.2 & 6.3 with Positional Swatch Binding and Constraint-Based Prompting.
  */
 apiApp.post('/api/generate-curtain-fabric', async (req, res) => {
   try {
     const {
       templateName,
       templateImage,
-      assignments, // Array of { regionName, regionDisplayName, fabricName, fabricWeave, fabricImageBase64 }
+      assignments, // Array of { regionName, regionDisplayName, fabricName, fabricWeave, fabricImageBase64, maskImageBase64, tintedImageBase64 }
       customInstructions = '',
     } = req.body;
 
@@ -220,20 +235,6 @@ apiApp.post('/api/generate-curtain-fabric', async (req, res) => {
       });
     }
 
-    // Construct region description string from assignments
-    const fabricDescriptions = (assignments || [])
-      .map((a: any) => `Zone "${a.regionDisplayName || a.regionName}" draped with "${a.fabricName}" fabric (${a.fabricWeave || 'luxury weave'}, ${a.fabricCategory || 'interior drapery'})`)
-      .join(', and ');
-
-    const positivePrompt = `Professional photorealistic catalog product photography of a hanging luxury drapery curtain from brand Aatmi, style "${templateName}".
-Natural soft columnar folds and realistic gravity draping with authentic pleat shadows.
-Fabric specification: ${fabricDescriptions}.
-All zones must strictly preserve the deep pleats, vertical folds, shadows, highlights, and window daylight from the original curtain image.
-Accurate lighting direction and ambient interior room shadows.
-Sharp focus, 8k architectural interior design detail, tactile weave texture.`;
-
-    const negativePrompt = `flat texture, plastic look, distorted folds, mismatched lighting, visible hard seams between regions, low resolution, blurry weave, warped geometry, cartoonish, oversaturated, floating fabric, incorrect perspective, extra windows, distorted background`;
-
     const parts: any[] = [
       {
         inlineData: {
@@ -243,7 +244,10 @@ Sharp focus, 8k architectural interior design detail, tactile weave texture.`;
       },
     ];
 
-    // Add only validated raster swatch images as reference parts if provided
+    // Build strict positional image bindings
+    let swatchDescriptions = '';
+    let partIndex = 2;
+
     if (Array.isArray(assignments)) {
       assignments.forEach((assignment: any) => {
         if (assignment.fabricImageBase64) {
@@ -255,21 +259,41 @@ Sharp focus, 8k architectural interior design detail, tactile weave texture.`;
                 mimeType: swatch.mimeType,
               },
             });
+            swatchDescriptions += `\n- Image ${partIndex} = Target textile swatch for zone "${assignment.regionDisplayName || assignment.regionName}" (${assignment.regionDescription || 'curtain drape'}). Swatch name: "${assignment.fabricName}", weave: ${assignment.fabricWeave || 'couture weave'}, color tone: ${assignment.fabricColorHex || ''}.`;
+            partIndex++;
           }
         }
       });
     }
 
-    parts.push({
-      text: `${positivePrompt}\n\nAvoid: ${negativePrompt}\n${customInstructions ? `Additional client styling note: ${customInstructions}` : ''}`,
-    });
+    const promptText = `Professional architectural interior product photography of hanging couture draperies from brand Aatmi, style "${templateName}".
 
-    // We use gemini-3.1-flash-lite-image or gemini-3.1-flash-image for image generation/editing
+INPUT REFERENCE IMAGES:
+- Image 1 = Authentic high-resolution photograph of the hanging curtain drapery in an interior architectural setting.${swatchDescriptions}
+
+STRICT EXECUTION DIRECTIVES:
+1. REPAINT ONLY SPECIFIED ZONES: Repaint ONLY the designated curtain zones with their corresponding textile swatches (Image 2, Image 3, etc.). The textile pattern, weave texture, thread relief, and color must match the swatch precisely.
+2. PRESERVE ALL ORIGINAL FOLDS & PLEATS: Inside every zone, preserve 100% of the authentic vertical columnar folds, deep pleat shadows, specular crest highlights, and window daylight falloff from Image 1. The new fabric must drape naturally into existing folds with authentic gravitational tension.
+3. ZERO BACKGROUND DRIFT: Keep ALL pixels outside the curtain drapery zones (walls, crown moldings, ceiling, window glass, trim, floor, curtain rod and finials) 100% IDENTICAL to Image 1.
+4. CLEAN TAILORED SEAMS: Boundaries between adjacent zones must form crisp, tight, bespoke sewn seams with zero color bleed, halos, or artifacts.
+5. NO SYNTHETIC ARTIFACTS: Do NOT flatten fabric folds, do not shift zone boundaries, do not add watermarks, labels, dashed lines, pins, or artificial borders.
+${customInstructions ? `Additional designer specification: ${customInstructions}` : ''}`;
+
+    parts.push({ text: promptText });
+
+    // Try high-tier gemini-3.1-flash-image with 2K 4:5 imageConfig; fallback to lite tier if needed
+    const primaryModel = process.env.GEMINI_IMAGE_MODEL || 'gemini-3.1-flash-image';
     let resultImageUrl: string | null = null;
 
     try {
       const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite-image',
+        model: primaryModel,
+        config: {
+          imageConfig: {
+            aspectRatio: '4:5',
+            imageSize: '2K',
+          },
+        },
         contents: {
           parts,
         },
@@ -283,18 +307,41 @@ Sharp focus, 8k architectural interior design detail, tactile weave texture.`;
           }
         }
       }
-    } catch (genErr: any) {
-      console.warn('Direct image gen failed, falling back to gemini-3.8-flash design descriptor:', genErr.message);
-      const isPaidKeyError =
-        genErr.message?.includes('paid') ||
-        genErr.message?.includes('quota') ||
-        genErr.message?.includes('RESOURCE_EXHAUSTED') ||
-        genErr.status === 429;
+    } catch (primaryErr: any) {
+      console.warn(`Primary image generation (${primaryModel}) failed, attempting fallback tier:`, primaryErr.message);
 
-      return res.status(422).json({
-        error: genErr.message || 'Image generation model encountered an issue.',
-        needsPaidKey: isPaidKeyError,
-      });
+      // Fallback tier
+      try {
+        const fallbackResponse = await ai.models.generateContent({
+          model: 'gemini-3.1-flash-lite-image',
+          contents: {
+            parts,
+          },
+        });
+
+        if (fallbackResponse.candidates && fallbackResponse.candidates[0]?.content?.parts) {
+          for (const part of fallbackResponse.candidates[0].content.parts) {
+            if (part.inlineData && part.inlineData.data) {
+              resultImageUrl = `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`;
+              break;
+            }
+          }
+        }
+      } catch (fallbackErr: any) {
+        console.error('All image generation models failed:', fallbackErr.message);
+        const isPaidKeyError =
+          primaryErr.message?.includes('paid') ||
+          primaryErr.message?.includes('quota') ||
+          primaryErr.message?.includes('RESOURCE_EXHAUSTED') ||
+          primaryErr.status === 429 ||
+          fallbackErr.message?.includes('paid') ||
+          fallbackErr.message?.includes('quota');
+
+        return res.status(422).json({
+          error: primaryErr.message || fallbackErr.message || 'Image generation model encountered an issue.',
+          needsPaidKey: isPaidKeyError,
+        });
+      }
     }
 
     if (!resultImageUrl) {
@@ -304,11 +351,114 @@ Sharp focus, 8k architectural interior design detail, tactile weave texture.`;
     return res.json({
       success: true,
       imageUrl: resultImageUrl,
-      positivePrompt,
+      positivePrompt: promptText,
       timestamp: new Date().toISOString(),
     });
   } catch (err: any) {
     console.error('Error in /api/generate-curtain-fabric:', err);
     res.status(500).json({ error: err.message || 'Failed to generate curtain' });
+  }
+});
+
+/**
+ * Endpoint: Single-Zone Masked Edit for Sequential Inpainting
+ * Takes base photograph, masked guidance image, and high-res textile swatch
+ */
+apiApp.post('/api/generate-curtain-edit', async (req, res) => {
+  try {
+    const {
+      baseImage,
+      tintedImage,
+      fabricImage,
+      zoneName,
+      zoneDescription,
+      templateName = 'Bespoke Curtain',
+    } = req.body;
+
+    if (!baseImage || !fabricImage) {
+      return res.status(400).json({ error: 'baseImage and fabricImage are required' });
+    }
+
+    const ai = getGenAIClient();
+    if (!ai) {
+      return res.status(400).json({ error: 'GEMINI_API_KEY is not configured.' });
+    }
+
+    const baseParsed = parseBase64Image(baseImage);
+    const fabricParsed = parseBase64Image(fabricImage);
+    const tintedParsed = tintedImage ? parseBase64Image(tintedImage) : null;
+
+    if (!baseParsed || !fabricParsed) {
+      return res.status(400).json({ error: 'Invalid base64 raster image data' });
+    }
+
+    const parts: any[] = [
+      {
+        inlineData: {
+          data: baseParsed.base64,
+          mimeType: baseParsed.mimeType,
+        },
+      },
+    ];
+
+    let imageIndex = 2;
+    if (tintedParsed) {
+      parts.push({
+        inlineData: {
+          data: tintedParsed.base64,
+          mimeType: tintedParsed.mimeType,
+        },
+      });
+      imageIndex = 3;
+    }
+
+    parts.push({
+      inlineData: {
+        data: fabricParsed.base64,
+        mimeType: fabricParsed.mimeType,
+      },
+    });
+
+    const promptText = `Image 1 = authentic curtain photograph (style: "${templateName}").
+${tintedParsed ? `Image 2 = visual guidance highlighting the target zone in solid color.\nImage 3 = target textile swatch.` : `Image 2 = target textile swatch.`}
+
+TARGET ZONE: "${zoneName}" (${zoneDescription || 'curtain drape section'}).
+
+INSTRUCTIONS:
+1. Repaint ONLY the target zone with the exact pattern, weave texture, and color of the target textile swatch.
+2. Inside that zone, preserve all natural columnar pleats, vertical fold shadows, and sunlight crests from Image 1.
+3. Keep ALL pixels outside the zone identical to Image 1. Boundaries must be clean sewn seams.`;
+
+    parts.push({ text: promptText });
+
+    const response = await ai.models.generateContent({
+      model: process.env.GEMINI_IMAGE_MODEL || 'gemini-3.1-flash-image',
+      config: {
+        imageConfig: {
+          aspectRatio: '4:5',
+          imageSize: '2K',
+        },
+      },
+      contents: { parts },
+    });
+
+    let resultUrl: string | null = null;
+    if (response.candidates && response.candidates[0]?.content?.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData && part.inlineData.data) {
+          resultUrl = `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`;
+          break;
+        }
+      }
+    }
+
+    if (!resultUrl) {
+      return res.status(500).json({ error: 'No image was generated.' });
+    }
+
+    res.json({ success: true, imageUrl: resultUrl });
+  } catch (err: any) {
+    console.error('Error in /api/generate-curtain-edit:', err);
+    res.status(500).json({ error: err.message || 'Failed to edit curtain zone' });
   }
 });

@@ -463,55 +463,55 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/75 backdrop-blur-xs">
-      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-stone-950/80 backdrop-blur-xs">
+      <div className="bg-white sm:rounded-2xl shadow-2xl border-0 sm:border border-stone-200 w-full sm:max-w-4xl h-full sm:h-auto sm:max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in duration-200">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
-          <div>
-            <h3 className="font-serif text-lg font-bold text-stone-900">
-              Add Curtain Design & Stencil
+        <div className="px-4 sm:px-6 py-3.5 border-b border-stone-200 flex items-center justify-between bg-stone-50">
+          <div className="min-w-0 pr-2">
+            <h3 className="font-serif text-base sm:text-lg font-bold text-stone-900 truncate">
+              Curtain Design & Stencil
             </h3>
-            <p className="text-xs text-stone-500">
-              Select an architectural curtain stencil cut or upload a genuine showroom photograph to segment.
+            <p className="text-[11px] sm:text-xs text-stone-500 truncate">
+              Select an architectural curtain stencil or upload showroom photo.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-200/60 transition cursor-pointer"
+            className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-200/60 transition cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Mode Toggle Tabs */}
-        <div className="px-6 pt-3 pb-1 border-b border-stone-200 bg-stone-100/50 flex items-center gap-4">
+        <div className="px-4 sm:px-6 pt-2.5 pb-1 border-b border-stone-200 bg-stone-100/50 flex items-center gap-3 sm:gap-4 overflow-x-auto scrollbar-none">
           <button
             onClick={() => setCreationMode('stencil')}
-            className={`pb-2.5 text-xs font-semibold flex items-center gap-1.5 cursor-pointer border-b-2 transition ${
+            className={`pb-2 text-xs font-semibold flex items-center gap-1.5 cursor-pointer border-b-2 transition whitespace-nowrap ${
               creationMode === 'stencil'
                 ? 'border-amber-700 text-amber-900'
                 : 'border-transparent text-stone-500 hover:text-stone-800'
             }`}
           >
             <LayoutTemplate className="w-3.5 h-3.5" />
-            <span>Curtain Stencil Presets ({BUILT_IN_STENCILS.length})</span>
+            <span>Stencil Presets ({BUILT_IN_STENCILS.length})</span>
           </button>
 
           <button
             onClick={() => setCreationMode('upload')}
-            className={`pb-2.5 text-xs font-semibold flex items-center gap-1.5 cursor-pointer border-b-2 transition ${
+            className={`pb-2 text-xs font-semibold flex items-center gap-1.5 cursor-pointer border-b-2 transition whitespace-nowrap ${
               creationMode === 'upload'
                 ? 'border-amber-700 text-amber-900'
                 : 'border-transparent text-stone-500 hover:text-stone-800'
             }`}
           >
             <Camera className="w-3.5 h-3.5" />
-            <span>Upload Real Curtain Photograph</span>
+            <span>Upload Photo & Auto-Segment</span>
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 flex-1 overflow-y-auto">
+        <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
           {/* MODE A: STENCIL PRESETS */}
           {creationMode === 'stencil' && (
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">

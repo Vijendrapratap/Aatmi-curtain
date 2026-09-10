@@ -109,38 +109,39 @@ export const FabricLibraryModal: React.FC<FabricLibraryModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-xs">
-      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-stone-950/80 backdrop-blur-xs">
+      <div className="bg-white sm:rounded-2xl shadow-2xl border-0 sm:border border-stone-200 w-full sm:max-w-4xl h-full sm:h-auto sm:max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in duration-200">
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-serif text-lg font-bold text-stone-900">
-                Aatmi Haute Fabric Library
+        <div className="px-4 sm:px-6 py-3.5 border-b border-stone-200/90 flex items-center justify-between bg-[#FAF9F6]">
+          <div className="min-w-0 pr-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-serif text-base sm:text-lg font-bold text-stone-900 tracking-wide truncate">
+                Aatmi Fabric Library
               </h3>
               {activeRegion && (
-                <span className="text-xs bg-amber-100 text-amber-900 border border-amber-300/80 px-2 py-0.5 rounded-md font-semibold">
-                  Assigning to: {activeRegion.display_name}
+                <span className="text-[10px] sm:text-xs bg-amber-100 text-amber-900 border border-amber-300/80 px-2 py-0.5 rounded-md font-semibold shrink-0">
+                  Zone: {activeRegion.display_name}
                 </span>
               )}
             </div>
-            <p className="text-xs text-stone-500 mt-0.5">
-              Select a luxury fabric swatch or upload your own physical fabric photograph.
+            <p className="text-[11px] sm:text-xs text-stone-500 mt-0.5 truncate">
+              Select a luxury fabric swatch or upload physical fabric photograph.
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               id="modal-toggle-upload"
               onClick={() => setIsUploading(!isUploading)}
-              className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition cursor-pointer ${
+              className={`flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg border transition cursor-pointer ${
                 isUploading
                   ? 'bg-stone-800 text-white border-stone-800'
                   : 'bg-white text-stone-800 border-stone-300 hover:bg-stone-100'
               }`}
             >
               <Upload className="w-3.5 h-3.5 text-amber-600" />
-              <span>{isUploading ? 'Back to Swatches' : 'Upload Swatch'}</span>
+              <span className="hidden xs:inline">{isUploading ? 'Back to Swatches' : 'Upload Swatch'}</span>
+              <span className="xs:hidden">{isUploading ? 'Swatches' : 'Upload'}</span>
             </button>
 
             <button
@@ -273,27 +274,27 @@ export const FabricLibraryModal: React.FC<FabricLibraryModalProps> = ({
           /* Swatches Gallery View */
           <>
             {/* Search & Category Filter Bar */}
-            <div className="p-4 border-b border-stone-200 flex flex-col sm:flex-row items-center gap-3 bg-white">
-              <div className="relative w-full sm:w-64">
+            <div className="p-3 sm:p-4 border-b border-stone-200/80 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 bg-white">
+              <div className="relative w-full sm:w-64 shrink-0">
                 <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Search fabrics, weave, tags..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 text-xs border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
+                  className="w-full pl-8 pr-3 py-1.5 text-xs border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600 bg-stone-50/50"
                 />
               </div>
 
               {/* Category Pills */}
-              <div className="flex items-center gap-1 overflow-x-auto w-full pb-1 sm:pb-0 scrollbar-none">
+              <div className="flex items-center gap-1.5 overflow-x-auto w-full pb-1 sm:pb-0 scrollbar-none">
                 {categories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setActiveCategory(cat)}
-                    className={`px-2.5 py-1 text-xs rounded-full whitespace-nowrap transition cursor-pointer font-medium ${
+                    className={`px-2.5 py-1 text-[11px] sm:text-xs rounded-full whitespace-nowrap transition cursor-pointer font-medium ${
                       activeCategory === cat
-                        ? 'bg-amber-800 text-white shadow-2xs font-semibold'
+                        ? 'bg-amber-900 text-amber-100 shadow-2xs font-semibold'
                         : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                     }`}
                   >
@@ -304,7 +305,7 @@ export const FabricLibraryModal: React.FC<FabricLibraryModalProps> = ({
             </div>
 
             {/* Fabrics Grid */}
-            <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-6 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-4">
               {filteredFabrics.map((fabric) => {
                 const isSelected = currentAssignedFabricId === fabric.id;
 
@@ -316,7 +317,7 @@ export const FabricLibraryModal: React.FC<FabricLibraryModalProps> = ({
                       onSelectFabric(fabric.id);
                       onClose();
                     }}
-                    className={`group rounded-xl border p-3.5 transition-all duration-150 cursor-pointer bg-white relative flex flex-col justify-between ${
+                    className={`group rounded-xl border p-2.5 sm:p-3.5 transition-all duration-150 cursor-pointer bg-white relative flex flex-col justify-between ${
                       isSelected
                         ? 'border-amber-600 ring-2 ring-amber-600/30 shadow-md bg-amber-50/20'
                         : 'border-stone-200 hover:border-amber-500/70 hover:shadow-sm'
@@ -324,38 +325,38 @@ export const FabricLibraryModal: React.FC<FabricLibraryModalProps> = ({
                   >
                     <div>
                       {/* Swatch Image Box */}
-                      <div className="w-full aspect-video rounded-lg overflow-hidden border border-stone-200 bg-stone-100 mb-3 relative shadow-2xs">
+                      <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border border-stone-200 bg-stone-100 mb-2 sm:mb-3 relative shadow-2xs">
                         <img
                           src={fabric.image_url}
                           alt={fabric.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                         />
                         {isSelected && (
-                          <div className="absolute top-2 right-2 bg-amber-600 text-white rounded-full p-1 shadow-md">
+                          <div className="absolute top-1.5 right-1.5 bg-amber-600 text-white rounded-full p-1 shadow-md">
                             <Check className="w-3 h-3 stroke-[3]" />
                           </div>
                         )}
-                        <span className="absolute bottom-2 left-2 text-[10px] font-semibold bg-stone-900/80 text-white px-2 py-0.5 rounded backdrop-blur-xs">
+                        <span className="absolute bottom-1.5 left-1.5 text-[9px] sm:text-[10px] font-semibold bg-stone-900/85 text-stone-100 px-1.5 py-0.5 rounded backdrop-blur-xs">
                           {fabric.category}
                         </span>
                       </div>
 
                       {/* Info */}
-                      <h4 className="font-serif text-xs font-bold text-stone-900 leading-snug group-hover:text-amber-800 transition">
+                      <h4 className="font-serif text-[11px] sm:text-xs font-bold text-stone-900 leading-snug group-hover:text-amber-800 transition line-clamp-1">
                         {fabric.name}
                       </h4>
-                      <p className="text-[11px] text-stone-500 mt-0.5">
+                      <p className="text-[10px] sm:text-[11px] text-stone-500 mt-0.5 line-clamp-1">
                         {fabric.metadata.weave} • {fabric.metadata.sheen}
                       </p>
-                      <p className="text-[10px] text-stone-400 mt-0.5">
+                      <p className="text-[9px] sm:text-[10px] text-stone-400 mt-0.5 hidden xs:block line-clamp-1">
                         {fabric.metadata.composition}
                       </p>
                     </div>
 
                     {/* Action Button */}
-                    <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between">
-                      <div className="flex items-center gap-1 flex-wrap">
-                        {fabric.tags.slice(0, 2).map((t) => (
+                    <div className="mt-2.5 pt-2 border-t border-stone-100 flex items-center justify-between">
+                      <div className="hidden sm:flex items-center gap-1 flex-wrap">
+                        {fabric.tags.slice(0, 1).map((t) => (
                           <span
                             key={t}
                             className="text-[9px] bg-stone-100 text-stone-500 px-1.5 py-0.5 rounded font-mono"
@@ -365,8 +366,8 @@ export const FabricLibraryModal: React.FC<FabricLibraryModalProps> = ({
                         ))}
                       </div>
 
-                      <span className="text-xs font-semibold text-amber-700 group-hover:underline">
-                        {isSelected ? 'Assigned' : 'Select Swatch →'}
+                      <span className="text-[11px] sm:text-xs font-semibold text-amber-800 group-hover:underline ml-auto">
+                        {isSelected ? 'Assigned' : 'Apply Swatch →'}
                       </span>
                     </div>
                   </div>

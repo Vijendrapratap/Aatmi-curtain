@@ -207,6 +207,84 @@ function createProceduralFabricPattern(
 }
 
 /**
+ * Extracts authentic photographic luminance maps (shadow folds and daylight highlights)
+ * from a real drapery photograph to enable photorealistic texture transfer.
+ */
+function extractLuminanceCanvases(baseImg: HTMLImageElement, width: number, height: number) {
+  try {
+    const offCanvas = document.createElement('canvas');
+    offCanvas.width = width;
+    offCanvas.height = height;
+    const offCtx = offCanvas.getContext('2d');
+    if (!offCtx) return null;
+    offCtx.drawImage(baseImg, 0, 0, width, height);
+
+    const imgData = offCtx.getImageData(0, 0, width, height);
+    const data = imgData.data;
+
+    // Shadow/fold map: darker photo areas create realistic gravitational pleat depths
+    const shadowCanvas = document.createElement('canvas');
+    shadowCanvas.width = width;
+    shadowCanvas.height = height;
+    const shadowCtx = shadowCanvas.getContext('2d');
+    if (!shadowCtx) return null;
+    const shadowImgData = shadowCtx.createImageData(width, height);
+    const sData = shadowImgData.data;
+
+    // Highlight map: specular pleat crests and soft daylight
+    const highlightCanvas = document.createElement('canvas');
+    highlightCanvas.width = width;
+    highlightCanvas.height = height;
+    const highlightCtx = highlightCanvas.getContext('2d');
+    if (!highlightCtx) return null;
+    const highlightImgData = highlightCtx.createImageData(width, height);
+    const hData = highlightImgData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      // Perceptual grayscale luminance
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+
+      // Folds/Shadows: areas with lum < 155 get deep natural drapery shadowing
+      const shadowRatio = Math.max(0, 155 - lum) / 155;
+      sData[i] = 18;
+      sData[i + 1] = 16;
+      sData[i + 2] = 22;
+      sData[i + 3] = Math.round(shadowRatio * 185);
+
+      // Highlights: areas with lum > 170 get crest sheen
+      const highlightRatio = Math.max(0, lum - 170) / 85;
+      hData[i] = 255;
+      hData[i + 1] = 250;
+      hData[i + 2] = 240;
+      hData[i + 3] = Math.round(Math.min(1, highlightRatio) * 140);
+    }
+
+    shadowCtx.putImageData(shadowImgData, 0, 0);
+    highlightCtx.putImageData(highlightImgData, 0, 0);
+
+    return { shadowCanvas, highlightCanvas };
+  } catch (err) {
+    console.warn('extractLuminanceCanvases note:', err);
+    return null;
+  }
+}
+
+export interface RenderCurtainOptions {
+  showWireframe?: boolean;
+  activeRegionId?: string | null;
+  width?: number;
+  height?: number;
+  renderMode?: 'realistic' | 'wireframe' | 'depth' | 'canny';
+  drawStitchLines?: boolean;
+  includeWatermark?: boolean;
+  cleanPlate?: boolean;
+  useLuminanceTransfer?: boolean;
+}
+
+/**
  * Renders an ultra-realistic curtain mockup on HTML5 Canvas
  * preserving folds, ambient highlights, and shadow maps.
  */
@@ -215,16 +293,11 @@ export async function renderCurtainOnCanvas(
   template: CurtainTemplate,
   assignments: FabricAssignment[],
   fabrics: Fabric[],
-  options: {
-    showWireframe?: boolean;
-    activeRegionId?: string | null;
-    width?: number;
-    height?: number;
-    renderMode?: 'realistic' | 'wireframe' | 'depth' | 'canny';
-  } = {}
+  options: RenderCurtainOptions = {}
 ): Promise<string> {
   const width = options.width || 800;
   const height = options.height || 1000;
+  const useLuminanceTransfer = options.useLuminanceTransfer !== false;
 
   canvas.width = width;
   canvas.height = height;
@@ -242,6 +315,11 @@ export async function renderCurtainOnCanvas(
       console.warn('Real photo plate load note:', e);
     }
   }
+
+  // Precompute authentic photo luminance maps if available
+  const luminanceMaps = basePlateImg && useLuminanceTransfer
+    ? extractLuminanceCanvases(basePlateImg, width, height)
+    : null;
 
   if (basePlateImg) {
     // Draw authentic high-resolution real photograph
@@ -390,6 +468,17 @@ export async function renderCurtainOnCanvas(
       }
     }
 
+    // 3d. Photorealistic Luminance Transfer (Authentic Pleat Folds & Sunlight Crests from Real Photograph)
+    if (luminanceMaps) {
+      // Transfer authentic shadowed pleats
+      ctx.drawImage(luminanceMaps.shadowCanvas, 0, 0);
+      // Transfer authentic crest highlights in screen mode
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.drawImage(luminanceMaps.highlightCanvas, 0, 0);
+      ctx.restore();
+    }
+
     ctx.restore();
   }
 
@@ -495,26 +584,29 @@ export async function renderCurtainOnCanvas(
   ctx.restore();
 
   // 6. Seam Stitching lines between regions (Gold/Taupe tailored topstitch)
-  ctx.save();
-  ctx.strokeStyle = 'rgba(215, 195, 155, 0.7)';
-  ctx.lineWidth = 1.2;
-  ctx.setLineDash([4, 3]);
+  // Only rendered if wireframe/stencil mode is requested and not in cleanPlate mode
+  if (!options.cleanPlate && (options.drawStitchLines || options.showWireframe)) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(215, 195, 155, 0.7)';
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([4, 3]);
 
-  template.regions.forEach((region) => {
-    const points = getCanvasPoints(region.polygon_coords);
-    if (points.length < 3) return;
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++) {
-      ctx.lineTo(points[i].x, points[i].y);
-    }
-    ctx.closePath();
-    ctx.stroke();
-  });
-  ctx.restore();
+    template.regions.forEach((region) => {
+      const points = getCanvasPoints(region.polygon_coords);
+      if (points.length < 3) return;
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+      ctx.closePath();
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
 
   // 7. Interactive UI Region Outlines / Hover Overlays
-  if (options.showWireframe || options.activeRegionId) {
+  if (!options.cleanPlate && (options.showWireframe || options.activeRegionId)) {
     ctx.save();
     template.regions.forEach((region) => {
       const isSelected = options.activeRegionId === region.id;
@@ -558,14 +650,16 @@ export async function renderCurtainOnCanvas(
     ctx.restore();
   }
 
-  // 8. Brand Watermark subtly in corner
-  ctx.save();
-  ctx.fillStyle = 'rgba(70, 60, 50, 0.4)';
-  ctx.font = '600 13px "Cinzel", serif';
-  ctx.letterSpacing = '2px';
-  ctx.textAlign = 'right';
-  ctx.fillText('AATMI HAUTE COUTURE DRAPERY', width - 24, height - 20);
-  ctx.restore();
+  // 8. Brand Watermark subtly in corner (cleanPlate skips this completely)
+  if (!options.cleanPlate && options.includeWatermark) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(70, 60, 50, 0.4)';
+    ctx.font = '600 13px "Cinzel", serif';
+    ctx.letterSpacing = '2px';
+    ctx.textAlign = 'right';
+    ctx.fillText('AATMI HAUTE COUTURE DRAPERY', width - 24, height - 20);
+    ctx.restore();
+  }
 
   try {
     return canvas.toDataURL('image/jpeg', 0.92);
