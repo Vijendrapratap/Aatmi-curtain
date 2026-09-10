@@ -8,6 +8,12 @@ import { RegionAssignmentPanel } from './components/RegionAssignmentPanel';
 import { FabricLibraryModal } from './components/FabricLibraryModal';
 import { NewTemplateModal } from './components/NewTemplateModal';
 import { SpecSheetModal } from './components/SpecSheetModal';
+import { AuthModal } from './components/AuthModal';
+import { OnboardingTourModal } from './components/OnboardingTourModal';
+import { TactileLoupeModal } from './components/TactileLoupeModal';
+import { RoomLightingControls } from './components/RoomLightingControls';
+import { UserProfile, RoomLightingId, RoomSettingId } from './types/auth';
+import { DEMO_USERS } from './data/roomSettings';
 import { Sparkles, AlertTriangle, CheckCircle, Info, Eye, Layers } from 'lucide-react';
 
 export default function App() {
@@ -17,6 +23,30 @@ export default function App() {
   const [assignments, setAssignments] = useState<FabricAssignment[]>([]);
   const [activeRegionId, setActiveRegionId] = useState<string | null>(null);
   const [mobileTab, setMobileTab] = useState<'preview' | 'regions'>('preview');
+
+  // User Authentication & Persona
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+    const saved = localStorage.getItem('aatmi_user_profile');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // fallback
+      }
+    }
+    return DEMO_USERS[0]; // Elena Vance (Lead Interior Designer) as intuitive starting persona
+  });
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [isOnboardingTourOpen, setIsOnboardingTourOpen] = useState<boolean>(false);
+
+  // Environmental Lighting & Architectural Presentation
+  const [roomLighting, setRoomLighting] = useState<RoomLightingId>('daylight');
+  const [roomSetting, setRoomSetting] = useState<RoomSettingId>('parisian');
+  const [isPresentationMode, setIsPresentationMode] = useState<boolean>(false);
+
+  // Tactile Fabric Loupe Inspection
+  const [tactileFabric, setTactileFabric] = useState<Fabric | null>(null);
+  const [isTactileLoupeOpen, setIsTactileLoupeOpen] = useState<boolean>(false);
 
   // AI Generation state
   const [aiGeneratedImageUrl, setAiGeneratedImageUrl] = useState<string | null>(null);
@@ -206,6 +236,9 @@ export default function App() {
         onOpenFabricLibrary={() => setIsFabricLibraryOpen(true)}
         onExportMockup={handleExportMockup}
         hasGeneratedResult={Boolean(aiGeneratedImageUrl)}
+        currentUser={currentUser}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onOpenTourModal={() => setIsOnboardingTourOpen(true)}
       />
 
       {/* Generation Notification Banner (if any) */}
@@ -309,15 +342,30 @@ export default function App() {
             onTriggerAiGeneration={handleTriggerAiGeneration}
             isGeneratingAi={isGeneratingAi}
             onReturnToPreview={() => setMobileTab('preview')}
+            onOpenTactileLoupe={(fab) => {
+              setTactileFabric(fab);
+              setIsTactileLoupeOpen(true);
+            }}
           />
         </div>
 
-        {/* Center: Curtain Visualizer Stage */}
+        {/* Center: Curtain Visualizer Stage with Environmental Lighting Bar */}
         <div
           className={`flex-1 h-full min-h-0 ${
             mobileTab === 'preview' ? 'flex flex-col flex-1' : 'hidden lg:flex lg:flex-col'
           }`}
         >
+          {/* Room Lighting & Setting Controls Bar */}
+          <RoomLightingControls
+            currentLighting={roomLighting}
+            onSelectLighting={setRoomLighting}
+            currentSetting={roomSetting}
+            onSelectSetting={setRoomSetting}
+            isPresentationMode={isPresentationMode}
+            onTogglePresentationMode={() => setIsPresentationMode(!isPresentationMode)}
+          />
+
+          {/* Interactive Fabric Canvas */}
           <CurtainCanvas
             template={selectedTemplate}
             assignments={assignments}
@@ -332,6 +380,13 @@ export default function App() {
             onOpenFabricPicker={() => setIsFabricLibraryOpen(true)}
             onOpenRegionsTab={() => setMobileTab('regions')}
             onAssignFabric={handleAssignFabric}
+            roomLighting={roomLighting}
+            roomSetting={roomSetting}
+            isPresentationMode={isPresentationMode}
+            onOpenTactileLoupe={(fab) => {
+              setTactileFabric(fab);
+              setIsTactileLoupeOpen(true);
+            }}
           />
         </div>
       </main>
@@ -364,6 +419,39 @@ export default function App() {
         assignments={assignments}
         fabrics={fabrics}
         currentPreviewImage={aiGeneratedImageUrl || currentCanvasUrl}
+      />
+
+      {/* User Login / Role Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        currentUser={currentUser}
+        onLogin={(user) => {
+          setCurrentUser(user);
+          localStorage.setItem('aatmi_user_profile', JSON.stringify(user));
+        }}
+        onLogout={() => {
+          setCurrentUser(null);
+          localStorage.removeItem('aatmi_user_profile');
+        }}
+      />
+
+      {/* Engaging Onboarding Tour Modal */}
+      <OnboardingTourModal
+        isOpen={isOnboardingTourOpen}
+        onClose={() => setIsOnboardingTourOpen(false)}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onOpenFabrics={() => setIsFabricLibraryOpen(true)}
+        onOpenSpecSheet={() => setIsSpecModalOpen(true)}
+        onTogglePresentation={() => setIsPresentationMode(!isPresentationMode)}
+      />
+
+      {/* 40x Macro Tactile Weave Loupe Modal */}
+      <TactileLoupeModal
+        isOpen={isTactileLoupeOpen}
+        onClose={() => setIsTactileLoupeOpen(false)}
+        fabric={tactileFabric}
+        currentLighting={roomLighting}
       />
     </div>
   );

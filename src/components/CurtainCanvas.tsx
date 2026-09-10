@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CurtainTemplate, Fabric, FabricAssignment, Region } from '../types/curtain';
+import { RoomLightingId, RoomSettingId } from '../types/auth';
+import { ROOM_LIGHTING_OPTIONS, ROOM_SETTING_OPTIONS } from '../data/roomSettings';
 import { renderCurtainOnCanvas, generateCannyStructureMap, getTemplateRealPhotoUrl } from '../utils/fabricRenderer';
 import {
   Sparkles,
@@ -17,7 +19,11 @@ import {
   LayoutTemplate,
   Download,
   Image as ImageIcon,
-  Check
+  Check,
+  Award,
+  Sun,
+  Sunset,
+  Moon
 } from 'lucide-react';
 
 interface CurtainCanvasProps {
@@ -34,6 +40,10 @@ interface CurtainCanvasProps {
   onOpenFabricPicker?: () => void;
   onOpenRegionsTab?: () => void;
   onAssignFabric?: (regionId: string, fabricId: string) => void;
+  roomLighting?: RoomLightingId;
+  roomSetting?: RoomSettingId;
+  isPresentationMode?: boolean;
+  onOpenTactileLoupe?: (fabric: Fabric) => void;
 }
 
 export const CurtainCanvas: React.FC<CurtainCanvasProps> = ({
@@ -50,6 +60,10 @@ export const CurtainCanvas: React.FC<CurtainCanvasProps> = ({
   onOpenFabricPicker,
   onOpenRegionsTab,
   onAssignFabric,
+  roomLighting = 'daylight',
+  roomSetting = 'parisian',
+  isPresentationMode = false,
+  onOpenTactileLoupe,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -64,6 +78,9 @@ export const CurtainCanvas: React.FC<CurtainCanvasProps> = ({
   const [hoveredRegion, setHoveredRegion] = useState<Region | null>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [showAiResult, setShowAiResult] = useState<boolean>(true);
+
+  const activeLight = ROOM_LIGHTING_OPTIONS.find((l) => l.id === roomLighting) || ROOM_LIGHTING_OPTIONS[0];
+  const activeSetting = ROOM_SETTING_OPTIONS.find((s) => s.id === roomSetting) || ROOM_SETTING_OPTIONS[0];
 
   // Filter out the 13 uploaded fabric samples for quick access
   const uploadedFabrics = fabrics.filter((f) => f.id.startsWith('fab-user-'));
@@ -287,7 +304,31 @@ export const CurtainCanvas: React.FC<CurtainCanvasProps> = ({
       </div>
 
       {/* Main Canvas Stage */}
-      <div className="flex-1 relative flex items-center justify-center p-4 sm:p-6 overflow-auto">
+      <div
+        className="flex-1 relative flex items-center justify-center p-4 sm:p-6 overflow-auto transition-all duration-300"
+        style={{
+          background: isPresentationMode
+            ? activeSetting.bgGradient
+            : 'radial-gradient(ellipse at 50% 30%, #FAF9F6 0%, #EFECE5 70%, #E2DDD5 100%)',
+        }}
+      >
+        {/* Presentation Mode Watermark & Client Room Tag */}
+        {isPresentationMode && (
+          <div className="absolute top-4 left-6 z-20 pointer-events-none flex flex-col">
+            <div className="flex items-center gap-2">
+              <span className="font-serif font-bold text-base tracking-widest text-stone-900">
+                AATMI ATELIER
+              </span>
+              <span className="text-[10px] uppercase font-sans tracking-widest px-2 py-0.5 rounded bg-stone-900/10 text-stone-800 font-semibold border border-stone-900/15">
+                Client Presentation View
+              </span>
+            </div>
+            <span className="text-xs text-stone-700 font-serif italic mt-0.5">
+              {template.name} · {activeSetting.name} · {activeLight.name} ({activeLight.kelvin})
+            </span>
+          </div>
+        )}
+
         {/* Generating Overlay indicator */}
         {isGeneratingAi && (
           <div className="absolute inset-0 bg-stone-900/65 backdrop-blur-xs z-20 flex flex-col items-center justify-center text-center p-6">
@@ -312,28 +353,36 @@ export const CurtainCanvas: React.FC<CurtainCanvasProps> = ({
         )}
 
         {/* View Mode Badge & Tracking Integrity Audit */}
-        <div className="absolute top-4 left-6 z-10 flex flex-wrap items-center gap-2 pointer-events-none">
-          <span className="bg-stone-900/85 backdrop-blur-xs text-stone-100 text-[11px] font-medium px-3 py-1 rounded-full border border-stone-700 shadow-md flex items-center gap-1.5">
-            <LayoutTemplate className="w-3.5 h-3.5 text-amber-400" />
-            <span className="font-semibold">{template.name}</span>
-            <span className="text-stone-400">·</span>
-            <span className="text-amber-300 font-mono text-[10px]">{template.regions.length} Zones</span>
-          </span>
-
-          {viewMode === 'final_image' && (
-            <span className="bg-amber-950/90 backdrop-blur-xs text-amber-200 text-[11px] font-medium px-2.5 py-1 rounded-full border border-amber-600/50 shadow-md flex items-center gap-1.5">
-              <Camera className="w-3 h-3 text-amber-400" />
-              <span>{aiGeneratedImageUrl ? 'AI Generated Real Photo' : 'Photorealistic Curtain Scene'}</span>
+        {!isPresentationMode && (
+          <div className="absolute top-4 left-6 z-10 flex flex-wrap items-center gap-2 pointer-events-none">
+            <span className="bg-stone-900/85 backdrop-blur-xs text-stone-100 text-[11px] font-medium px-3 py-1 rounded-full border border-stone-700 shadow-md flex items-center gap-1.5">
+              <LayoutTemplate className="w-3.5 h-3.5 text-amber-400" />
+              <span className="font-semibold">{template.name}</span>
+              <span className="text-stone-400">·</span>
+              <span className="text-amber-300 font-mono text-[10px]">{template.regions.length} Zones</span>
             </span>
-          )}
 
-          {viewMode === 'wireframe' && (
-            <span className="bg-emerald-950/90 backdrop-blur-xs text-emerald-200 text-[11px] font-medium px-2.5 py-1 rounded-full border border-emerald-600/50 shadow-md flex items-center gap-1.5">
-              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-              <span>Full Surface Covered (0 Missing Sections)</span>
+            {viewMode === 'final_image' && (
+              <span className="bg-amber-950/90 backdrop-blur-xs text-amber-200 text-[11px] font-medium px-2.5 py-1 rounded-full border border-amber-600/50 shadow-md flex items-center gap-1.5">
+                <Camera className="w-3 h-3 text-amber-400" />
+                <span>{aiGeneratedImageUrl ? 'AI Generated Real Photo' : 'Photorealistic Curtain Scene'}</span>
+              </span>
+            )}
+
+            {viewMode === 'wireframe' && (
+              <span className="bg-emerald-950/90 backdrop-blur-xs text-emerald-200 text-[11px] font-medium px-2.5 py-1 rounded-full border border-emerald-600/50 shadow-md flex items-center gap-1.5">
+                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                <span>Full Surface Covered (0 Missing Sections)</span>
+              </span>
+            )}
+
+            {/* Room Light Indicator */}
+            <span className="bg-stone-900/80 backdrop-blur-xs text-stone-200 text-[10px] font-medium px-2.5 py-1 rounded-full border border-stone-700 flex items-center gap-1">
+              <Sun className="w-3 h-3 text-amber-400" />
+              <span>{activeLight.name}</span>
             </span>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Viewport Box */}
         <div
@@ -342,61 +391,86 @@ export const CurtainCanvas: React.FC<CurtainCanvasProps> = ({
           onMouseMove={handleCanvasMouseMove}
           onMouseLeave={() => setHoveredRegion(null)}
           style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'center center' }}
-          className="relative max-w-[560px] w-full aspect-[4/5] min-h-[380px] bg-white rounded-lg shadow-xl overflow-hidden border border-stone-300/80 transition-transform duration-200 cursor-crosshair select-none"
+          className="relative max-w-[560px] w-full aspect-[4/5] min-h-[380px] bg-white rounded-lg shadow-2xl overflow-hidden border border-stone-300/80 transition-transform duration-200 cursor-crosshair select-none"
         >
-          {/* 1. Base Canvas (Interactive rendering on template/stencil) */}
-          <canvas
-            ref={canvasRef}
-            width={800}
-            height={1000}
-            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-            className={`w-full h-full ${
-              viewMode === 'original' || viewMode === 'structure' || (viewMode === 'final_image' && aiGeneratedImageUrl) ? 'hidden' : 'block'
-            }`}
+          {/* Ambient Lighting Filter Wrapper */}
+          <div
+            className="w-full h-full relative"
+            style={{
+              filter: activeLight.canvasFilter,
+              transition: 'filter 0.3s ease',
+            }}
+          >
+            {/* 1. Base Canvas (Interactive rendering on template/stencil) */}
+            <canvas
+              ref={canvasRef}
+              width={800}
+              height={1000}
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              className={`w-full h-full ${
+                viewMode === 'original' || viewMode === 'structure' || (viewMode === 'final_image' && aiGeneratedImageUrl) ? 'hidden' : 'block'
+              }`}
+            />
+
+            {/* 1b. AI Generated Real Curtain Image */}
+            {viewMode === 'final_image' && aiGeneratedImageUrl && (
+              <div className="w-full h-full relative">
+                <img
+                  src={aiGeneratedImageUrl}
+                  alt="AI Generated Real Curtain Photo"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-3 right-3 bg-stone-900/85 text-amber-300 text-[11px] px-2.5 py-1 rounded-full border border-amber-500/40 flex items-center gap-1.5 shadow-md">
+                  <Sparkles className="w-3 h-3 text-amber-400" />
+                  <span>AI Synthesized Photo</span>
+                </div>
+              </div>
+            )}
+
+            {/* 2. Original Authentic Real Photo View */}
+            {viewMode === 'original' && originalImageUrl && (
+              <div className="w-full h-full relative">
+                <img
+                  src={originalImageUrl}
+                  alt="Authentic Real Curtain Photograph"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-3 left-3 bg-stone-900/90 text-stone-100 text-[11px] px-2.5 py-1 rounded-full border border-stone-700 flex items-center gap-1.5 shadow-md">
+                  <Camera className="w-3 h-3 text-blue-400" />
+                  <span>Authentic Showroom Photograph</span>
+                </div>
+              </div>
+            )}
+
+            {/* 3. Canny Edge Structure Map View */}
+            {viewMode === 'structure' && cannyMapUrl && (
+              <div className="w-full h-full bg-black flex items-center justify-center">
+                <img
+                  src={cannyMapUrl}
+                  alt="Canny Structure Map"
+                  className="w-full h-full object-contain filter invert"
+                />
+                <div className="absolute top-3 left-3 bg-stone-900/90 text-stone-200 text-[11px] px-2.5 py-1 rounded border border-stone-700 font-mono">
+                  Canny Edge & Drape Matrix
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Environmental Ambient Light Tint Overlay */}
+          <div
+            className="absolute inset-0 pointer-events-none transition-all duration-300"
+            style={{ background: activeLight.tintOverlay }}
           />
 
-          {/* 1b. AI Generated Real Curtain Image */}
-          {viewMode === 'final_image' && aiGeneratedImageUrl && (
-            <div className="w-full h-full relative">
-              <img
-                src={aiGeneratedImageUrl}
-                alt="AI Generated Real Curtain Photo"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-3 right-3 bg-stone-900/85 text-amber-300 text-[11px] px-2.5 py-1 rounded-full border border-amber-500/40 flex items-center gap-1.5 shadow-md">
-                <Sparkles className="w-3 h-3 text-amber-400" />
-                <span>AI Synthesized Photo</span>
-              </div>
-            </div>
-          )}
-
-          {/* 2. Original Authentic Real Photo View */}
-          {viewMode === 'original' && originalImageUrl && (
-            <div className="w-full h-full relative">
-              <img
-                src={originalImageUrl}
-                alt="Authentic Real Curtain Photograph"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-3 left-3 bg-stone-900/90 text-stone-100 text-[11px] px-2.5 py-1 rounded-full border border-stone-700 flex items-center gap-1.5 shadow-md">
-                <Camera className="w-3 h-3 text-blue-400" />
-                <span>Authentic Showroom Photograph</span>
-              </div>
-            </div>
-          )}
-
-          {/* 3. Canny Edge Structure Map View */}
-          {viewMode === 'structure' && cannyMapUrl && (
-            <div className="w-full h-full bg-black flex items-center justify-center">
-              <img
-                src={cannyMapUrl}
-                alt="Canny Structure Map"
-                className="w-full h-full object-contain filter invert"
-              />
-              <div className="absolute top-3 left-3 bg-stone-900/90 text-stone-200 text-[11px] px-2.5 py-1 rounded border border-stone-700 font-mono">
-                Canny Edge & Drape Matrix
-              </div>
-            </div>
+          {/* Golden hour diagonal sunbeam highlights */}
+          {roomLighting === 'golden_hour' && (
+            <div
+              className="absolute inset-0 pointer-events-none mix-blend-screen opacity-35"
+              style={{
+                background: 'radial-gradient(circle at 10% 20%, rgba(255,200,80,0.6) 0%, transparent 60%)',
+              }}
+            />
           )}
 
           {/* 4. Split Screen Comparison Mode (Original vs Redesign) */}
@@ -538,7 +612,7 @@ export const CurtainCanvas: React.FC<CurtainCanvasProps> = ({
 
       {/* Active Zone Status & Quick Action Bar */}
       <div className="bg-white border-t border-stone-200/90 px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-stone-500 font-medium">Selected Zone:</span>
           <span className="font-semibold text-stone-900 bg-stone-100 border border-stone-200 px-2 py-0.5 rounded shadow-2xs">
             {activeRegion?.display_name || 'Zone'}
@@ -551,6 +625,18 @@ export const CurtainCanvas: React.FC<CurtainCanvasProps> = ({
               />
               <span className="text-stone-700 font-medium">{activeFabric.name}</span>
             </div>
+          )}
+
+          {activeFabric && onOpenTactileLoupe && (
+            <button
+              id="btn-inspect-tactile-loupe"
+              onClick={() => onOpenTactileLoupe(activeFabric)}
+              className="flex items-center gap-1 text-[11px] bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300/80 px-2 py-0.5 rounded font-medium transition cursor-pointer ml-1 shadow-2xs"
+              title="Inspect warp & weft micro-weave and light reflection with 40x optical loupe"
+            >
+              <ZoomIn className="w-3 h-3 text-amber-700" />
+              <span>Inspect Weave (40x Loupe)</span>
+            </button>
           )}
         </div>
 
@@ -590,7 +676,10 @@ export const CurtainCanvas: React.FC<CurtainCanvasProps> = ({
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <span className="hidden sm:inline text-stone-400 font-sans">
+            Fullness: <strong className="text-stone-700">2.5x Tailored Pleat</strong>
+          </span>
           <span className="text-stone-400">Surface Tracking:</span>
           <span className="font-semibold text-emerald-700 flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5" />

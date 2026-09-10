@@ -10,7 +10,8 @@ import {
   Check,
   Palette,
   ChevronRight,
-  Info
+  Info,
+  ZoomIn
 } from 'lucide-react';
 
 interface RegionAssignmentPanelProps {
@@ -26,6 +27,7 @@ interface RegionAssignmentPanelProps {
   onTriggerAiGeneration: () => void;
   isGeneratingAi: boolean;
   onReturnToPreview?: () => void;
+  onOpenTactileLoupe?: (fabric: Fabric) => void;
 }
 
 export const RegionAssignmentPanel: React.FC<RegionAssignmentPanelProps> = ({
@@ -41,6 +43,7 @@ export const RegionAssignmentPanel: React.FC<RegionAssignmentPanelProps> = ({
   onTriggerAiGeneration,
   isGeneratingAi,
   onReturnToPreview,
+  onOpenTactileLoupe,
 }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const targetRegionForFileRef = useRef<string | null>(null);
@@ -224,11 +227,11 @@ export const RegionAssignmentPanel: React.FC<RegionAssignmentPanelProps> = ({
                     e.stopPropagation();
                     triggerUploadForRegion(region.id);
                   }}
-                  className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-medium bg-stone-100 hover:bg-stone-200 text-stone-800 py-1.5 px-2.5 rounded-md border border-stone-200 transition cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-medium bg-stone-100 hover:bg-stone-200 text-stone-800 py-1.5 px-2 rounded-md border border-stone-200 transition cursor-pointer"
                   title="Upload a fabric photo for this specific section"
                 >
                   <Upload className="w-3 h-3 text-amber-700" />
-                  <span>Upload Fabric</span>
+                  <span>Upload</span>
                 </button>
 
                 <button
@@ -238,11 +241,25 @@ export const RegionAssignmentPanel: React.FC<RegionAssignmentPanelProps> = ({
                     onSelectRegion(region.id);
                     onOpenFabricLibrary();
                   }}
-                  className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-medium bg-white hover:bg-stone-50 text-stone-700 py-1.5 px-2.5 rounded-md border border-stone-200 transition cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-medium bg-white hover:bg-stone-50 text-stone-700 py-1.5 px-2 rounded-md border border-stone-200 transition cursor-pointer"
                 >
                   <Palette className="w-3 h-3 text-indigo-600" />
-                  <span>Browse Swatches</span>
+                  <span>Swatches</span>
                 </button>
+
+                {currentFabric && onOpenTactileLoupe && (
+                  <button
+                    id={`btn-loupe-region-${region.id}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenTactileLoupe(currentFabric);
+                    }}
+                    className="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-md border border-amber-300 transition cursor-pointer shrink-0"
+                    title={`Inspect ${currentFabric.name} with 40x macro optical loupe`}
+                  >
+                    <ZoomIn className="w-3.5 h-3.5 text-amber-700" />
+                  </button>
+                )}
               </div>
 
               {/* Expanded Fine-tuning controls when region is selected */}
