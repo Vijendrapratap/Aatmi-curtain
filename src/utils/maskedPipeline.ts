@@ -1,254 +1,84 @@
-import { Region, CurtainTemplate, Fabric, FabricAssignment } from '../types/curtain';
 import { loadImage, rasterizeToPngBase64, getTemplateRealPhotoUrl } from './fabricRenderer';
+import type { CurtainTemplate, Fabric, FabricAssignment, Region } from '../types/curtain';
 
-/**
- * Solid distinctive tint colors for guiding inpainting models per region order
- */
-export const REGION_TINTS = [
-  '#00FF88', // Electric Emerald
-  '#FF0077', // Hot Magenta
-  '#00DDFF', // Vivid Cyan
-  '#FFAA00', // Deep Amber
-  '#B800FF', // Neon Violet
-  '#FF3300', // Radiant Vermilion
-];
+const TINTS = ['#00ff00', '#ff00ff', '#00ffff', '#ff8000', '#8000ff', '#ffff00'];
 
-/**
- * Renders a crisp binary mask (white = region interior, black = background)
- * on an offscreen HTMLCanvasElement matching the target dimensions.
- */
-export function createRegionMaskCanvas(
-  region: Region,
-  width: number,
-  height: number
-): HTMLCanvasElement {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return canvas;
-
-  // Solid black background
-  ctx.fillStyle = '#000000';
-  ctx.fillRect(0, 0, width, height);
-
-  const coords = region.polygon_coords;
-  if (coords && coords.length >= 3) {
-    ctx.fillStyle = '#FFFFFF';
-    ctx.beginPath();
-    ctx.moveTo((coords[0].x / 100) * width, (coords[0].y / 100) * height);
-    for (let i = 1; i < coords.length; i++) {
-      ctx.lineTo((coords[i].x / 100) * width, (coords[i].y / 100) * height);
-    }
-    ctx.closePath();
-    ctx.fill();
-  }
-
-  return canvas;
+async function toCanvas(src: string, w?: number, h?: number) {
+  const img = await loadImage(src);
+  const c = document.createElement('canvas');
+  c.width = w || img.width; c.height = h || img.height;
+  c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
+  return c;
 }
 
-/**
- * Creates a visual guidance plate where the target region is highlighted
- * with a translucent neon tint overlay, while the rest of the room stays authentic.
- */
-export function createTintedGuidanceCanvas(
-  baseImage: HTMLImageElement | HTMLCanvasElement,
-  maskCanvas: HTMLCanvasElement,
-  tintColor: string,
-  alpha = 0.55
-): HTMLCanvasElement {
-  const canvas = document.createElement('canvas');
-  canvas.width = baseImage.width;
-  canvas.height = baseImage.height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return canvas;
-
-  // 1. Draw base photo
-  ctx.drawImage(baseImage, 0, 0, canvas.width, canvas.height);
-
-  // 2. Overlay colored tint masked strictly to the region
-  const tintCanvas = document.createElement('canvas');
-  tintCanvas.width = canvas.width;
-  tintCanvas.height = canvas.height;
-  const tCtx = tintCanvas.getContext('2d');
-  if (tCtx) {
-    tCtx.fillStyle = tintColor;
-    tCtx.fillRect(0, 0, canvas.width, canvas.height);
-    tCtx.globalCompositeOperation = 'destination-in';
-    tCtx.drawImage(maskCanvas, 0, 0);
-
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.drawImage(tintCanvas, 0, 0);
-    ctx.restore();
-  }
-
-  return canvas;
+/** Fallback mask when no SAM mask_url exists: rasterize the VLM polygon. */
+export async function polygonMask(region: Region, w: number, h: number): Promise<string> {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const ctx = c.getContext('2d')!;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = '#fff'; ctx.beginPath();
+  region.polygon_coords.forEach((p, i) =>
+    i ? ctx.lineTo((p.x / 100) * w, (p.y / 100) * h) : ctx.moveTo((p.x / 100) * w, (p.y / 100) * h));
+  ctx.closePath(); ctx.fill();
+  return c.toDataURL('image/png');
 }
 
-/**
- * Performs client-side feathered alpha compositing:
- * Keeps 100% of the original base photo pixels outside the mask,
- * and seamlessly blends the generative AI edit inside the zone
- * using a softly feathered boundary to eliminate halos or hard seams.
- */
-export function featheredComposite(
-  baseImage: HTMLImageElement | HTMLCanvasElement,
-  editedImage: HTMLImageElement | HTMLCanvasElement,
-  maskCanvas: HTMLCanvasElement,
-  featherRadius = 4
-): string {
-  const width = baseImage.width;
-  const height = baseImage.height;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return '';
-
-  // 1. Draw 100% pristine original background
-  ctx.drawImage(baseImage, 0, 0, width, height);
-
-  // 2. Prepare feathered mask
-  const featheredMask = document.createElement('canvas');
-  featheredMask.width = width;
-  featheredMask.height = height;
-  const fCtx = featheredMask.getContext('2d');
-  if (fCtx) {
-    if (featherRadius > 0) {
-      fCtx.filter = `blur(${featherRadius}px)`;
-    }
-    fCtx.drawImage(maskCanvas, 0, 0);
-  }
-
-  // 3. Prepare masked edit layer
-  const editLayer = document.createElement('canvas');
-  editLayer.width = width;
-  editLayer.height = height;
-  const eCtx = editLayer.getContext('2d');
-  if (eCtx) {
-    eCtx.drawImage(editedImage, 0, 0, width, height);
-    // Mask with feathered alpha
-    eCtx.globalCompositeOperation = 'destination-in';
-    eCtx.drawImage(featheredMask, 0, 0);
-
-    // 4. Composite over base image
-    ctx.drawImage(editLayer, 0, 0);
-  }
-
-  return canvas.toDataURL('image/jpeg', 0.94);
+export async function tintRegion(base: string, mask: string, tint: string): Promise<string> {
+  const c = await toCanvas(base); const ctx = c.getContext('2d')!;
+  const m = await toCanvas(mask, c.width, c.height);
+  const mc = document.createElement('canvas'); mc.width = c.width; mc.height = c.height;
+  const mctx = mc.getContext('2d')!;
+  mctx.drawImage(m, 0, 0); mctx.globalCompositeOperation = 'source-in';
+  mctx.fillStyle = tint; mctx.fillRect(0, 0, mc.width, mc.height);
+  mctx.globalAlpha = 0.9; ctx.drawImage(mc, 0, 0);
+  return c.toDataURL('image/png');
 }
 
-/**
- * Executes high-precision masked curtain generation:
- * - Sorts assignments by topological priority (large drape panels first, thin trims & borders last)
- * - Sends clean high-res 1024x1280 base plate and 1024x1024 fabric swatches
- * - Preserves background pixels with feathered alpha compositing
- */
-export async function executeMaskedPipeline(
-  template: CurtainTemplate,
-  assignments: FabricAssignment[],
-  fabrics: Fabric[],
-  onStepProgress?: (step: string) => void
-): Promise<{ success: boolean; imageUrl: string; message?: string }> {
-  const fabricMap = new Map<string, Fabric>();
-  fabrics.forEach((f) => fabricMap.set(f.id, f));
+/** Guide §5.2 step 4: keep ONLY the mask interior from the edit, feathered edges. */
+export async function featheredComposite(base: string, edit: string, mask: string, featherPx = 4): Promise<string> {
+  const c = await toCanvas(base); const ctx = c.getContext('2d')!;
+  const e = await toCanvas(edit, c.width, c.height);
+  const m = await toCanvas(mask, c.width, c.height);
+  const mc = document.createElement('canvas'); mc.width = c.width; mc.height = c.height;
+  const mctx = mc.getContext('2d')!;
+  mctx.filter = `blur(${featherPx}px)`; mctx.drawImage(m, 0, 0); mctx.filter = 'none';
+  mctx.globalCompositeOperation = 'source-in'; mctx.drawImage(e, 0, 0);
+  ctx.drawImage(mc, 0, 0);
+  return c.toDataURL('image/png');
+}
 
-  // 1. Resolve authentic clean source photo (never the synthetic mockup canvas)
-  const basePhotoUrl = template.original_image_url || getTemplateRealPhotoUrl(template, 1024, 1280);
-  onStepProgress?.('Rasterizing authentic high-res curtain plate (1024×1280)...');
-  const cleanBaseBase64 = await rasterizeToPngBase64(basePhotoUrl, 1024, 1280);
-  const baseImage = await loadImage(cleanBaseBase64);
+export async function generateSequentialRedesign(opts: {
+  template: CurtainTemplate; assignments: FabricAssignment[]; fabrics: Fabric[];
+  callEdit: (payload: any) => Promise<any>; onStep?: (msg: string) => void;
+}): Promise<{ imageUrl: string }> {
+  // FIX 1: base = ORIGINAL PHOTO, never the canvas mockup
+  const baseSrc = opts.template.original_image_url || getTemplateRealPhotoUrl(opts.template, 1024, 1280);
+  let current = await rasterizeToPngBase64(baseSrc, 1024, 1280);
+  const fabricMap = new Map(opts.fabrics.map(f => [f.id, f]));
+  const ordered = [...opts.assignments].sort((a, b) =>
+    (opts.template.regions.find(r => r.id === a.region_id)?.order ?? 0) -
+    (opts.template.regions.find(r => r.id === b.region_id)?.order ?? 0));
 
-  // Sort assignments by region order (e.g. 1 = main body, 2 = flanking, 3 = horizontal band, 4 = hem trim)
-  const sortedAssignments = [...assignments].sort((a, b) => {
-    const regA = template.regions.find((r) => r.id === a.region_id);
-    const regB = template.regions.find((r) => r.id === b.region_id);
-    return (regA?.order || 0) - (regB?.order || 0);
-  });
-
-  // Prepare high-res swatches (1024x1024 to preserve houndstooth, slub linen, damask, embroidery detail)
-  onStepProgress?.('Encoding textile swatches at 1024×1024 micro-weave resolution...');
-  const assignmentPayload = await Promise.all(
-    sortedAssignments.map(async (asg, idx) => {
-      const reg = template.regions.find((r) => r.id === asg.region_id);
-      const fab = fabricMap.get(asg.fabric_id);
-
-      let rasterBase64 = '';
-      if (fab?.image_url) {
-        rasterBase64 = await rasterizeToPngBase64(fab.image_url, 1024, 1024);
-      }
-
-      // Generate region mask
-      const maskCanvas = createRegionMaskCanvas(reg || template.regions[0], 1024, 1280);
-      const maskBase64 = maskCanvas.toDataURL('image/png');
-
-      // Generate tinted guidance plate
-      const tintColor = REGION_TINTS[idx % REGION_TINTS.length];
-      const tintedCanvas = createTintedGuidanceCanvas(baseImage, maskCanvas, tintColor);
-      const tintedBase64 = tintedCanvas.toDataURL('image/png');
-
-      return {
-        regionId: reg?.id || '',
-        regionName: reg?.name || 'region',
-        regionDisplayName: reg?.display_name || 'Curtain Zone',
-        regionDescription: reg?.description || 'Curtain drapery section',
-        order: reg?.order || idx + 1,
-        fabricName: fab?.name || 'Luxe Fabric',
-        fabricWeave: fab?.metadata.weave || 'woven',
-        fabricColorHex: fab?.color_hex || '#D4AF37',
-        fabricCategory: fab?.category || 'Drapery',
-        fabricImageBase64: rasterBase64,
-        maskImageBase64: maskBase64,
-        tintedImageBase64: tintedBase64,
-        tintColor,
-      };
-    })
-  );
-
-  onStepProgress?.('Executing positional generative draping via Gemini AI...');
-
-  // Call the server API with positional, constraint-based prompt payload
-  const response = await fetch('/api/generate-curtain-fabric', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      templateName: template.name,
-      templateImage: cleanBaseBase64,
-      assignments: assignmentPayload,
-    }),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok || !data.imageUrl) {
-    throw new Error(data.error || 'Generative redesign failed.');
-  }
-
-  onStepProgress?.('Applying sub-pixel feathered edge compositing...');
-
-  // Combine region masks into a master curtain mask for pristine room background preservation
-  const combinedMaskCanvas = document.createElement('canvas');
-  combinedMaskCanvas.width = 1024;
-  combinedMaskCanvas.height = 1280;
-  const cmCtx = combinedMaskCanvas.getContext('2d');
-  if (cmCtx) {
-    cmCtx.fillStyle = '#000000';
-    cmCtx.fillRect(0, 0, 1024, 1280);
-    template.regions.forEach((reg) => {
-      const regMask = createRegionMaskCanvas(reg, 1024, 1280);
-      cmCtx.drawImage(regMask, 0, 0);
+  for (let i = 0; i < ordered.length; i++) {
+    const asg = ordered[i];
+    const region = opts.template.regions.find(r => r.id === asg.region_id)!;
+    const fabric = fabricMap.get(asg.fabric_id)!;
+    const tint = TINTS[i % TINTS.length];
+    const mask = region.mask_url ? await rasterizeToPngBase64(region.mask_url, 1024, 1280)
+                                 : await polygonMask(region, 1024, 1280);
+    const guide = await tintRegion(current, mask, tint);
+    const swatch = await rasterizeToPngBase64(fabric.image_url, 1024, 1024); // FIX 2: hi-res swatch
+    opts.onStep?.(`Repainting "${region.display_name}" — zone ${i + 1}/${ordered.length}`);
+    const res = await opts.callEdit({
+      mode: 'single_region', templateName: opts.template.name,
+      templateImage: current, guideImage: guide, tint,
+      region: { name: region.name, displayName: region.display_name, description: region.description },
+      fabric: { name: fabric.name, weave: fabric.metadata?.weave, category: fabric.category, imageBase64: swatch },
     });
+    if (!res?.imageUrl) throw Object.assign(new Error(res?.error || 'Generation failed'), { needsPaidKey: res?.needsPaidKey });
+    current = await featheredComposite(current, res.imageUrl, mask, 4); // guarantees zero bleed/drift
   }
-
-  // Load generated AI output and composite with feathered mask
-  const aiOutputImg = await loadImage(data.imageUrl);
-  const compositedUrl = featheredComposite(baseImage, aiOutputImg, combinedMaskCanvas, 3);
-
-  return {
-    success: true,
-    imageUrl: compositedUrl || data.imageUrl,
-    message: 'Photorealistic AI draping completed with zero background drift and preserved folds.',
-  };
+  return { imageUrl: current };
 }
+
+export const executeMaskedPipeline = generateSequentialRedesign;

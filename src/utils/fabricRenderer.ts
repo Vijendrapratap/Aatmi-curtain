@@ -273,6 +273,7 @@ function extractLuminanceCanvases(baseImg: HTMLImageElement, width: number, heig
 }
 
 export interface RenderCurtainOptions {
+  uiOnly?: boolean;
   showWireframe?: boolean;
   activeRegionId?: string | null;
   width?: number;
@@ -584,8 +585,8 @@ export async function renderCurtainOnCanvas(
   ctx.restore();
 
   // 6. Seam Stitching lines between regions (Gold/Taupe tailored topstitch)
-  // Only rendered if wireframe/stencil mode is requested and not in cleanPlate mode
-  if (!options.cleanPlate && (options.drawStitchLines || options.showWireframe)) {
+  // Only rendered if wireframe/stencil mode is requested, uiOnly is set, and not in cleanPlate mode
+  if (options.uiOnly && !options.cleanPlate && (options.drawStitchLines || options.showWireframe)) {
     ctx.save();
     ctx.strokeStyle = 'rgba(215, 195, 155, 0.7)';
     ctx.lineWidth = 1.2;
@@ -650,8 +651,8 @@ export async function renderCurtainOnCanvas(
     ctx.restore();
   }
 
-  // 8. Brand Watermark subtly in corner (cleanPlate skips this completely)
-  if (!options.cleanPlate && options.includeWatermark) {
+  // 8. Brand Watermark subtly in corner (uiOnly; cleanPlate skips this completely)
+  if (options.uiOnly && !options.cleanPlate && options.includeWatermark) {
     ctx.save();
     ctx.fillStyle = 'rgba(70, 60, 50, 0.4)';
     ctx.font = '600 13px "Cinzel", serif';

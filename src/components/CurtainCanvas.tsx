@@ -102,6 +102,7 @@ export const CurtainCanvas: React.FC<CurtainCanvasProps> = ({
       height: 1000,
       showWireframe: viewMode === 'wireframe',
       activeRegionId: activeRegionId,
+      uiOnly: true,
     })
       .then((dataUrl) => {
         setCurrentRenderUrl(dataUrl);
