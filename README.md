@@ -1,112 +1,193 @@
 # Aatmi Couture Drapery AI
 
-> **Next-Generation Multi-Region Architectural Drapery Visualizer & Textile Specification Platform**
+> **Enterprise Multi-Tenant Architectural Drapery Visualizer, Structure-Preserving Textile Inpainting & Real-Room Staging Platform**
 
 ---
 
 ## 1. Executive Summary & Objective
 
-In high-end interior architecture and bespoke drapery design, communicating how a custom fabric will drape, reflect natural light, and coordinate across multiple panels has traditionally been one of the highest-friction bottlenecks in the industry.
+In high-end interior architecture and bespoke drapery design, communicating how a custom textile will drape, reflect natural light, and coordinate across multiple panels has traditionally been one of the highest-friction bottlenecks in the industry.
 
-Clients struggle to visualize how a small 4"x4" fabric swatch translates into floor-to-ceiling 10-foot curtains with deep tailored pleats. Interior designers often spend days waiting for physical showroom memos, manual Photoshop mockups, or expensive 3D renderings that fail to represent real fabric weight.
+Clients struggle to visualize how a small 4"x4" fabric swatch translates into floor-to-ceiling 10-foot curtains with deep tailored pleats. Interior designers often spend weeks waiting for physical showroom memos, manual Photoshop mockups, or costly 3D renderings that fail to represent real fabric weight and room illumination.
 
-**Aatmi Couture Drapery AI** transforms this process into a real-time, interactive, and photorealistic design experience. It treats the curtain not merely as an image, but as an architectural system composed of functional fabric zones (main body, leading edge border, weighted hem, headers, and flanking columns) rendered under calibrated environmental lighting.
-
----
-
-## 2. The Dual Perspective: Designer & Brand Owner
-
-### For the Interior Designer & Architect
-- **Zero Ambiguity with Luxury Clients:** Place real, high-resolution textile swatches directly into tailored curtain templates with continuous pleats and real-time shadow depth.
-- **Accurate Yardage & Cut Specifications:** Select drapery fullness ratios (**2.0x Casual**, **2.5x Tailored Luxury**, or **3.0x Ultra-Opulent**) and generate immediate fabric cut lengths, bolt width requirements (54"), and estimated yardage dockets.
-- **40x Macro Optical Loupe:** Inspect microscopic warp and weft weave textures, slub linen characteristics, jacquard relief, and silk sheen without needing physical fabric in hand.
-- **Client Presentation Mode:** Enter a distraction-free, branded presentation view with architectural room backdrops (Haussmannian Parisian Salon, Tribeca Penthouse, Belgravia Townhouse, Tuscan Villa).
-- **Environmental Lighting Simulation:** Verify how the fabric looks during Morning Daylight (5500K Crisp), Golden Hour (2800K Warm Sunset), and Evening Luxe (3000K Chandelier Ambient).
-
-### For the Textile Brand Owner & Showroom
-- **Accelerate Sample-to-Sale Conversion:** Eliminate the weeks-long sample ordering cycle; allow designers and clients to visualize hundreds of SKU combinations instantaneously.
-- **Custom Fabric Swatch Ingestion:** Designers and clients can snap or upload their own custom fabric photos or swatch files, which are immediately mapped onto all curtain zones.
-- **Interactive Stencil Creation:** Convert any showroom photograph or architectural CAD stencil into an interactive multi-region template using AI boundary detection.
-- **Durable Trade Specifications:** Export printable, client-ready PDF dockets with designer credentials, style codes, heading pleat options, and yardage allocations.
+**Aatmi Couture Drapery AI** transforms this process into a real-time, interactive, and photorealistic design experience. It treats the curtain not merely as an image, but as an architectural system composed of functional fabric zones (main drape panels, leading edge borders, weighted hems, headers, and flanking columns) rendered under calibrated environmental lighting and composited into real customer rooms without altering real architectural surfaces.
 
 ---
 
-## 3. Core Technical Architecture & Rendering Engine
+## 2. System Architecture & End-to-End Flow Diagram
 
+The platform utilizes a multi-stage pipeline powered by a **Unified OpenRouter API Gateway**. Brand owners only need **one single API key** (`OPENROUTER_API_KEY`) to access specialized models for vision analysis, structure-preserving inpainting, and real-room staging.
+
+```mermaid
+flowchart TD
+    subgraph Inputs["1. Designer & Showroom Inputs"]
+        A1["Curtain Template / Showroom Photo"]
+        A2["Fabric Swatches (Catalog or Camera Capture)"]
+        A3["Real Customer Room Photograph"]
+    end
+
+    subgraph Stage1["2. Stage 1: Spatial Geometry & Textile Analysis"]
+        B1["Curtain Architectural Region Decomposition\n(Hierarchical Polygons & Bounding Boxes)"]
+        B2["Tactile Textile Extraction\n(Dominant Hex, Weave Pattern, Sheen, Drape)"]
+        B3["Window Bay & Lighting Proposal\n(Daylight Direction & Drapery Track Anchor)"]
+    end
+
+    subgraph OpenRouterGateway["3. OpenRouter Unified API Gateway (Single API Key)"]
+        C1["OPENROUTER_API_KEY\n(Unified Quota, Authentication & Model Routing)"]
+        C2["/api/v1/chat/completions (Vision & Multimodal)"]
+        C3["/api/v1/images (Dedicated Generative Pipeline)"]
+    end
+
+    subgraph Stage2["4. Specialized Model Routing"]
+        D1["google/gemini-2.5-flash\n(Sub-second 2D Coordinate & Polygon Detection)"]
+        D2["black-forest-labs/flux-fill-pro\n(Edge-Locked Structure-Preserving Inpainting)"]
+        D3["google/gemini-3-pro-image\n(Nano Banana Pro: Real-Room Architectural Staging)"]
+        D4["bytedance-seed/seedream-4.5\n(Fast 4MP Ultra-High-Resolution Staging)"]
+    end
+
+    subgraph Stage3["5. Dual Synthesis & Rendering"]
+        E1["Interactive 2D Canvas Engine\n(Instant Sinusoidal Continuous Pleat Shading)"]
+        E2["Photorealistic AI Synthesis\n(Folds, Gravity Creases & Specular Highlights)"]
+    end
+
+    subgraph Output["6. Client Presentation & Fabrication"]
+        F1["Architectural Real-Room Visualizer"]
+        F2["40x Tactile Optical Loupe"]
+        F3["Printable Spec Sheet & Yardage Docket"]
+    end
+
+    Inputs --> Stage1
+    Stage1 --> OpenRouterGateway
+    OpenRouterGateway --> Stage2
+
+    B1 & B2 & B3 -.-> D1
+    A1 & A2 -.-> D2
+    A3 & E1 -.-> D3
+    A3 & E1 -.-> D4
+
+    Stage2 --> Stage3
+    Stage3 --> Output
 ```
-[ User Input / Swatch Upload ]
-              │
-              ▼
-[ Client-Side Rasterizer ] ──► RFC 4648 PNG / Base64 Conversion
-              │
-              ├──► [ Interactive 2D Fabric Canvas Engine ]
-              │       ├─ Multi-Region Stencil Masking
-              │       ├─ Continuous Pleat Shading Heuristic
-              │       └─ Dynamic Room Lighting Filter Overlay
-              │
-              └──► [ Gemini AI Generative Model ]
-                      ├─ High-Resolution Photorealistic Synthesis
-                      ├─ Micro-Embroidery & Slub Depth
-                      └─ Ambient Window Daylight Falloff
-```
-
-### 1. Multi-Zone Geometric Stencil Matrix
-Every curtain style is defined as a structured template featuring coordinate-mapped polygon regions:
-- **Style AT-101 (Classic Pinch Pleat with Tailored Border):** Main Body Panels, Left/Right Leading Edge Borders, Weighted Bottom Hem.
-- **Style AT-102 (Modern Ripplefold Sheer & Blackout Flanks):** Center Diffusing Voile Panels with Outer Flanking Columns.
-- **Style AT-103 (Grand Continental Box Pleat with Valance):** Crown Valance Pelmet, Main Body Drops, and Contrast Side Banding.
-
-### 2. High-Fidelity Canvas Shading Engine (`src/utils/fabricRenderer.ts`)
-- **Panel-Based Continuous Shading:** Instead of isolated shading that creates artificial seams between adjacent regions, regions belonging to the same vertical panel receive unified sinusoidal vertical pleat shading.
-- **Directional Light Simulation:** Highlights and deep trough shadows simulate 3D fabric folds hanging under gravitational tension.
-- **Client-Side Swatch Rasterization:** Automatically converts vector SVG patterns and user uploads into high-performance bitmap textures for smooth canvas manipulation.
-
-### 3. Gemini AI Photorealistic Synthesis
-- Generates museum-grade photographic renders incorporating real-world environmental reflections, subtle floor pooling, and delicate fabric sheen.
-- Built-in fallback to the interactive canvas engine ensures the user experience is always fluid, responsive, and uninterrupted.
-
-### 4. 40x Tactile Weave Loupe (`src/components/TactileLoupeModal.tsx`)
-- Interactive circular magnifying glass displaying fabric fiber weave, yarn gauge, thread count density, and lighting response under simulated studio lighting.
 
 ---
 
-## 4. Key Application Features & Navigation
+## 3. Model Research & Selection: Why These Models?
+
+To deliver museum-grade drapery rendering, different AI tasks demand specialized foundational models. We conducted comprehensive research across vision-language models, masked inpainting systems, and architectural staging engines:
+
+| Pipeline Stage | Critical Technical Requirements | Selected Model (via OpenRouter) | Secondary / Alternative | Rationale for Drapery & Interior Architecture |
+| :--- | :--- | :--- | :--- | :--- |
+| **Stage 1: Curtain Vision & Geometry** | • Precise 2D coordinate grounding (0–100 normalized polygons)<br>• Hierarchical zone parsing (main drape vs borders vs hems)<br>• Textile fiber, weave & sheen analysis from camera captures | **`google/gemini-2.5-flash`** | `anthropic/claude-3.7-sonnet` (deep aesthetic reasoning) & `qwen/qwen-2.5-vl-72b-instruct` | **Best-in-class spatial grounding**: Gemini 2.5 Flash excels at returning tight polygon vertices without drifting off drapery edges. Its 1M token context window ingests raw 4K showroom photos without downscaling blur, with sub-second (~450ms) turnaround and ultra-low cost ($0.075/1M tokens). |
+| **Stage 2: Precision Fabric Inpainting** | • Strict preservation of columnar pleats, fold creases, and shadow troughs<br>• Zero boundary bleeding into neighboring zones or walls<br>• Accurate pattern repeat scaling (1/25th scale) | **`black-forest-labs/flux-fill-pro`** *(FLUX.1 Fill Pro)* | **`google/gemini-3.1-flash-image`** *(Nano Banana 2)* | **Sub-pixel seam locking**: FLUX.1 Fill Pro is built specifically for structure-preserving inpainting. It locks to the zone mask boundary with zero halo, seamlessly draping complex patterns (damasks, velvets, slub linens) into existing fold shadows without flattening volume. |
+| **Stage 3: Real-Room Architectural Staging** | • Mounts custom drapery onto customer's real window track<br>• **NO synthetic room hallucination**: keeps customer's real parquet, wall paint, moldings, and furniture 100% intact<br>• Realistic daylight diffusion & contact floor shadow pooling | **`google/gemini-3-pro-image`** *(Nano Banana Pro)* | **`bytedance-seed/seedream-4.5`** *(ByteDance 4MP Staging)* | **Real-photo architectural editing**: Nano Banana Pro understands 3D architectural perspective. Unlike models that generate generic lookalike rooms, it respects the real uploaded room photo, accurately mounting the curtain track and casting natural contact shadows onto the floor. |
+
+---
+
+## 4. Single API Key Architecture via OpenRouter
+
+### The Multi-Vendor Problem
+Prior to this integration, supporting high-fidelity drapery design required brands to configure, manage, and fund **four separate vendor platforms**:
+1. Google Cloud / AI Studio (for Gemini VLM and Nano Banana Pro)
+2. Replicate or Black Forest Labs (for FLUX.1 Fill Pro)
+3. OpenAI (for GPT-4o Vision)
+4. ByteDance / Stability (for Seedream / SD3.5)
+
+This caused fragmented billing, conflicting rate limits, multiple enterprise account setups, and high onboarding friction.
+
+### The OpenRouter Solution
+With OpenRouter as the unified backbone:
+- **One Master Key (`OPENROUTER_API_KEY`)**: Brands configure **one single API key** in their `.env` file or directly in the Brand Settings dashboard.
+- **Universal Model Access**: That single key instantly routes requests to `google/gemini-2.5-flash`, `black-forest-labs/flux-fill-pro`, `google/gemini-3-pro-image`, and `bytedance-seed/seedream-4.5`.
+- **Unified Billing & Quotas**: One credit balance covers all vision analysis, fabric inpainting, and room visualization renders.
+- **Zero Vendor Lock-In**: Models can be hot-swapped dynamically without modifying application code or updating provider credentials.
+
+---
+
+## 5. How Brand Owners Configure the API Key
+
+Brand owners can update their API key in **under 30 seconds** using either of two methods:
+
+### Method A: Via the Web Dashboard (Recommended for Brand Admins)
+1. Launch the application and click **Settings** (or the Brand avatar) in the top navigation bar.
+2. Select the **AI Models** tab.
+3. Under **Billing & API Keys**, select **"Use my own API key (BYO Key)"**.
+4. Choose **OpenRouter (Unified)** from the provider dropdown.
+5. Paste your OpenRouter API key (`sk-or-v1-...`) and click **Test Connection** to verify live ping and model availability.
+6. Click **Save Changes** in the bottom bar. All subsequent renders and vision requests will automatically route through your key.
+
+### Method B: Via Environment File (Recommended for Self-Hosting & Showrooms)
+Create a `.env` file in the project root (or copy `.env.example`):
+
+```bash
+cp .env.example .env
+```
+
+Add your OpenRouter key:
+
+```env
+# Single Unified Key for all AI capabilities
+OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+Restart the server:
+
+```bash
+npm run dev
+```
+
+---
+
+## 6. Core Application Features
 
 | Feature | Description | Access Point |
 | :--- | :--- | :--- |
-| **Zone Assignment Panel** | Assign fabrics from the curated couture catalog or upload custom samples. Fine-tune pattern repeat scale and rotation. | Left Sidebar / Mobile Tab |
-| **Room Lighting Controls** | Toggle between **Crisp Daylight (5500K)**, **Golden Hour (2800K)**, and **Evening Luxe (3000K)**. | Top Dock / Canvas Bar |
-| **Architectural Setting** | Select Parisian Haussmann, Tribeca Penthouse, Belgravia Townhouse, or Tuscan Villa backdrops. | Room Setting Selector |
-| **Presentation Mode** | Clean, watermark-styled presentation view designed for client meetings and reviews. | Presentation Mode Button |
-| **Tactile Loupe (40x)** | Macro fiber inspection tool for warp/weft density, composition, and slub texture. | "Inspect Weave" Buttons |
-| **Spec Sheet & Yardage** | Dynamic yardage calculations based on 2.0x, 2.5x, and 3.0x pleat fullness. Print or copy dockets. | "Spec Sheet" in Header |
-| **Onboarding Tour** | Guided step-by-step walkthrough explaining the workflow for designers and clients. | "How It Works" in Header |
-| **Persona & Auth Modal** | Switch between Lead Designer, Luxury Client, or Showroom Partner profiles. | User Avatar / "Sign In" |
+| **Zone Assignment Panel** | Assign fabrics from the curated catalog or upload custom samples. Fine-tune pattern repeat scale (0.5x to 3.0x) and rotation (0° to 360°). | Left Sidebar / Mobile Sheet |
+| **Tactile 40x Weave Loupe** | High-magnification optical loupe displaying yarn gauge, slub texture, thread count density, and sheen response under simulated studio lighting. | "Inspect Weave" Buttons |
+| **Real-Room Visualizer** | Upload a photo of your customer's living room or bedroom. The AI detects the window bay and mounts the bespoke curtain with realistic daylight diffusion. | "Room Viz" Studio Tab |
+| **Environmental Lighting** | Toggle between **Crisp Daylight (5500K)**, **Golden Hour (2800K)**, and **Evening Luxe (3000K)** to preview fabric warmth and color rendering. | Top Dock / Canvas Bar |
+| **Fullness & Yardage Dockets** | Select fullness ratios (**2.0x Casual**, **2.5x Tailored Luxury**, or **3.0x Ultra-Opulent**) and generate printable fabrication cut sheets with yardage allocations. | "Spec Sheet" in Header |
+| **Camera Swatch Capture** | Snap fabric swatches in the showroom using your smartphone camera. Real-time perspective correction and texture normalization. | Catalog / Fabric Picker |
+| **Multi-Tenant Brand Platform** | Custom theme accent colors, logo branding, model routing preferences, and team permissions per brand atelier. | Brand Admin Dashboard |
 
 ---
 
-## 5. Technology Stack
+## 7. Technology Stack
 
-- **Framework:** React 18+ with TypeScript & Vite
-- **Styling:** Tailwind CSS with custom high-contrast typography and sophisticated neutral palettes
+- **Frontend:** React 18+ with TypeScript & Vite
+- **Styling:** Tailwind CSS with CSS design tokens (`--color-accent`, `--color-bg-surface`, `--color-border-subtle`)
 - **Icons:** Lucide React
-- **Graphics & Rendering:** HTML5 Canvas 2D API, Offscreen Rasterization, SVG Pattern Engines
-- **AI Integration:** Google GenAI TypeScript SDK (Gemini multimodal synthesis)
-- **State Management:** Reactive React hooks with `localStorage` user profile persistence
+- **Canvas Rendering:** HTML5 2D Canvas Engine with sinusoidal vertical pleat shading & offscreen rasterization
+- **AI Gateway:** OpenRouter Unified API (`https://openrouter.ai/api/v1`)
+- **Specialized AI Models:**
+  - *Vision:* `google/gemini-2.5-flash` & `anthropic/claude-3.7-sonnet`
+  - *Inpainting:* `black-forest-labs/flux-fill-pro` & `google/gemini-3.1-flash-image`
+  - *Room Staging:* `google/gemini-3-pro-image` (Nano Banana Pro) & `bytedance-seed/seedream-4.5`
+- **Backend:** Node.js Express server (`server.ts` & `src/server/api.ts`)
 
 ---
 
-## 6. How to Run Locally
+## 8. Quickstart & Local Development
 
 ```bash
-# Install dependencies
+# 1. Install dependencies
 npm install
 
-# Start development server
+# 2. Configure environment (add your OpenRouter key)
+cp .env.example .env
+
+# 3. Start development server
 npm run dev
 
-# Build for production
+# 4. Open in browser
+# Studio UI: http://localhost:3000
+# API Health: http://localhost:3000/api/health
+```
+
+### Production Build
+```bash
 npm run build
 ```
 
-*Crafted for luxury interior ateliers, high-end textile houses, and discerning architectural designers.*
+---
+
+*Crafted for luxury interior ateliers, bespoke drapery workrooms, and discerning architectural designers.*

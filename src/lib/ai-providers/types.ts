@@ -1,6 +1,6 @@
 // src/lib/ai-providers/types.ts
 
-export type AIProviderId = 'gemini' | 'openai' | 'replicate' | 'stability';
+export type AIProviderId = 'openrouter' | 'gemini' | 'openai' | 'replicate' | 'stability';
 
 export interface AIProviderMetadata {
   id: AIProviderId;

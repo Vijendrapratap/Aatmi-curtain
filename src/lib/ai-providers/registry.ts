@@ -1,5 +1,6 @@
 // src/lib/ai-providers/registry.ts
 import { AIImageProvider, AIProviderId, AIProviderMetadata } from './types';
+import { OpenRouterProvider, OPENROUTER_METADATA } from './openrouter-provider';
 import { GeminiProvider, GEMINI_METADATA } from './gemini-provider';
 import { OpenAIProvider, OPENAI_METADATA } from './openai-provider';
 import { ReplicateProvider, REPLICATE_METADATA } from './replicate-provider';
@@ -11,11 +12,12 @@ const STORAGE_KEY_KEYS = 'aatmi_ai_provider_keys';
 export class AIProviderRegistry {
   private providers: Map<AIProviderId, AIImageProvider> = new Map();
   private metadatas: Map<AIProviderId, AIProviderMetadata> = new Map();
-  private activeProviderId: AIProviderId = 'gemini';
+  private activeProviderId: AIProviderId = 'openrouter';
   private apiKeys: Record<string, string> = {};
 
   constructor() {
     // Register metadata
+    this.metadatas.set('openrouter', OPENROUTER_METADATA);
     this.metadatas.set('gemini', GEMINI_METADATA);
     this.metadatas.set('openai', OPENAI_METADATA);
     this.metadatas.set('replicate', REPLICATE_METADATA);
@@ -30,7 +32,7 @@ export class AIProviderRegistry {
     try {
       if (typeof window !== 'undefined') {
         const savedActive = localStorage.getItem(STORAGE_KEY_ACTIVE) as AIProviderId;
-        if (savedActive && ['gemini', 'openai', 'replicate', 'stability'].includes(savedActive)) {
+        if (savedActive && ['openrouter', 'gemini', 'openai', 'replicate', 'stability'].includes(savedActive)) {
           this.activeProviderId = savedActive;
         }
 
@@ -45,6 +47,7 @@ export class AIProviderRegistry {
   }
 
   private initProviders() {
+    this.providers.set('openrouter', new OpenRouterProvider(this.apiKeys.openrouter));
     this.providers.set('gemini', new GeminiProvider(this.apiKeys.gemini));
     this.providers.set('openai', new OpenAIProvider(this.apiKeys.openai));
     this.providers.set('replicate', new ReplicateProvider(this.apiKeys.replicate));
@@ -56,7 +59,7 @@ export class AIProviderRegistry {
   }
 
   public setActiveProviderId(id: AIProviderId): AIImageProvider {
-    if (!['gemini', 'openai', 'replicate', 'stability'].includes(id)) {
+    if (!['openrouter', 'gemini', 'openai', 'replicate', 'stability'].includes(id)) {
       throw new Error(`Unknown AI Provider: ${id}`);
     }
     this.activeProviderId = id;

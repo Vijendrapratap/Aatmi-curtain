@@ -50,6 +50,14 @@ import {
   REGION_EDIT_MODEL_METADATA,
   ROOM_PREVIEW_MODEL_METADATA,
 } from './providers';
+import {
+  callOpenRouterVision,
+  callOpenRouterInpaint,
+  callOpenRouterRoomViz,
+  testOpenRouterConnection,
+  getEffectiveOpenRouterKey,
+  OPENROUTER_RECOMMENDED_MODELS,
+} from './openrouter';
 import { Brand, BrandModelConfig } from '../types/brand';
 
 // In-Memory Multi-Tenant Store for Brands & Model Configurations
@@ -167,15 +175,19 @@ function getOrCreateBrandConfig(brandId: string): BrandModelConfig {
  * Health & Capabilities Endpoint
  */
 apiApp.get('/api/health', (req, res) => {
-  const hasKey = Boolean(process.env.GEMINI_API_KEY);
+  const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY);
+  const hasOpenRouterKey = Boolean(process.env.OPENROUTER_API_KEY);
   res.json({
     status: 'ok',
     brand: 'Aatmi Brand Platform',
-    hasApiKey: hasKey,
+    hasApiKey: hasGeminiKey || hasOpenRouterKey,
+    hasOpenRouterKey,
+    hasGeminiKey,
     features: [
       'multi_tenant_isolation',
       'brand_onboarding',
       'model_switching_provider_abstraction',
+      'openrouter_unified_gateway',
       'flux_kontext_adapter',
       'nano_banana_pro_room_preview',
       'bulk_fabric_upload',
@@ -264,10 +276,14 @@ apiApp.patch('/api/brands/:id/model-config', (req, res) => {
 apiApp.post('/api/test-provider', async (req, res) => {
   const { provider, apiKey, type = 'region_edit' } = req.body;
   try {
+    if (provider === 'openrouter' || provider === 'openrouter_unified') {
+      const result = await testOpenRouterConnection(apiKey);
+      return res.json(result);
+    }
     const adapter =
       type === 'room_preview'
-        ? getRoomPreviewProvider(provider || 'nano_banana_pro')
-        : getRegionEditProvider(provider || 'flux_kontext');
+        ? getRoomPreviewProvider(provider || 'openrouter_unified')
+        : getRegionEditProvider(provider || 'openrouter_unified');
     const result = await adapter.testConnection(apiKey);
     res.json(result);
   } catch (err: any) {
@@ -382,6 +398,57 @@ apiApp.post('/api/analyze-curtain', async (req, res) => {
       return res.status(400).json({ error: 'imageBase64 is required' });
     }
 
+    // Clean base64 data if it has data URL prefix
+    const parsedImg = parseBase64Image(imageBase64);
+    if (!parsedImg) {
+      return res.status(400).json({ error: 'imageBase64 must be a valid base64 encoded raster image (JPEG/PNG/WEBP)' });
+    }
+
+    const prompt = `Analyze this curtain drapery photograph with extreme architectural precision.
+Identify every distinct fabric region and design zone that can receive a custom fabric, stencil, or trim (main drape panels, vertical borders, horizontal accent bands, ribbon trims, pleated headers, valance, bottom hems, etc.).
+
+CRITICAL ACCURACY RULES:
+1. FULL COVERAGE & TOPOLOGICAL ORDER: Order regions hierarchically from largest panels (order: 1) to smaller accent bands (order: 2-3) and fine borders/hems (order: 4-5).
+2. BOUNDING BOX & POLYGON: For each region, provide both a normalized bounding box { "x": number, "y": number, "width": number, "height": number } (0-100%) and ordered clockwise perimeter polygon coordinates { "x": number, "y": number } from 0 to 100.
+3. SEAMLESS SNAPPING: Boundaries of adjacent regions must snap tightly together with zero gaps between them.
+4. DETAIL GRANULARITY: Identify 2 to 6 distinct regions covering 100% of the curtain fabric surface.
+5. FLAGS: Mark multi_component: true if a zone repeats symmetrically (e.g. left & right panels, or matching flank borders). Mark replaceable: true for curtain fabric, and false for rigid hardware/rods.
+
+For each region return:
+- name: snake_case identifier (e.g. "main_drape_panel", "horizontal_accent_band", "leading_edge_border", "bottom_weighted_hem")
+- display_name: clear title (e.g. "Main Drapery Panel", "Inset Accent Band", "Leading Edge Border", "Weighted Bottom Hem")
+- description: visual description of the weave, fold structure, and position
+- location: position description (e.g. "Central drape 15% to 85% width", "Lower 12% height")
+- order: integer (1 for primary drapes, 2 for side borders, 3 for accent bands, 4 for hems/trims)
+- multi_component: boolean
+- replaceable: boolean
+- bbox: { "x": number, "y": number, "width": number, "height": number }
+- polygon_coords: array of 4 to 8 ordered clockwise points [{ "x": number, "y": number }] from 0 to 100
+- suggested_sam_prompt: precise visual segmentation prompt
+
+Output ONLY a valid JSON array of these region objects. Do not include markdown or explanations.`;
+
+    // 1. Primary Route: OpenRouter Unified Vision (Single API Key)
+    const openRouterKey = getEffectiveOpenRouterKey();
+    if (openRouterKey) {
+      try {
+        const rawText = await callOpenRouterVision({
+          imageBase64,
+          prompt,
+          model: OPENROUTER_RECOMMENDED_MODELS.vision,
+          apiKey: openRouterKey,
+          mimeType,
+        });
+        const cleaned = rawText.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(cleaned);
+        let regions = Array.isArray(parsed) ? parsed : (parsed.regions || []);
+        regions.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+        return res.json({ regions, source: 'openrouter_gemini_vlm' });
+      } catch (orErr) {
+        console.warn('OpenRouter vision call failed, falling back to direct Gemini SDK:', orErr);
+      }
+    }
+
     const ai = getGenAIClient();
     if (!ai) {
       // Return smart fallback regions based on typical curtain architecture
@@ -421,36 +488,6 @@ apiApp.post('/api/analyze-curtain', async (req, res) => {
         source: 'default_geometry'
       });
     }
-
-    // Clean base64 data if it has data URL prefix
-    const parsedImg = parseBase64Image(imageBase64);
-    if (!parsedImg) {
-      return res.status(400).json({ error: 'imageBase64 must be a valid base64 encoded raster image (JPEG/PNG/WEBP)' });
-    }
-
-    const prompt = `Analyze this curtain drapery photograph with extreme architectural precision.
-Identify every distinct fabric region and design zone that can receive a custom fabric, stencil, or trim (main drape panels, vertical borders, horizontal accent bands, ribbon trims, pleated headers, valance, bottom hems, etc.).
-
-CRITICAL ACCURACY RULES:
-1. FULL COVERAGE & TOPOLOGICAL ORDER: Order regions hierarchically from largest panels (order: 1) to smaller accent bands (order: 2-3) and fine borders/hems (order: 4-5).
-2. BOUNDING BOX & POLYGON: For each region, provide both a normalized bounding box { "x": number, "y": number, "width": number, "height": number } (0-100%) and ordered clockwise perimeter polygon coordinates { "x": number, "y": number } from 0 to 100.
-3. SEAMLESS SNAPPING: Boundaries of adjacent regions must snap tightly together with zero gaps between them.
-4. DETAIL GRANULARITY: Identify 2 to 6 distinct regions covering 100% of the curtain fabric surface.
-5. FLAGS: Mark multi_component: true if a zone repeats symmetrically (e.g. left & right panels, or matching flank borders). Mark replaceable: true for curtain fabric, and false for rigid hardware/rods.
-
-For each region return:
-- name: snake_case identifier (e.g. "main_drape_panel", "horizontal_accent_band", "leading_edge_border", "bottom_weighted_hem")
-- display_name: clear title (e.g. "Main Drapery Panel", "Inset Accent Band", "Leading Edge Border", "Weighted Bottom Hem")
-- description: visual description of the weave, fold structure, and position
-- location: position description (e.g. "Central drape 15% to 85% width", "Lower 12% height")
-- order: integer (1 for primary drapes, 2 for side borders, 3 for accent bands, 4 for hems/trims)
-- multi_component: boolean
-- replaceable: boolean
-- bbox: { "x": number, "y": number, "width": number, "height": number }
-- polygon_coords: array of 4 to 8 ordered clockwise points [{ "x": number, "y": number }] from 0 to 100
-- suggested_sam_prompt: precise visual segmentation prompt
-
-Output ONLY a valid JSON array of these region objects. Do not include markdown or explanations.`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-3.8-flash',
@@ -525,10 +562,11 @@ Output ONLY a valid JSON array of these region objects. Do not include markdown 
  */
 apiApp.post('/api/generate-curtain-fabric', async (req, res) => {
   try {
+    const openRouterKey = getEffectiveOpenRouterKey();
     const ai = getGenAIClient();
-    if (!ai) {
+    if (!openRouterKey && !ai) {
       return res.status(400).json({
-        error: 'GEMINI_API_KEY is not configured on the server. Please add your key in Settings > Secrets.',
+        error: 'Neither OPENROUTER_API_KEY nor GEMINI_API_KEY is configured on the server. Please add your key in Settings > Secrets.',
       });
     }
 
@@ -544,6 +582,33 @@ Repaint ONLY the ${tint} zone with the exact pattern and weave of Image 2 (${fab
 Inside the zone preserve every fold, pleat, shadow and highlight of Image 1; the fabric must drape into the existing folds. Pattern repeat ≈ 1/25 of curtain height.
 Keep ALL pixels outside the ${tint} zone identical to Image 1. Boundary = clean sewn seam, no halo.
 Do not flatten folds, move zone boundaries, redraw the background, or add text/watermarks.`;
+
+      // 1. Primary Route: OpenRouter Inpainting (FLUX.1 Fill Pro)
+      if (openRouterKey) {
+        try {
+          const imageUrl = await callOpenRouterInpaint({
+            baseImage: templateImage,
+            fabricImage: fabric?.imageBase64,
+            maskImage: guideImage,
+            prompt,
+            zoneName: region?.displayName || region?.name,
+            fabricName: fabric?.name,
+            fabricWeave: fabric?.weave,
+            model: OPENROUTER_RECOMMENDED_MODELS.inpaintingPro,
+            apiKey: openRouterKey,
+          });
+          if (imageUrl) {
+            return res.json({ success: true, imageUrl, providerUsed: 'openrouter_flux' });
+          }
+        } catch (orSingleErr) {
+          console.warn('OpenRouter single region inpaint error, trying Gemini SDK fallback:', orSingleErr);
+        }
+      }
+
+      if (!ai) {
+        return res.status(400).json({ error: 'No AI model available for image generation.' });
+      }
+
       try {
         const response = await ai.models.generateContent({
           model: process.env.GEMINI_IMAGE_MODEL || 'gemini-3.1-flash-image', // FIX 3: tier up, env-switchable
@@ -721,9 +786,29 @@ apiApp.post('/api/generate-curtain-edit', async (req, res) => {
       return res.status(400).json({ error: 'baseImage and fabricImage are required' });
     }
 
+    const openRouterKey = getEffectiveOpenRouterKey();
+    if (openRouterKey) {
+      try {
+        const imageUrl = await callOpenRouterInpaint({
+          baseImage,
+          fabricImage,
+          maskImage: tintedImage,
+          prompt: `Inpaint zone "${zoneName}" (${zoneDescription || 'curtain drape'}). Preserve all natural columnar pleats, vertical fold shadows, and sunlight crests.`,
+          zoneName,
+          model: OPENROUTER_RECOMMENDED_MODELS.inpaintingPro,
+          apiKey: openRouterKey,
+        });
+        if (imageUrl) {
+          return res.json({ success: true, imageUrl, providerUsed: 'openrouter_flux' });
+        }
+      } catch (orEditErr) {
+        console.warn('OpenRouter curtain edit failed, trying Gemini fallback:', orEditErr);
+      }
+    }
+
     const ai = getGenAIClient();
     if (!ai) {
-      return res.status(400).json({ error: 'GEMINI_API_KEY is not configured.' });
+      return res.status(400).json({ error: 'Neither OPENROUTER_API_KEY nor GEMINI_API_KEY is configured.' });
     }
 
     const baseParsed = parseBase64Image(baseImage);
@@ -810,8 +895,16 @@ INSTRUCTIONS:
  */
 apiApp.get('/api/ai/providers', (req, res) => {
   res.json({
-    activeDefault: 'gemini',
+    activeDefault: 'openrouter',
     providers: [
+      {
+        id: 'openrouter',
+        name: 'OpenRouter Unified (All-in-One)',
+        hasServerKey: Boolean(process.env.OPENROUTER_API_KEY),
+        defaultModel: 'black-forest-labs/flux-fill-pro',
+        tagline: 'Single API Key for FLUX.1, Gemini Nano Banana, Claude, & Seedream',
+        isRecommended: true,
+      },
       {
         id: 'gemini',
         name: 'Google Gemini',
@@ -848,6 +941,16 @@ apiApp.post('/api/ai/test-connection', async (req, res) => {
   const start = Date.now();
 
   try {
+    if (provider === 'openrouter' || provider === 'openrouter_unified') {
+      const result = await testOpenRouterConnection(apiKey);
+      return res.json({
+        success: result.success,
+        latencyMs: result.latencyMs,
+        model: 'flux-fill-pro / gemini-3-pro-image',
+        message: result.message,
+      });
+    }
+
     if (provider === 'gemini') {
       const keyToUse = apiKey || process.env.GEMINI_API_KEY;
       if (!keyToUse) {

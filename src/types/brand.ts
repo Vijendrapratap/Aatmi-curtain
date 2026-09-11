@@ -19,8 +19,8 @@ export interface Brand {
   activated_at: string | null;
 }
 
-export type RegionEditProvider = 'flux_kontext' | 'qwen_image_edit' | 'gpt_image_2';
-export type RoomPreviewProvider = 'nano_banana_pro' | 'seedream_edit' | 'gpt_image_2';
+export type RegionEditProvider = 'flux_kontext' | 'qwen_image_edit' | 'gpt_image_2' | 'openrouter_unified';
+export type RoomPreviewProvider = 'nano_banana_pro' | 'seedream_edit' | 'gpt_image_2' | 'openrouter_unified';
 export type KeyMode = 'platform_managed' | 'brand_byo_key';
 
 export interface BrandModelConfig {
