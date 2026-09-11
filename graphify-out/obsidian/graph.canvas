@@ -1,0 +1,4266 @@
+{
+  "nodes": [
+    {
+      "id": "g0",
+      "type": "group",
+      "label": "Camera Capture & Fabric Catalog Assets",
+      "x": 0,
+      "y": 0,
+      "width": 1540,
+      "height": 1620,
+      "color": "1"
+    },
+    {
+      "id": "n_readme_tactile_loupe",
+      "type": "file",
+      "file": "graphify/obsidian/40x Tactile Optical Loupe.md",
+      "x": 20,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_embroidery_linen",
+      "type": "file",
+      "file": "graphify/obsidian/Aatmi Tribal Diamond Embroidered Linen.md",
+      "x": 220,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_damask_parchment",
+      "type": "file",
+      "file": "graphify/obsidian/Art Nouveau Scrolled Damask.md",
+      "x": 420,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_chevron_natural",
+      "type": "file",
+      "file": "graphify/obsidian/Artisan Herringbone Chevron Twill.md",
+      "x": 20,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_chevron_black",
+      "type": "file",
+      "file": "graphify/obsidian/Bold Graphic Noir Chevron.md",
+      "x": 220,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_botanical_sheer",
+      "type": "file",
+      "file": "graphify/obsidian/Botanical Skeleton Leaf Voile.md",
+      "x": 420,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_palm_taupe",
+      "type": "file",
+      "file": "graphify/obsidian/Bronze Plume Jacquard.md",
+      "x": 20,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_cameracapturemodal",
+      "type": "file",
+      "file": "graphify/obsidian/CameraCaptureModal.tsx.md",
+      "x": 220,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_velvet_spa",
+      "type": "file",
+      "file": "graphify/obsidian/Celadon Ribbed Palm Herringbone.md",
+      "x": 420,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_velvet_forest",
+      "type": "file",
+      "file": "graphify/obsidian/Deep Forest Moss Velvet.md",
+      "x": 20,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_ikat_sage",
+      "type": "file",
+      "file": "graphify/obsidian/Eucalyptus Ikat Chevron Flame.md",
+      "x": 220,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_harlequin_charcoal",
+      "type": "file",
+      "file": "graphify/obsidian/Geometric Argyle Diamond Jacquard.md",
+      "x": 420,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_floral_aqua",
+      "type": "file",
+      "file": "graphify/obsidian/Heritage French Floral Embroidered Linen.md",
+      "x": 20,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_herringbone_cream",
+      "type": "file",
+      "file": "graphify/obsidian/Micro-Tweed Tailored Herringbone.md",
+      "x": 220,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_diamond_ivory",
+      "type": "file",
+      "file": "graphify/obsidian/Quilted Trellis Diamond Lattice.md",
+      "x": 420,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_raw_162210",
+      "type": "file",
+      "file": "graphify/obsidian/Raw Swatch Bronze Plume.md",
+      "x": 20,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_raw_162307",
+      "type": "file",
+      "file": "graphify/obsidian/Raw Swatch Celadon Palm.md",
+      "x": 220,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_raw_162320",
+      "type": "file",
+      "file": "graphify/obsidian/Raw Swatch Chevron Black.md",
+      "x": 420,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_raw_162226",
+      "type": "file",
+      "file": "graphify/obsidian/Raw Swatch Chevron Twill.md",
+      "x": 20,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_raw_162330",
+      "type": "file",
+      "file": "graphify/obsidian/Raw Swatch Floral Aqua.md",
+      "x": 220,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_raw_162154",
+      "type": "file",
+      "file": "graphify/obsidian/Raw Swatch Forest Velvet.md",
+      "x": 420,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_raw_162255",
+      "type": "file",
+      "file": "graphify/obsidian/Raw Swatch Harlequin Charcoal.md",
+      "x": 20,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_raw_162315",
+      "type": "file",
+      "file": "graphify/obsidian/Raw Swatch Herringbone Cream.md",
+      "x": 220,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_raw_162205",
+      "type": "file",
+      "file": "graphify/obsidian/Raw Swatch Ikat Sage.md",
+      "x": 420,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_raw_162243",
+      "type": "file",
+      "file": "graphify/obsidian/Raw Swatch Quilted Trellis.md",
+      "x": 20,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_raw_162218",
+      "type": "file",
+      "file": "graphify/obsidian/Raw Swatch Scrolled Damask.md",
+      "x": 220,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_raw_162146",
+      "type": "file",
+      "file": "graphify/obsidian/Raw Swatch Skeleton Leaf Sheer.md",
+      "x": 420,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabric_raw_162137",
+      "type": "file",
+      "file": "graphify/obsidian/Raw Swatch Tribal Diamond Linen.md",
+      "x": 20,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tactileloupemodal",
+      "type": "file",
+      "file": "graphify/obsidian/TactileLoupeModal.tsx.md",
+      "x": 220,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabricrenderer_createproceduralfabricpattern",
+      "type": "file",
+      "file": "graphify/obsidian/createProceduralFabricPattern().md",
+      "x": 420,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_defaultcatalog",
+      "type": "file",
+      "file": "graphify/obsidian/defaultCatalog.ts.md",
+      "x": 20,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabricrenderer_extractluminancecanvases",
+      "type": "file",
+      "file": "graphify/obsidian/extractLuminanceCanvases().md",
+      "x": 220,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabricrenderer",
+      "type": "file",
+      "file": "graphify/obsidian/fabricRenderer.ts.md",
+      "x": 420,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabricrenderer_generatecannystructuremap",
+      "type": "file",
+      "file": "graphify/obsidian/generateCannyStructureMap().md",
+      "x": 20,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabricrenderer_gettemplaterealphotourl",
+      "type": "file",
+      "file": "graphify/obsidian/getTemplateRealPhotoUrl().md",
+      "x": 220,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_cameracapturemodal_handleconfirmandsave",
+      "type": "file",
+      "file": "graphify/obsidian/handleConfirmAndSave().md",
+      "x": 420,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_cameracapturemodal_handleimageselected",
+      "type": "file",
+      "file": "graphify/obsidian/handleImageSelected().md",
+      "x": 20,
+      "y": 1040,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tactileloupemodal_handlemousemove",
+      "type": "file",
+      "file": "graphify/obsidian/handleMouseMove()_1.md",
+      "x": 220,
+      "y": 1040,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_cameracapturemodal_handleproceedtoperspective",
+      "type": "file",
+      "file": "graphify/obsidian/handleProceedToPerspective().md",
+      "x": 420,
+      "y": 1040,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_cameracapturemodal_handleretake",
+      "type": "file",
+      "file": "graphify/obsidian/handleRetake().md",
+      "x": 20,
+      "y": 1120,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tactileloupemodal_handletouchmove",
+      "type": "file",
+      "file": "graphify/obsidian/handleTouchMove()_1.md",
+      "x": 220,
+      "y": 1120,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabricrenderer_loadimage",
+      "type": "file",
+      "file": "graphify/obsidian/loadImage()_1.md",
+      "x": 420,
+      "y": 1120,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabricrenderer_rasterizetopngbase64",
+      "type": "file",
+      "file": "graphify/obsidian/rasterizeToPngBase64().md",
+      "x": 20,
+      "y": 1200,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabricrenderer_rendercurtainoncanvas",
+      "type": "file",
+      "file": "graphify/obsidian/renderCurtainOnCanvas().md",
+      "x": 220,
+      "y": 1200,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_useruploadedfabrics",
+      "type": "file",
+      "file": "graphify/obsidian/userUploadedFabrics.ts.md",
+      "x": 420,
+      "y": 1200,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g1",
+      "type": "group",
+      "label": "Brand Management & Studio State",
+      "x": 1620,
+      "y": 0,
+      "width": 1540,
+      "height": 1520,
+      "color": "2"
+    },
+    {
+      "id": "n_readme_aatmi_couture_drapery_ai",
+      "type": "file",
+      "file": "graphify/obsidian/Aatmi Couture Drapery AI.md",
+      "x": 1640,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_app",
+      "type": "file",
+      "file": "graphify/obsidian/App.tsx.md",
+      "x": 1840,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_branddashboard_branddashboard",
+      "type": "file",
+      "file": "graphify/obsidian/BrandDashboard().md",
+      "x": 2040,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_branddashboard",
+      "type": "file",
+      "file": "graphify/obsidian/BrandDashboard.tsx.md",
+      "x": 1640,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_brandheader",
+      "type": "file",
+      "file": "graphify/obsidian/BrandHeader.tsx.md",
+      "x": 1840,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_brandsettingsview",
+      "type": "file",
+      "file": "graphify/obsidian/BrandSettingsView.tsx.md",
+      "x": 2040,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_designdetailview_designdetailview",
+      "type": "file",
+      "file": "graphify/obsidian/DesignDetailView().md",
+      "x": 1640,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_designdetailview",
+      "type": "file",
+      "file": "graphify/obsidian/DesignDetailView.tsx.md",
+      "x": 1840,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_readme_dual_synthesis_pipeline",
+      "type": "file",
+      "file": "graphify/obsidian/Dual Synthesis Pipeline.md",
+      "x": 2040,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_readme_multi_tenant_brand",
+      "type": "file",
+      "file": "graphify/obsidian/Multi-Tenant Brand Platform.md",
+      "x": 1640,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_onboardingwizard",
+      "type": "file",
+      "file": "graphify/obsidian/OnboardingWizard.tsx.md",
+      "x": 1840,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_platformadminview",
+      "type": "file",
+      "file": "graphify/obsidian/PlatformAdminView.tsx.md",
+      "x": 2040,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_readme_md",
+      "type": "file",
+      "file": "graphify/obsidian/README.md.md",
+      "x": 1640,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_readme_real_room_staging",
+      "type": "file",
+      "file": "graphify/obsidian/Real-Room Architectural Staging.md",
+      "x": 1840,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_signin_signin",
+      "type": "file",
+      "file": "graphify/obsidian/SignIn().md",
+      "x": 2040,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_signin",
+      "type": "file",
+      "file": "graphify/obsidian/SignIn.tsx.md",
+      "x": 1640,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_templatesgallery",
+      "type": "file",
+      "file": "graphify/obsidian/TemplatesGallery.tsx.md",
+      "x": 1840,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_brandstore_applyroottheme",
+      "type": "file",
+      "file": "graphify/obsidian/applyRootTheme().md",
+      "x": 2040,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_brand",
+      "type": "file",
+      "file": "graphify/obsidian/brand.ts.md",
+      "x": 1640,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_brandstore",
+      "type": "file",
+      "file": "graphify/obsidian/brandStore.ts.md",
+      "x": 1840,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_brand_deriveaccentpalette",
+      "type": "file",
+      "file": "graphify/obsidian/deriveAccentPalette().md",
+      "x": 2040,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_brand_getrelativeluminance",
+      "type": "file",
+      "file": "graphify/obsidian/getRelativeLuminance().md",
+      "x": 1640,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_onboardingwizard_handleaddteammate",
+      "type": "file",
+      "file": "graphify/obsidian/handleAddTeammate().md",
+      "x": 1840,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_onboardingwizard_handleapplysafeshade",
+      "type": "file",
+      "file": "graphify/obsidian/handleApplySafeShade().md",
+      "x": 2040,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_platformadminview_handleapprovebrand",
+      "type": "file",
+      "file": "graphify/obsidian/handleApproveBrand().md",
+      "x": 1640,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_designdetailview_handlecopysharelink",
+      "type": "file",
+      "file": "graphify/obsidian/handleCopyShareLink().md",
+      "x": 1840,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_designdetailview_handledownloadimage",
+      "type": "file",
+      "file": "graphify/obsidian/handleDownloadImage().md",
+      "x": 2040,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_designdetailview_handlegenerateroomfromsource",
+      "type": "file",
+      "file": "graphify/obsidian/handleGenerateRoomFromSource().md",
+      "x": 1640,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_onboardingwizard_handlelogoupload",
+      "type": "file",
+      "file": "graphify/obsidian/handleLogoUpload().md",
+      "x": 1840,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_onboardingwizard_handlenextstep",
+      "type": "file",
+      "file": "graphify/obsidian/handleNextStep().md",
+      "x": 2040,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_brandsettingsview_handlesavechanges",
+      "type": "file",
+      "file": "graphify/obsidian/handleSaveChanges().md",
+      "x": 1640,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_app_handlesavenewtemplate",
+      "type": "file",
+      "file": "graphify/obsidian/handleSaveNewTemplate().md",
+      "x": 1840,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_brandsettingsview_handlesaveprofile",
+      "type": "file",
+      "file": "graphify/obsidian/handleSaveProfile().md",
+      "x": 2040,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_templatesgallery_handleselecttemplate",
+      "type": "file",
+      "file": "graphify/obsidian/handleSelectTemplate().md",
+      "x": 1640,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_platformadminview_handlesuspendbrand",
+      "type": "file",
+      "file": "graphify/obsidian/handleSuspendBrand().md",
+      "x": 1840,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_brandsettingsview_handletestconnection",
+      "type": "file",
+      "file": "graphify/obsidian/handleTestConnection().md",
+      "x": 2040,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_designdetailview_handleuploadedroomfile",
+      "type": "file",
+      "file": "graphify/obsidian/handleUploadedRoomFile().md",
+      "x": 1640,
+      "y": 1040,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_main",
+      "type": "file",
+      "file": "graphify/obsidian/main.tsx.md",
+      "x": 1840,
+      "y": 1040,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_brand_parsehexcolor",
+      "type": "file",
+      "file": "graphify/obsidian/parseHexColor().md",
+      "x": 2040,
+      "y": 1040,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_brand_validateaccentcontrast",
+      "type": "file",
+      "file": "graphify/obsidian/validateAccentContrast().md",
+      "x": 1640,
+      "y": 1120,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g2",
+      "type": "group",
+      "label": "Curtain Canvas & Interactive Rendering",
+      "x": 3240,
+      "y": 0,
+      "width": 1320,
+      "height": 1320,
+      "color": "3"
+    },
+    {
+      "id": "n_tpl_screenshot_134330",
+      "type": "file",
+      "file": "graphify/obsidian/Architectural Track Reference.md",
+      "x": 3260,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_authmodal",
+      "type": "file",
+      "file": "graphify/obsidian/AuthModal.tsx.md",
+      "x": 3460,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tpl_linen_embroidery_border",
+      "type": "file",
+      "file": "graphify/obsidian/Belgian Linen Embroidery Border Template.md",
+      "x": 3660,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tpl_camel_black_duo",
+      "type": "file",
+      "file": "graphify/obsidian/Camel Black Duo Panel Template.md",
+      "x": 3260,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tpl_screenshot_134257",
+      "type": "file",
+      "file": "graphify/obsidian/Colorblock Zone Reference.md",
+      "x": 3460,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tpl_screenshot_134409",
+      "type": "file",
+      "file": "graphify/obsidian/Curtain Studio Layout Reference.md",
+      "x": 3660,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_curtaincanvas",
+      "type": "file",
+      "file": "graphify/obsidian/CurtainCanvas.tsx.md",
+      "x": 3260,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_freehandmaskcanvas",
+      "type": "file",
+      "file": "graphify/obsidian/FreehandMaskCanvas.tsx.md",
+      "x": 3460,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tpl_screenshot_134144",
+      "type": "file",
+      "file": "graphify/obsidian/Header & Border Reference.md",
+      "x": 3660,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tpl_ivory_chevron_band",
+      "type": "file",
+      "file": "graphify/obsidian/Ivory Chevron Band Pinch Pleat Template.md",
+      "x": 3260,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tpl_ivory_gold_border",
+      "type": "file",
+      "file": "graphify/obsidian/Ivory Gold Border Tailored Template.md",
+      "x": 3460,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tpl_velvet_houndstooth",
+      "type": "file",
+      "file": "graphify/obsidian/Midnight Velvet Houndstooth Template.md",
+      "x": 3660,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tpl_colorblock_navy_camel",
+      "type": "file",
+      "file": "graphify/obsidian/Modern Colorblock Navy Camel Template.md",
+      "x": 3260,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_newtemplatemodal",
+      "type": "file",
+      "file": "graphify/obsidian/NewTemplateModal.tsx.md",
+      "x": 3460,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tpl_screenshot_134239",
+      "type": "file",
+      "file": "graphify/obsidian/Pinch Pleat Zone Mask Reference.md",
+      "x": 3660,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_roomlightingcontrols",
+      "type": "file",
+      "file": "graphify/obsidian/RoomLightingControls.tsx.md",
+      "x": 3260,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_tpl_screenshot_134311",
+      "type": "file",
+      "file": "graphify/obsidian/Window Bay Framing Reference.md",
+      "x": 3460,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_auth",
+      "type": "file",
+      "file": "graphify/obsidian/auth.ts.md",
+      "x": 3660,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_freehandmaskcanvas_getcanvascoords",
+      "type": "file",
+      "file": "graphify/obsidian/getCanvasCoords().md",
+      "x": 3260,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_curtaincanvas_handlecanvasclick",
+      "type": "file",
+      "file": "graphify/obsidian/handleCanvasClick().md",
+      "x": 3460,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_curtaincanvas_handlecanvasmousemove",
+      "type": "file",
+      "file": "graphify/obsidian/handleCanvasMouseMove().md",
+      "x": 3660,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_curtaincanvas_handlecanvastouchend",
+      "type": "file",
+      "file": "graphify/obsidian/handleCanvasTouchEnd().md",
+      "x": 3260,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_freehandmaskcanvas_handleclearzone",
+      "type": "file",
+      "file": "graphify/obsidian/handleClearZone().md",
+      "x": 3460,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_authmodal_handlecustomsubmit",
+      "type": "file",
+      "file": "graphify/obsidian/handleCustomSubmit().md",
+      "x": 3660,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_curtaincanvas_handledownloadcurtain",
+      "type": "file",
+      "file": "graphify/obsidian/handleDownloadCurtain().md",
+      "x": 3260,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_curtaincanvas_handleglobalmove",
+      "type": "file",
+      "file": "graphify/obsidian/handleGlobalMove().md",
+      "x": 3460,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_freehandmaskcanvas_handlepointerdown",
+      "type": "file",
+      "file": "graphify/obsidian/handlePointerDown().md",
+      "x": 3660,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_freehandmaskcanvas_handlepointermove",
+      "type": "file",
+      "file": "graphify/obsidian/handlePointerMove().md",
+      "x": 3260,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_freehandmaskcanvas_handlepointerup",
+      "type": "file",
+      "file": "graphify/obsidian/handlePointerUp().md",
+      "x": 3460,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_authmodal_handleselectdemo",
+      "type": "file",
+      "file": "graphify/obsidian/handleSelectDemo().md",
+      "x": 3660,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_curtaincanvas_ispointinpolygon",
+      "type": "file",
+      "file": "graphify/obsidian/isPointInPolygon().md",
+      "x": 3260,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_curtaincanvas_onend",
+      "type": "file",
+      "file": "graphify/obsidian/onEnd().md",
+      "x": 3460,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_curtaincanvas_onmousemove",
+      "type": "file",
+      "file": "graphify/obsidian/onMouseMove().md",
+      "x": 3660,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_curtaincanvas_ontouchmove",
+      "type": "file",
+      "file": "graphify/obsidian/onTouchMove().md",
+      "x": 3260,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_roomsettings",
+      "type": "file",
+      "file": "graphify/obsidian/roomSettings.ts.md",
+      "x": 3460,
+      "y": 960,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g3",
+      "type": "group",
+      "label": "AI Provider Adapters & Inpainting Routing",
+      "x": 4640,
+      "y": 0,
+      "width": 1320,
+      "height": 1220,
+      "color": "4"
+    },
+    {
+      "id": "n_providers_fluxkontextadapter_regionedit",
+      "type": "file",
+      "file": "graphify/obsidian/.regionEdit().md",
+      "x": 4660,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_gptimage2adapter_regionedit",
+      "type": "file",
+      "file": "graphify/obsidian/.regionEdit()_2.md",
+      "x": 4860,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_nanobananaproadapter_regionedit",
+      "type": "file",
+      "file": "graphify/obsidian/.regionEdit()_3.md",
+      "x": 5060,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_openrouterunifiedadapter_regionedit",
+      "type": "file",
+      "file": "graphify/obsidian/.regionEdit()_5.md",
+      "x": 4660,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_qwenimageeditadapter_regionedit",
+      "type": "file",
+      "file": "graphify/obsidian/.regionEdit()_1.md",
+      "x": 4860,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_seedreameditadapter_regionedit",
+      "type": "file",
+      "file": "graphify/obsidian/.regionEdit()_4.md",
+      "x": 5060,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_fluxkontextadapter_roompreview",
+      "type": "file",
+      "file": "graphify/obsidian/.roomPreview().md",
+      "x": 4660,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_gptimage2adapter_roompreview",
+      "type": "file",
+      "file": "graphify/obsidian/.roomPreview()_2.md",
+      "x": 4860,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_nanobananaproadapter_roompreview",
+      "type": "file",
+      "file": "graphify/obsidian/.roomPreview()_3.md",
+      "x": 5060,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_openrouterunifiedadapter_roompreview",
+      "type": "file",
+      "file": "graphify/obsidian/.roomPreview()_5.md",
+      "x": 4660,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_qwenimageeditadapter_roompreview",
+      "type": "file",
+      "file": "graphify/obsidian/.roomPreview()_1.md",
+      "x": 4860,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_seedreameditadapter_roompreview",
+      "type": "file",
+      "file": "graphify/obsidian/.roomPreview()_4.md",
+      "x": 5060,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_fluxkontextadapter_testconnection",
+      "type": "file",
+      "file": "graphify/obsidian/.testConnection().md",
+      "x": 4660,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_gptimage2adapter_testconnection",
+      "type": "file",
+      "file": "graphify/obsidian/.testConnection()_2.md",
+      "x": 4860,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_nanobananaproadapter_testconnection",
+      "type": "file",
+      "file": "graphify/obsidian/.testConnection()_3.md",
+      "x": 5060,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_openrouterunifiedadapter_testconnection",
+      "type": "file",
+      "file": "graphify/obsidian/.testConnection()_5.md",
+      "x": 4660,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_qwenimageeditadapter_testconnection",
+      "type": "file",
+      "file": "graphify/obsidian/.testConnection()_1.md",
+      "x": 4860,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_seedreameditadapter_testconnection",
+      "type": "file",
+      "file": "graphify/obsidian/.testConnection()_4.md",
+      "x": 5060,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_readme_seedream_45",
+      "type": "file",
+      "file": "graphify/obsidian/ByteDance Seedream 4.5.md",
+      "x": 4660,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_readme_flux_fill_pro",
+      "type": "file",
+      "file": "graphify/obsidian/FLUX.1 Fill Pro Inpainting.md",
+      "x": 4860,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_fluxkontextadapter",
+      "type": "file",
+      "file": "graphify/obsidian/FluxKontextAdapter.md",
+      "x": 5060,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_readme_gemini_3_pro_image",
+      "type": "file",
+      "file": "graphify/obsidian/Gemini 3 Pro Image (Nano Banana Pro).md",
+      "x": 4660,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_readme_gemini_25_flash",
+      "type": "file",
+      "file": "graphify/obsidian/Google Gemini 2.5 Flash VLM.md",
+      "x": 4860,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_gptimage2adapter",
+      "type": "file",
+      "file": "graphify/obsidian/GptImage2Adapter.md",
+      "x": 5060,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_nanobananaproadapter",
+      "type": "file",
+      "file": "graphify/obsidian/NanoBananaProAdapter.md",
+      "x": 4660,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_readme_openrouter_gateway",
+      "type": "file",
+      "file": "graphify/obsidian/OpenRouter Unified API Gateway.md",
+      "x": 4860,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_openrouterunifiedadapter",
+      "type": "file",
+      "file": "graphify/obsidian/OpenRouterUnifiedAdapter.md",
+      "x": 5060,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_qwenimageeditadapter",
+      "type": "file",
+      "file": "graphify/obsidian/QwenImageEditAdapter.md",
+      "x": 4660,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_seedreameditadapter",
+      "type": "file",
+      "file": "graphify/obsidian/SeedreamEditAdapter.md",
+      "x": 4860,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_cleanbase64",
+      "type": "file",
+      "file": "graphify/obsidian/cleanBase64().md",
+      "x": 5060,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_getregioneditprovider",
+      "type": "file",
+      "file": "graphify/obsidian/getRegionEditProvider().md",
+      "x": 4660,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers_getroompreviewprovider",
+      "type": "file",
+      "file": "graphify/obsidian/getRoomPreviewProvider().md",
+      "x": 4860,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_providers",
+      "type": "file",
+      "file": "graphify/obsidian/providers.ts.md",
+      "x": 5060,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g4",
+      "type": "group",
+      "label": "Catalog Library & Bulk Upload",
+      "x": 6040,
+      "y": 0,
+      "width": 1320,
+      "height": 1220,
+      "color": "5"
+    },
+    {
+      "id": "n_bulkuploadmodal",
+      "type": "file",
+      "file": "graphify/obsidian/BulkUploadModal.tsx.md",
+      "x": 6060,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_cataloglibraryview",
+      "type": "file",
+      "file": "graphify/obsidian/CatalogLibraryView.tsx.md",
+      "x": 6260,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_catalogview_catalogview",
+      "type": "file",
+      "file": "graphify/obsidian/CatalogView().md",
+      "x": 6460,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_catalogview",
+      "type": "file",
+      "file": "graphify/obsidian/CatalogView.tsx.md",
+      "x": 6060,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabriccard",
+      "type": "file",
+      "file": "graphify/obsidian/FabricCard.tsx.md",
+      "x": 6260,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabriclibrarymodal",
+      "type": "file",
+      "file": "graphify/obsidian/FabricLibraryModal.tsx.md",
+      "x": 6460,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabricpickersheet",
+      "type": "file",
+      "file": "graphify/obsidian/FabricPickerSheet.tsx.md",
+      "x": 6060,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabricpreviewmodal",
+      "type": "file",
+      "file": "graphify/obsidian/FabricPreviewModal.tsx.md",
+      "x": 6260,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_luxurycolorpalette",
+      "type": "file",
+      "file": "graphify/obsidian/LuxuryColorPalette.tsx.md",
+      "x": 6460,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_readme_spec_sheet_generator",
+      "type": "file",
+      "file": "graphify/obsidian/Printable Spec Sheet & Yardage Docket.md",
+      "x": 6060,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_regionassignmentpanel",
+      "type": "file",
+      "file": "graphify/obsidian/RegionAssignmentPanel.tsx.md",
+      "x": 6260,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_renderlookbookpage",
+      "type": "file",
+      "file": "graphify/obsidian/RenderLookbookPage.tsx.md",
+      "x": 6460,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_specsheetmodal_specsheetmodal",
+      "type": "file",
+      "file": "graphify/obsidian/SpecSheetModal().md",
+      "x": 6060,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_specsheetmodal",
+      "type": "file",
+      "file": "graphify/obsidian/SpecSheetModal.tsx.md",
+      "x": 6260,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_templatecarddrawer_templatecarddrawer",
+      "type": "file",
+      "file": "graphify/obsidian/TemplateCardDrawer().md",
+      "x": 6460,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_templatecarddrawer",
+      "type": "file",
+      "file": "graphify/obsidian/TemplateCardDrawer.tsx.md",
+      "x": 6060,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_templateeditor",
+      "type": "file",
+      "file": "graphify/obsidian/TemplateEditor.tsx.md",
+      "x": 6260,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_templategallerypage",
+      "type": "file",
+      "file": "graphify/obsidian/TemplateGalleryPage.tsx.md",
+      "x": 6460,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_curtain",
+      "type": "file",
+      "file": "graphify/obsidian/curtain.ts.md",
+      "x": 6060,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabricpreviewmodal_handleapplyall",
+      "type": "file",
+      "file": "graphify/obsidian/handleApplyAll().md",
+      "x": 6260,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabricpreviewmodal_handleapplyandgo",
+      "type": "file",
+      "file": "graphify/obsidian/handleApplyAndGo().md",
+      "x": 6460,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_luxurycolorpalette_handleapplycustomhex",
+      "type": "file",
+      "file": "graphify/obsidian/handleApplyCustomHex().md",
+      "x": 6060,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabricpreviewmodal_handleapplysingle",
+      "type": "file",
+      "file": "graphify/obsidian/handleApplySingle().md",
+      "x": 6260,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_templateeditor_handleconfirmfinalize",
+      "type": "file",
+      "file": "graphify/obsidian/handleConfirmFinalize().md",
+      "x": 6460,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bulkuploadmodal_handlefilesselected",
+      "type": "file",
+      "file": "graphify/obsidian/handleFilesSelected().md",
+      "x": 6060,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_fabricpreviewmodal_handlemousemove",
+      "type": "file",
+      "file": "graphify/obsidian/handleMouseMove()_2.md",
+      "x": 6260,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_renderlookbookpage_handlemousemove",
+      "type": "file",
+      "file": "graphify/obsidian/handleMouseMove().md",
+      "x": 6460,
+      "y": 720,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bulkuploadmodal_handleretryfailed",
+      "type": "file",
+      "file": "graphify/obsidian/handleRetryFailed().md",
+      "x": 6060,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_templateeditor_handleselectregion",
+      "type": "file",
+      "file": "graphify/obsidian/handleSelectRegion().md",
+      "x": 6260,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_bulkuploadmodal_handlestartprocessing",
+      "type": "file",
+      "file": "graphify/obsidian/handleStartProcessing().md",
+      "x": 6460,
+      "y": 800,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_renderlookbookpage_handletouchmove",
+      "type": "file",
+      "file": "graphify/obsidian/handleTouchMove().md",
+      "x": 6060,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_templateeditor_handletriggeraigeneration",
+      "type": "file",
+      "file": "graphify/obsidian/handleTriggerAiGeneration().md",
+      "x": 6260,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_cataloglibraryview_handleuploadfabric",
+      "type": "file",
+      "file": "graphify/obsidian/handleUploadFabric().md",
+      "x": 6460,
+      "y": 880,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g5",
+      "type": "group",
+      "label": "Provider Settings & Gemini Client",
+      "x": 0,
+      "y": 1700,
+      "width": 1320,
+      "height": 1220,
+      "color": "6"
+    },
+    {
+      "id": "n_gemini_provider_geminiprovider_analyzeimage",
+      "type": "file",
+      "file": "graphify/obsidian/.analyzeImage()_3.md",
+      "x": 20,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_gemini_provider_geminiprovider_constructor",
+      "type": "file",
+      "file": "graphify/obsidian/.constructor()_4.md",
+      "x": 220,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_gemini_provider_geminiprovider_editimage",
+      "type": "file",
+      "file": "graphify/obsidian/.editImage()_3.md",
+      "x": 420,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_gemini_provider_geminiprovider_generatescene",
+      "type": "file",
+      "file": "graphify/obsidian/.generateScene()_3.md",
+      "x": 20,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_gemini_provider_geminiprovider_setapikey",
+      "type": "file",
+      "file": "graphify/obsidian/.setApiKey()_4.md",
+      "x": 220,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_gemini_provider_geminiprovider_testconnection",
+      "type": "file",
+      "file": "graphify/obsidian/.testConnection()_9.md",
+      "x": 420,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_aiprovidersettingsmodal",
+      "type": "file",
+      "file": "graphify/obsidian/AIProviderSettingsModal.tsx.md",
+      "x": 20,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_databaseschemamodal",
+      "type": "file",
+      "file": "graphify/obsidian/DatabaseSchemaModal.tsx.md",
+      "x": 220,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_gemini_provider_geminiprovider",
+      "type": "file",
+      "file": "graphify/obsidian/GeminiProvider.md",
+      "x": 420,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_header_header",
+      "type": "file",
+      "file": "graphify/obsidian/Header().md",
+      "x": 20,
+      "y": 2020,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_header",
+      "type": "file",
+      "file": "graphify/obsidian/Header.tsx.md",
+      "x": 220,
+      "y": 2020,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_roomvizstudio",
+      "type": "file",
+      "file": "graphify/obsidian/RoomVizStudio.tsx.md",
+      "x": 420,
+      "y": 2020,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_sequentialprogressoverlay",
+      "type": "file",
+      "file": "graphify/obsidian/SequentialProgressOverlay.tsx.md",
+      "x": 20,
+      "y": 2100,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_sequential_inpainting_compositeregionontocanvas",
+      "type": "file",
+      "file": "graphify/obsidian/compositeRegionOntoCanvas().md",
+      "x": 220,
+      "y": 2100,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_sequential_inpainting_executesequentialinpainting",
+      "type": "file",
+      "file": "graphify/obsidian/executeSequentialInpainting().md",
+      "x": 420,
+      "y": 2100,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_gemini_provider",
+      "type": "file",
+      "file": "graphify/obsidian/gemini-provider.ts.md",
+      "x": 20,
+      "y": 2180,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_sequential_inpainting_generateregionmask",
+      "type": "file",
+      "file": "graphify/obsidian/generateRegionMask().md",
+      "x": 220,
+      "y": 2180,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_aiprovidersettingsmodal_handleactivateprovider",
+      "type": "file",
+      "file": "graphify/obsidian/handleActivateProvider().md",
+      "x": 420,
+      "y": 2180,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_databaseschemamodal_handlecopy",
+      "type": "file",
+      "file": "graphify/obsidian/handleCopy().md",
+      "x": 20,
+      "y": 2260,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_aiprovidersettingsmodal_handlesavekey",
+      "type": "file",
+      "file": "graphify/obsidian/handleSaveKey().md",
+      "x": 220,
+      "y": 2260,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_aiprovidersettingsmodal_handleselectprovider",
+      "type": "file",
+      "file": "graphify/obsidian/handleSelectProvider().md",
+      "x": 420,
+      "y": 2260,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_roomvizstudio_handleuploadcustomroom",
+      "type": "file",
+      "file": "graphify/obsidian/handleUploadCustomRoom().md",
+      "x": 20,
+      "y": 2340,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_sequential_inpainting_loadimage",
+      "type": "file",
+      "file": "graphify/obsidian/loadImage().md",
+      "x": 220,
+      "y": 2340,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openai_provider",
+      "type": "file",
+      "file": "graphify/obsidian/openai-provider.ts.md",
+      "x": 420,
+      "y": 2340,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openrouter_provider",
+      "type": "file",
+      "file": "graphify/obsidian/openrouter-provider.ts.md",
+      "x": 20,
+      "y": 2420,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_registry",
+      "type": "file",
+      "file": "graphify/obsidian/registry.ts.md",
+      "x": 220,
+      "y": 2420,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_replicate_provider",
+      "type": "file",
+      "file": "graphify/obsidian/replicate-provider.ts.md",
+      "x": 420,
+      "y": 2420,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_sequential_inpainting",
+      "type": "file",
+      "file": "graphify/obsidian/sequential-inpainting.ts.md",
+      "x": 20,
+      "y": 2500,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_stability_provider",
+      "type": "file",
+      "file": "graphify/obsidian/stability-provider.ts.md",
+      "x": 220,
+      "y": 2500,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_store",
+      "type": "file",
+      "file": "graphify/obsidian/store.ts.md",
+      "x": 420,
+      "y": 2500,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_types",
+      "type": "file",
+      "file": "graphify/obsidian/types.ts.md",
+      "x": 20,
+      "y": 2580,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g6",
+      "type": "group",
+      "label": "Photorealistic Photo Plate Synthesis",
+      "x": 1620,
+      "y": 1700,
+      "width": 880,
+      "height": 720,
+      "color": "1"
+    },
+    {
+      "id": "n_realisticphotoplates_drawbouclenoise",
+      "type": "file",
+      "file": "graphify/obsidian/drawBoucleNoise().md",
+      "x": 1640,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticphotoplates_drawbrassrod",
+      "type": "file",
+      "file": "graphify/obsidian/drawBrassRod().md",
+      "x": 1840,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticphotoplates_drawgreekkeyunit",
+      "type": "file",
+      "file": "graphify/obsidian/drawGreekKeyUnit().md",
+      "x": 2040,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticphotoplates_drawhardwoodfloor",
+      "type": "file",
+      "file": "graphify/obsidian/drawHardwoodFloor().md",
+      "x": 1640,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticphotoplates_drawhoundstoothpattern",
+      "type": "file",
+      "file": "graphify/obsidian/drawHoundstoothPattern().md",
+      "x": 1840,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticphotoplates_drawpersiantapestryribbon",
+      "type": "file",
+      "file": "graphify/obsidian/drawPersianTapestryRibbon().md",
+      "x": 2040,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticphotoplates_drawphotographicpleats",
+      "type": "file",
+      "file": "graphify/obsidian/drawPhotographicPleats().md",
+      "x": 1640,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticphotoplates_generaterealisticplate",
+      "type": "file",
+      "file": "graphify/obsidian/generateRealisticPlate().md",
+      "x": 1840,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticphotoplates",
+      "type": "file",
+      "file": "graphify/obsidian/realisticPhotoPlates.ts.md",
+      "x": 2040,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticphotoplates_renderchevronplate",
+      "type": "file",
+      "file": "graphify/obsidian/renderChevronPlate().md",
+      "x": 1640,
+      "y": 2020,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticphotoplates_rendercolorblocktrioplate",
+      "type": "file",
+      "file": "graphify/obsidian/renderColorBlockTrioPlate().md",
+      "x": 1840,
+      "y": 2020,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticphotoplates_renderdefaultcurtainplate",
+      "type": "file",
+      "file": "graphify/obsidian/renderDefaultCurtainPlate().md",
+      "x": 2040,
+      "y": 2020,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticphotoplates_rendergreekkeyframeplate",
+      "type": "file",
+      "file": "graphify/obsidian/renderGreekKeyFramePlate().md",
+      "x": 1640,
+      "y": 2100,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticphotoplates_renderpersiantapestryplate",
+      "type": "file",
+      "file": "graphify/obsidian/renderPersianTapestryPlate().md",
+      "x": 1840,
+      "y": 2100,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticphotoplates_rendertwotonecamelblackplate",
+      "type": "file",
+      "file": "graphify/obsidian/renderTwoToneCamelBlackPlate().md",
+      "x": 2040,
+      "y": 2100,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticphotoplates_rendervelvethoundstoothplate",
+      "type": "file",
+      "file": "graphify/obsidian/renderVelvetHoundstoothPlate().md",
+      "x": 1640,
+      "y": 2180,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g7",
+      "type": "group",
+      "label": "AI Provider Registry & Key Management",
+      "x": 3240,
+      "y": 1700,
+      "width": 880,
+      "height": 620,
+      "color": "2"
+    },
+    {
+      "id": "n_registry_aiproviderregistry_clearapikey",
+      "type": "file",
+      "file": "graphify/obsidian/.clearApiKey().md",
+      "x": 3260,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_registry_aiproviderregistry_constructor",
+      "type": "file",
+      "file": "graphify/obsidian/.constructor().md",
+      "x": 3460,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_registry_aiproviderregistry_getactiveprovider",
+      "type": "file",
+      "file": "graphify/obsidian/.getActiveProvider().md",
+      "x": 3660,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_registry_aiproviderregistry_getactiveproviderid",
+      "type": "file",
+      "file": "graphify/obsidian/.getActiveProviderId().md",
+      "x": 3260,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_registry_aiproviderregistry_getallmetadata",
+      "type": "file",
+      "file": "graphify/obsidian/.getAllMetadata().md",
+      "x": 3460,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_registry_aiproviderregistry_getapikey",
+      "type": "file",
+      "file": "graphify/obsidian/.getApiKey().md",
+      "x": 3660,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_registry_aiproviderregistry_getmetadata",
+      "type": "file",
+      "file": "graphify/obsidian/.getMetadata().md",
+      "x": 3260,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_registry_aiproviderregistry_getprovider",
+      "type": "file",
+      "file": "graphify/obsidian/.getProvider().md",
+      "x": 3460,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_registry_aiproviderregistry_hasapikey",
+      "type": "file",
+      "file": "graphify/obsidian/.hasApiKey().md",
+      "x": 3660,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_registry_aiproviderregistry_initproviders",
+      "type": "file",
+      "file": "graphify/obsidian/.initProviders().md",
+      "x": 3260,
+      "y": 2020,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_registry_aiproviderregistry_loadpersistedstate",
+      "type": "file",
+      "file": "graphify/obsidian/.loadPersistedState().md",
+      "x": 3460,
+      "y": 2020,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_registry_aiproviderregistry_setactiveproviderid",
+      "type": "file",
+      "file": "graphify/obsidian/.setActiveProviderId().md",
+      "x": 3660,
+      "y": 2020,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_registry_aiproviderregistry_setapikey",
+      "type": "file",
+      "file": "graphify/obsidian/.setApiKey().md",
+      "x": 3260,
+      "y": 2100,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_registry_aiproviderregistry_testprovider",
+      "type": "file",
+      "file": "graphify/obsidian/.testProvider().md",
+      "x": 3460,
+      "y": 2100,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_registry_aiproviderregistry",
+      "type": "file",
+      "file": "graphify/obsidian/AIProviderRegistry.md",
+      "x": 3660,
+      "y": 2100,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g8",
+      "type": "group",
+      "label": "Server API & OpenRouter Gateway",
+      "x": 4640,
+      "y": 1700,
+      "width": 880,
+      "height": 620,
+      "color": "3"
+    },
+    {
+      "id": "n_vite_config_aistudioapiplugin",
+      "type": "file",
+      "file": "graphify/obsidian/aistudioApiPlugin().md",
+      "x": 4660,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_vite_config_aistudiomediaplugin",
+      "type": "file",
+      "file": "graphify/obsidian/aistudioMediaPlugin().md",
+      "x": 4860,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_api",
+      "type": "file",
+      "file": "graphify/obsidian/api.ts.md",
+      "x": 5060,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openrouter_callopenrouterinpaint",
+      "type": "file",
+      "file": "graphify/obsidian/callOpenRouterInpaint().md",
+      "x": 4660,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openrouter_callopenrouterroomviz",
+      "type": "file",
+      "file": "graphify/obsidian/callOpenRouterRoomViz().md",
+      "x": 4860,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openrouter_callopenroutervision",
+      "type": "file",
+      "file": "graphify/obsidian/callOpenRouterVision().md",
+      "x": 5060,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openrouter_ensuredatauri",
+      "type": "file",
+      "file": "graphify/obsidian/ensureDataUri().md",
+      "x": 4660,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openrouter_geteffectiveopenrouterkey",
+      "type": "file",
+      "file": "graphify/obsidian/getEffectiveOpenRouterKey().md",
+      "x": 4860,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_api_getgenaiclient",
+      "type": "file",
+      "file": "graphify/obsidian/getGenAIClient().md",
+      "x": 5060,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_api_getorcreatebrandconfig",
+      "type": "file",
+      "file": "graphify/obsidian/getOrCreateBrandConfig().md",
+      "x": 4660,
+      "y": 2020,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openrouter",
+      "type": "file",
+      "file": "graphify/obsidian/openrouter.ts.md",
+      "x": 4860,
+      "y": 2020,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_api_parsebase64image",
+      "type": "file",
+      "file": "graphify/obsidian/parseBase64Image().md",
+      "x": 5060,
+      "y": 2020,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openrouter_testopenrouterconnection",
+      "type": "file",
+      "file": "graphify/obsidian/testOpenRouterConnection().md",
+      "x": 4660,
+      "y": 2100,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_vite_config",
+      "type": "file",
+      "file": "graphify/obsidian/vite.config.ts.md",
+      "x": 4860,
+      "y": 2100,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g9",
+      "type": "group",
+      "label": "Macro Fabric Textures & Weave Engine",
+      "x": 6040,
+      "y": 1700,
+      "width": 880,
+      "height": 620,
+      "color": "4"
+    },
+    {
+      "id": "n_realisticfabrictextures_generatemacrofabrictexture",
+      "type": "file",
+      "file": "graphify/obsidian/generateMacroFabricTexture().md",
+      "x": 6060,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticfabrictextures",
+      "type": "file",
+      "file": "graphify/obsidian/realisticFabricTextures.ts.md",
+      "x": 6260,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticfabrictextures_rendercamelcashmeremacro",
+      "type": "file",
+      "file": "graphify/obsidian/renderCamelCashmereMacro().md",
+      "x": 6460,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticfabrictextures_renderchevronjacquardmacro",
+      "type": "file",
+      "file": "graphify/obsidian/renderChevronJacquardMacro().md",
+      "x": 6060,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticfabrictextures_rendercreambouclemacro",
+      "type": "file",
+      "file": "graphify/obsidian/renderCreamBoucleMacro().md",
+      "x": 6260,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticfabrictextures_rendergenericweavemacro",
+      "type": "file",
+      "file": "graphify/obsidian/renderGenericWeaveMacro().md",
+      "x": 6460,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticfabrictextures_rendergreekkeytrimmacro",
+      "type": "file",
+      "file": "graphify/obsidian/renderGreekKeyTrimMacro().md",
+      "x": 6060,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticfabrictextures_renderhoundstoothmacro",
+      "type": "file",
+      "file": "graphify/obsidian/renderHoundstoothMacro().md",
+      "x": 6260,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticfabrictextures_rendermetallicgoldsatinmacro",
+      "type": "file",
+      "file": "graphify/obsidian/renderMetallicGoldSatinMacro().md",
+      "x": 6460,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticfabrictextures_rendermidnightvelvetmacro",
+      "type": "file",
+      "file": "graphify/obsidian/renderMidnightVelvetMacro().md",
+      "x": 6060,
+      "y": 2020,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticfabrictextures_rendermustardvelvetmacro",
+      "type": "file",
+      "file": "graphify/obsidian/renderMustardVelvetMacro().md",
+      "x": 6260,
+      "y": 2020,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticfabrictextures_renderpersiantapestrymacro",
+      "type": "file",
+      "file": "graphify/obsidian/renderPersianTapestryMacro().md",
+      "x": 6460,
+      "y": 2020,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_realisticfabrictextures_renderterracottavelvetmacro",
+      "type": "file",
+      "file": "graphify/obsidian/renderTerracottaVelvetMacro().md",
+      "x": 6060,
+      "y": 2100,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g10",
+      "type": "group",
+      "label": "OpenAI Multi-Modal Provider",
+      "x": 0,
+      "y": 3000,
+      "width": 660,
+      "height": 420,
+      "color": "5"
+    },
+    {
+      "id": "n_openai_provider_openaiprovider_analyzeimage",
+      "type": "file",
+      "file": "graphify/obsidian/.analyzeImage()_2.md",
+      "x": 20,
+      "y": 3080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openai_provider_openaiprovider_constructor",
+      "type": "file",
+      "file": "graphify/obsidian/.constructor()_3.md",
+      "x": 220,
+      "y": 3080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openai_provider_openaiprovider_editimage",
+      "type": "file",
+      "file": "graphify/obsidian/.editImage()_2.md",
+      "x": 420,
+      "y": 3080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openai_provider_openaiprovider_generatescene",
+      "type": "file",
+      "file": "graphify/obsidian/.generateScene()_2.md",
+      "x": 20,
+      "y": 3160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openai_provider_openaiprovider_setapikey",
+      "type": "file",
+      "file": "graphify/obsidian/.setApiKey()_3.md",
+      "x": 220,
+      "y": 3160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openai_provider_openaiprovider_testconnection",
+      "type": "file",
+      "file": "graphify/obsidian/.testConnection()_8.md",
+      "x": 420,
+      "y": 3160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openai_provider_openaiprovider",
+      "type": "file",
+      "file": "graphify/obsidian/OpenAIProvider.md",
+      "x": 20,
+      "y": 3240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g11",
+      "type": "group",
+      "label": "Stability Generative Provider",
+      "x": 1620,
+      "y": 3000,
+      "width": 660,
+      "height": 420,
+      "color": "6"
+    },
+    {
+      "id": "n_stability_provider_stabilityprovider_analyzeimage",
+      "type": "file",
+      "file": "graphify/obsidian/.analyzeImage().md",
+      "x": 1640,
+      "y": 3080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_stability_provider_stabilityprovider_constructor",
+      "type": "file",
+      "file": "graphify/obsidian/.constructor()_1.md",
+      "x": 1840,
+      "y": 3080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_stability_provider_stabilityprovider_editimage",
+      "type": "file",
+      "file": "graphify/obsidian/.editImage().md",
+      "x": 2040,
+      "y": 3080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_stability_provider_stabilityprovider_generatescene",
+      "type": "file",
+      "file": "graphify/obsidian/.generateScene().md",
+      "x": 1640,
+      "y": 3160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_stability_provider_stabilityprovider_setapikey",
+      "type": "file",
+      "file": "graphify/obsidian/.setApiKey()_1.md",
+      "x": 1840,
+      "y": 3160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_stability_provider_stabilityprovider_testconnection",
+      "type": "file",
+      "file": "graphify/obsidian/.testConnection()_6.md",
+      "x": 2040,
+      "y": 3160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_stability_provider_stabilityprovider",
+      "type": "file",
+      "file": "graphify/obsidian/StabilityProvider.md",
+      "x": 1640,
+      "y": 3240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g12",
+      "type": "group",
+      "label": "Replicate Model Provider",
+      "x": 3240,
+      "y": 3000,
+      "width": 660,
+      "height": 420,
+      "color": "1"
+    },
+    {
+      "id": "n_replicate_provider_replicateprovider_analyzeimage",
+      "type": "file",
+      "file": "graphify/obsidian/.analyzeImage()_1.md",
+      "x": 3260,
+      "y": 3080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_replicate_provider_replicateprovider_constructor",
+      "type": "file",
+      "file": "graphify/obsidian/.constructor()_2.md",
+      "x": 3460,
+      "y": 3080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_replicate_provider_replicateprovider_editimage",
+      "type": "file",
+      "file": "graphify/obsidian/.editImage()_1.md",
+      "x": 3660,
+      "y": 3080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_replicate_provider_replicateprovider_generatescene",
+      "type": "file",
+      "file": "graphify/obsidian/.generateScene()_1.md",
+      "x": 3260,
+      "y": 3160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_replicate_provider_replicateprovider_setapikey",
+      "type": "file",
+      "file": "graphify/obsidian/.setApiKey()_2.md",
+      "x": 3460,
+      "y": 3160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_replicate_provider_replicateprovider_testconnection",
+      "type": "file",
+      "file": "graphify/obsidian/.testConnection()_7.md",
+      "x": 3660,
+      "y": 3160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_replicate_provider_replicateprovider",
+      "type": "file",
+      "file": "graphify/obsidian/ReplicateProvider.md",
+      "x": 3260,
+      "y": 3240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g13",
+      "type": "group",
+      "label": "OpenRouter Unified Provider",
+      "x": 4640,
+      "y": 3000,
+      "width": 660,
+      "height": 420,
+      "color": "2"
+    },
+    {
+      "id": "n_openrouter_provider_openrouterprovider_analyzeimage",
+      "type": "file",
+      "file": "graphify/obsidian/.analyzeImage()_4.md",
+      "x": 4660,
+      "y": 3080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openrouter_provider_openrouterprovider_constructor",
+      "type": "file",
+      "file": "graphify/obsidian/.constructor()_5.md",
+      "x": 4860,
+      "y": 3080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openrouter_provider_openrouterprovider_editimage",
+      "type": "file",
+      "file": "graphify/obsidian/.editImage()_4.md",
+      "x": 5060,
+      "y": 3080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openrouter_provider_openrouterprovider_generatescene",
+      "type": "file",
+      "file": "graphify/obsidian/.generateScene()_4.md",
+      "x": 4660,
+      "y": 3160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openrouter_provider_openrouterprovider_setapikey",
+      "type": "file",
+      "file": "graphify/obsidian/.setApiKey()_5.md",
+      "x": 4860,
+      "y": 3160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openrouter_provider_openrouterprovider_testconnection",
+      "type": "file",
+      "file": "graphify/obsidian/.testConnection()_10.md",
+      "x": 5060,
+      "y": 3160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_openrouter_provider_openrouterprovider",
+      "type": "file",
+      "file": "graphify/obsidian/OpenRouterProvider.md",
+      "x": 4660,
+      "y": 3240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g14",
+      "type": "group",
+      "label": "Feathered Masking & Inpainting Pipeline",
+      "x": 6040,
+      "y": 3000,
+      "width": 660,
+      "height": 400,
+      "color": "3"
+    },
+    {
+      "id": "n_maskedpipeline_featheredcomposite",
+      "type": "file",
+      "file": "graphify/obsidian/featheredComposite().md",
+      "x": 6060,
+      "y": 3080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_maskedpipeline_generatesequentialredesign",
+      "type": "file",
+      "file": "graphify/obsidian/generateSequentialRedesign().md",
+      "x": 6260,
+      "y": 3080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_maskedpipeline",
+      "type": "file",
+      "file": "graphify/obsidian/maskedPipeline.ts.md",
+      "x": 6460,
+      "y": 3080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_maskedpipeline_polygonmask",
+      "type": "file",
+      "file": "graphify/obsidian/polygonMask().md",
+      "x": 6060,
+      "y": 3160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_maskedpipeline_tintregion",
+      "type": "file",
+      "file": "graphify/obsidian/tintRegion().md",
+      "x": 6260,
+      "y": 3160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_maskedpipeline_tocanvas",
+      "type": "file",
+      "file": "graphify/obsidian/toCanvas().md",
+      "x": 6460,
+      "y": 3160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g15",
+      "type": "group",
+      "label": "Backend Server & Architecture Specs",
+      "x": 0,
+      "y": 3500,
+      "width": 660,
+      "height": 400,
+      "color": "4"
+    },
+    {
+      "id": "n_roadmap_freehand_raster_masking",
+      "type": "file",
+      "file": "graphify/obsidian/Freehand Raster Masking Tool.md",
+      "x": 20,
+      "y": 3580,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_roadmap_sequential_synthesis",
+      "type": "file",
+      "file": "graphify/obsidian/Sequential Generative Inpainting Pipeline.md",
+      "x": 220,
+      "y": 3580,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_roadmap_supabase_data_schema",
+      "type": "file",
+      "file": "graphify/obsidian/Supabase Multi-Zone & Swatch Schema.md",
+      "x": 420,
+      "y": 3580,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_roadmap_visualizer_roadmap",
+      "type": "file",
+      "file": "graphify/obsidian/Visualizer Setup & Implementation Roadmap.md",
+      "x": 20,
+      "y": 3660,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_roadmap_md",
+      "type": "file",
+      "file": "graphify/obsidian/aatmi-curtain-roadmap.md.md",
+      "x": 220,
+      "y": 3660,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_server",
+      "type": "file",
+      "file": "graphify/obsidian/server.ts.md",
+      "x": 420,
+      "y": 3660,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g16",
+      "type": "group",
+      "label": "Brand Studio Onboarding Stepper",
+      "x": 1620,
+      "y": 3500,
+      "width": 600,
+      "height": 400,
+      "color": "5"
+    },
+    {
+      "id": "n_brandstudiostepper",
+      "type": "file",
+      "file": "graphify/obsidian/BrandStudioStepper.tsx.md",
+      "x": 1640,
+      "y": 3580,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_brandstudiostepper_handlenext",
+      "type": "file",
+      "file": "graphify/obsidian/handleNext().md",
+      "x": 1840,
+      "y": 3580,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_brandstudiostepper_handleprev",
+      "type": "file",
+      "file": "graphify/obsidian/handlePrev().md",
+      "x": 2040,
+      "y": 3580,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g17",
+      "type": "group",
+      "label": "Interactive Onboarding Tour",
+      "x": 3240,
+      "y": 3500,
+      "width": 600,
+      "height": 400,
+      "color": "6"
+    },
+    {
+      "id": "n_onboardingtourmodal_onboardingtourmodal",
+      "type": "file",
+      "file": "graphify/obsidian/OnboardingTourModal().md",
+      "x": 3260,
+      "y": 3580,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_onboardingtourmodal",
+      "type": "file",
+      "file": "graphify/obsidian/OnboardingTourModal.tsx.md",
+      "x": 3460,
+      "y": 3580,
+      "width": 180,
+      "height": 60
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_vite_config_api",
+      "fromNode": "n_vite_config",
+      "toNode": "n_api",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_vite_config_vite_config_aistudiomediaplugin",
+      "fromNode": "n_vite_config",
+      "toNode": "n_vite_config_aistudiomediaplugin",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_vite_config_vite_config_aistudioapiplugin",
+      "fromNode": "n_vite_config",
+      "toNode": "n_vite_config_aistudioapiplugin",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_server_roadmap_sequential_synthesis",
+      "fromNode": "n_server",
+      "toNode": "n_roadmap_sequential_synthesis",
+      "label": "orchestrated_by [EXTRACTED]"
+    },
+    {
+      "id": "e_app_brandstore",
+      "fromNode": "n_app",
+      "toNode": "n_brandstore",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_store",
+      "fromNode": "n_app",
+      "toNode": "n_store",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_signin",
+      "fromNode": "n_app",
+      "toNode": "n_signin",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_onboardingwizard",
+      "fromNode": "n_app",
+      "toNode": "n_onboardingwizard",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_brandheader",
+      "fromNode": "n_app",
+      "toNode": "n_brandheader",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_branddashboard",
+      "fromNode": "n_app",
+      "toNode": "n_branddashboard",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_templatesgallery",
+      "fromNode": "n_app",
+      "toNode": "n_templatesgallery",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_templateeditor",
+      "fromNode": "n_app",
+      "toNode": "n_templateeditor",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_catalogview",
+      "fromNode": "n_app",
+      "toNode": "n_catalogview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_designdetailview",
+      "fromNode": "n_app",
+      "toNode": "n_designdetailview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_brandsettingsview",
+      "fromNode": "n_app",
+      "toNode": "n_brandsettingsview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_platformadminview",
+      "fromNode": "n_app",
+      "toNode": "n_platformadminview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_bulkuploadmodal",
+      "fromNode": "n_app",
+      "toNode": "n_bulkuploadmodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_cameracapturemodal",
+      "fromNode": "n_app",
+      "toNode": "n_cameracapturemodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_newtemplatemodal",
+      "fromNode": "n_app",
+      "toNode": "n_newtemplatemodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_specsheetmodal",
+      "fromNode": "n_app",
+      "toNode": "n_specsheetmodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_curtain",
+      "fromNode": "n_app",
+      "toNode": "n_curtain",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_app_handlesavenewtemplate",
+      "fromNode": "n_app",
+      "toNode": "n_app_handlesavenewtemplate",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_app_main",
+      "fromNode": "n_app",
+      "toNode": "n_main",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_app_readme_real_room_staging",
+      "fromNode": "n_app",
+      "toNode": "n_readme_real_room_staging",
+      "label": "mounted_in [EXTRACTED]"
+    },
+    {
+      "id": "e_app_roadmap_supabase_data_schema",
+      "fromNode": "n_app",
+      "toNode": "n_roadmap_supabase_data_schema",
+      "label": "persisted_in [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_brand",
+      "fromNode": "n_providers",
+      "toNode": "n_brand",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_openrouter",
+      "fromNode": "n_providers",
+      "toNode": "n_openrouter",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_providers_cleanbase64",
+      "fromNode": "n_providers",
+      "toNode": "n_providers_cleanbase64",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_providers_fluxkontextadapter",
+      "fromNode": "n_providers",
+      "toNode": "n_providers_fluxkontextadapter",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_providers_qwenimageeditadapter",
+      "fromNode": "n_providers",
+      "toNode": "n_providers_qwenimageeditadapter",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_providers_gptimage2adapter",
+      "fromNode": "n_providers",
+      "toNode": "n_providers_gptimage2adapter",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_providers_nanobananaproadapter",
+      "fromNode": "n_providers",
+      "toNode": "n_providers_nanobananaproadapter",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_providers_seedreameditadapter",
+      "fromNode": "n_providers",
+      "toNode": "n_providers_seedreameditadapter",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_providers_openrouterunifiedadapter",
+      "fromNode": "n_providers",
+      "toNode": "n_providers_openrouterunifiedadapter",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_providers_getregioneditprovider",
+      "fromNode": "n_providers",
+      "toNode": "n_providers_getregioneditprovider",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_providers_getroompreviewprovider",
+      "fromNode": "n_providers",
+      "toNode": "n_providers_getroompreviewprovider",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_api",
+      "fromNode": "n_providers",
+      "toNode": "n_api",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_brandsettingsview",
+      "fromNode": "n_providers",
+      "toNode": "n_brandsettingsview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_readme_openrouter_gateway",
+      "fromNode": "n_providers",
+      "toNode": "n_readme_openrouter_gateway",
+      "label": "implemented_by [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_readme_gemini_25_flash",
+      "fromNode": "n_providers",
+      "toNode": "n_readme_gemini_25_flash",
+      "label": "analyzes_geometry [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_cleanbase64_providers_fluxkontextadapter_regionedit",
+      "fromNode": "n_providers_cleanbase64",
+      "toNode": "n_providers_fluxkontextadapter_regionedit",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_cleanbase64_providers_nanobananaproadapter_roompreview",
+      "fromNode": "n_providers_cleanbase64",
+      "toNode": "n_providers_nanobananaproadapter_roompreview",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_fluxkontextadapter_providers_fluxkontextadapter_regionedit",
+      "fromNode": "n_providers_fluxkontextadapter",
+      "toNode": "n_providers_fluxkontextadapter_regionedit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_fluxkontextadapter_providers_fluxkontextadapter_roompreview",
+      "fromNode": "n_providers_fluxkontextadapter",
+      "toNode": "n_providers_fluxkontextadapter_roompreview",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_fluxkontextadapter_providers_fluxkontextadapter_testconnection",
+      "fromNode": "n_providers_fluxkontextadapter",
+      "toNode": "n_providers_fluxkontextadapter_testconnection",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_fluxkontextadapter_readme_flux_fill_pro",
+      "fromNode": "n_providers_fluxkontextadapter",
+      "toNode": "n_readme_flux_fill_pro",
+      "label": "powers_inpainting [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_qwenimageeditadapter_providers_qwenimageeditadapter_regionedit",
+      "fromNode": "n_providers_qwenimageeditadapter",
+      "toNode": "n_providers_qwenimageeditadapter_regionedit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_qwenimageeditadapter_providers_qwenimageeditadapter_roompreview",
+      "fromNode": "n_providers_qwenimageeditadapter",
+      "toNode": "n_providers_qwenimageeditadapter_roompreview",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_qwenimageeditadapter_providers_qwenimageeditadapter_testconnection",
+      "fromNode": "n_providers_qwenimageeditadapter",
+      "toNode": "n_providers_qwenimageeditadapter_testconnection",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_qwenimageeditadapter_regionedit_providers_openrouterunifiedadapter_regionedit",
+      "fromNode": "n_providers_qwenimageeditadapter_regionedit",
+      "toNode": "n_providers_openrouterunifiedadapter_regionedit",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_gptimage2adapter_providers_gptimage2adapter_regionedit",
+      "fromNode": "n_providers_gptimage2adapter",
+      "toNode": "n_providers_gptimage2adapter_regionedit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_gptimage2adapter_providers_gptimage2adapter_roompreview",
+      "fromNode": "n_providers_gptimage2adapter",
+      "toNode": "n_providers_gptimage2adapter_roompreview",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_gptimage2adapter_providers_gptimage2adapter_testconnection",
+      "fromNode": "n_providers_gptimage2adapter",
+      "toNode": "n_providers_gptimage2adapter_testconnection",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_gptimage2adapter_regionedit_providers_openrouterunifiedadapter_regionedit",
+      "fromNode": "n_providers_gptimage2adapter_regionedit",
+      "toNode": "n_providers_openrouterunifiedadapter_regionedit",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_gptimage2adapter_roompreview_providers_openrouterunifiedadapter_roompreview",
+      "fromNode": "n_providers_gptimage2adapter_roompreview",
+      "toNode": "n_providers_openrouterunifiedadapter_roompreview",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_nanobananaproadapter_providers_nanobananaproadapter_regionedit",
+      "fromNode": "n_providers_nanobananaproadapter",
+      "toNode": "n_providers_nanobananaproadapter_regionedit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_nanobananaproadapter_providers_nanobananaproadapter_roompreview",
+      "fromNode": "n_providers_nanobananaproadapter",
+      "toNode": "n_providers_nanobananaproadapter_roompreview",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_nanobananaproadapter_providers_nanobananaproadapter_testconnection",
+      "fromNode": "n_providers_nanobananaproadapter",
+      "toNode": "n_providers_nanobananaproadapter_testconnection",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_nanobananaproadapter_regionedit_providers_openrouterunifiedadapter_regionedit",
+      "fromNode": "n_providers_nanobananaproadapter_regionedit",
+      "toNode": "n_providers_openrouterunifiedadapter_regionedit",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_seedreameditadapter_providers_seedreameditadapter_regionedit",
+      "fromNode": "n_providers_seedreameditadapter",
+      "toNode": "n_providers_seedreameditadapter_regionedit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_seedreameditadapter_providers_seedreameditadapter_roompreview",
+      "fromNode": "n_providers_seedreameditadapter",
+      "toNode": "n_providers_seedreameditadapter_roompreview",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_seedreameditadapter_providers_seedreameditadapter_testconnection",
+      "fromNode": "n_providers_seedreameditadapter",
+      "toNode": "n_providers_seedreameditadapter_testconnection",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_seedreameditadapter_regionedit_providers_openrouterunifiedadapter_regionedit",
+      "fromNode": "n_providers_seedreameditadapter_regionedit",
+      "toNode": "n_providers_openrouterunifiedadapter_regionedit",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_seedreameditadapter_roompreview_providers_openrouterunifiedadapter_roompreview",
+      "fromNode": "n_providers_seedreameditadapter_roompreview",
+      "toNode": "n_providers_openrouterunifiedadapter_roompreview",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_openrouterunifiedadapter_providers_openrouterunifiedadapter_regionedit",
+      "fromNode": "n_providers_openrouterunifiedadapter",
+      "toNode": "n_providers_openrouterunifiedadapter_regionedit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_openrouterunifiedadapter_providers_openrouterunifiedadapter_roompreview",
+      "fromNode": "n_providers_openrouterunifiedadapter",
+      "toNode": "n_providers_openrouterunifiedadapter_roompreview",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_providers_openrouterunifiedadapter_providers_openrouterunifiedadapter_testconnection",
+      "fromNode": "n_providers_openrouterunifiedadapter",
+      "toNode": "n_providers_openrouterunifiedadapter_testconnection",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_api_api_getgenaiclient",
+      "fromNode": "n_api",
+      "toNode": "n_api_getgenaiclient",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_api_api_parsebase64image",
+      "fromNode": "n_api",
+      "toNode": "n_api_parsebase64image",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_api_openrouter",
+      "fromNode": "n_api",
+      "toNode": "n_openrouter",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_api_brand",
+      "fromNode": "n_api",
+      "toNode": "n_brand",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_api_api_getorcreatebrandconfig",
+      "fromNode": "n_api",
+      "toNode": "n_api_getorcreatebrandconfig",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_openrouter_openrouter_geteffectiveopenrouterkey",
+      "fromNode": "n_openrouter",
+      "toNode": "n_openrouter_geteffectiveopenrouterkey",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_openrouter_openrouter_ensuredatauri",
+      "fromNode": "n_openrouter",
+      "toNode": "n_openrouter_ensuredatauri",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_openrouter_openrouter_callopenroutervision",
+      "fromNode": "n_openrouter",
+      "toNode": "n_openrouter_callopenroutervision",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_openrouter_openrouter_callopenrouterinpaint",
+      "fromNode": "n_openrouter",
+      "toNode": "n_openrouter_callopenrouterinpaint",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_openrouter_openrouter_callopenrouterroomviz",
+      "fromNode": "n_openrouter",
+      "toNode": "n_openrouter_callopenrouterroomviz",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_openrouter_openrouter_testopenrouterconnection",
+      "fromNode": "n_openrouter",
+      "toNode": "n_openrouter_testopenrouterconnection",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_openrouter_geteffectiveopenrouterkey_openrouter_callopenroutervision",
+      "fromNode": "n_openrouter_geteffectiveopenrouterkey",
+      "toNode": "n_openrouter_callopenroutervision",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_openrouter_geteffectiveopenrouterkey_openrouter_callopenrouterinpaint",
+      "fromNode": "n_openrouter_geteffectiveopenrouterkey",
+      "toNode": "n_openrouter_callopenrouterinpaint",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_openrouter_geteffectiveopenrouterkey_openrouter_callopenrouterroomviz",
+      "fromNode": "n_openrouter_geteffectiveopenrouterkey",
+      "toNode": "n_openrouter_callopenrouterroomviz",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_openrouter_geteffectiveopenrouterkey_openrouter_testopenrouterconnection",
+      "fromNode": "n_openrouter_geteffectiveopenrouterkey",
+      "toNode": "n_openrouter_testopenrouterconnection",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_openrouter_ensuredatauri_openrouter_callopenroutervision",
+      "fromNode": "n_openrouter_ensuredatauri",
+      "toNode": "n_openrouter_callopenroutervision",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_openrouter_ensuredatauri_openrouter_callopenrouterinpaint",
+      "fromNode": "n_openrouter_ensuredatauri",
+      "toNode": "n_openrouter_callopenrouterinpaint",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_openrouter_ensuredatauri_openrouter_callopenrouterroomviz",
+      "fromNode": "n_openrouter_ensuredatauri",
+      "toNode": "n_openrouter_callopenrouterroomviz",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_signin_brandstore",
+      "fromNode": "n_signin",
+      "toNode": "n_brandstore",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_signin_signin_signin",
+      "fromNode": "n_signin",
+      "toNode": "n_signin_signin",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_brand_brand_getrelativeluminance",
+      "fromNode": "n_brand",
+      "toNode": "n_brand_getrelativeluminance",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_brand_brand_parsehexcolor",
+      "fromNode": "n_brand",
+      "toNode": "n_brand_parsehexcolor",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_brand_brand_validateaccentcontrast",
+      "fromNode": "n_brand",
+      "toNode": "n_brand_validateaccentcontrast",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_brand_brand_deriveaccentpalette",
+      "fromNode": "n_brand",
+      "toNode": "n_brand_deriveaccentpalette",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_brand_brandstore",
+      "fromNode": "n_brand",
+      "toNode": "n_brandstore",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brand_onboardingwizard",
+      "fromNode": "n_brand",
+      "toNode": "n_onboardingwizard",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brand_brandsettingsview",
+      "fromNode": "n_brand",
+      "toNode": "n_brandsettingsview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brand_designdetailview",
+      "fromNode": "n_brand",
+      "toNode": "n_designdetailview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brand_readme_multi_tenant_brand",
+      "fromNode": "n_brand",
+      "toNode": "n_readme_multi_tenant_brand",
+      "label": "configured_in [EXTRACTED]"
+    },
+    {
+      "id": "e_brand_getrelativeluminance_brand_validateaccentcontrast",
+      "fromNode": "n_brand_getrelativeluminance",
+      "toNode": "n_brand_validateaccentcontrast",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_brand_parsehexcolor_brand_validateaccentcontrast",
+      "fromNode": "n_brand_parsehexcolor",
+      "toNode": "n_brand_validateaccentcontrast",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_brand_parsehexcolor_brand_deriveaccentpalette",
+      "fromNode": "n_brand_parsehexcolor",
+      "toNode": "n_brand_deriveaccentpalette",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_brandstore",
+      "fromNode": "n_curtain",
+      "toNode": "n_brandstore",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_store",
+      "fromNode": "n_curtain",
+      "toNode": "n_store",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_sequential_inpainting",
+      "fromNode": "n_curtain",
+      "toNode": "n_sequential_inpainting",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_fabricrenderer",
+      "fromNode": "n_curtain",
+      "toNode": "n_fabricrenderer",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_realisticfabrictextures",
+      "fromNode": "n_curtain",
+      "toNode": "n_realisticfabrictextures",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_maskedpipeline",
+      "fromNode": "n_curtain",
+      "toNode": "n_maskedpipeline",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_curtaincanvas",
+      "fromNode": "n_curtain",
+      "toNode": "n_curtaincanvas",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_templatecarddrawer",
+      "fromNode": "n_curtain",
+      "toNode": "n_templatecarddrawer",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_luxurycolorpalette",
+      "fromNode": "n_curtain",
+      "toNode": "n_luxurycolorpalette",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_renderlookbookpage",
+      "fromNode": "n_curtain",
+      "toNode": "n_renderlookbookpage",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_tactileloupemodal",
+      "fromNode": "n_curtain",
+      "toNode": "n_tactileloupemodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_fabriclibrarymodal",
+      "fromNode": "n_curtain",
+      "toNode": "n_fabriclibrarymodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_specsheetmodal",
+      "fromNode": "n_curtain",
+      "toNode": "n_specsheetmodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_freehandmaskcanvas",
+      "fromNode": "n_curtain",
+      "toNode": "n_freehandmaskcanvas",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_newtemplatemodal",
+      "fromNode": "n_curtain",
+      "toNode": "n_newtemplatemodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_regionassignmentpanel",
+      "fromNode": "n_curtain",
+      "toNode": "n_regionassignmentpanel",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_header",
+      "fromNode": "n_curtain",
+      "toNode": "n_header",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_templategallerypage",
+      "fromNode": "n_curtain",
+      "toNode": "n_templategallerypage",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_cataloglibraryview",
+      "fromNode": "n_curtain",
+      "toNode": "n_cataloglibraryview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_fabriccard",
+      "fromNode": "n_curtain",
+      "toNode": "n_fabriccard",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_templatesgallery",
+      "fromNode": "n_curtain",
+      "toNode": "n_templatesgallery",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_cameracapturemodal",
+      "fromNode": "n_curtain",
+      "toNode": "n_cameracapturemodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_catalogview",
+      "fromNode": "n_curtain",
+      "toNode": "n_catalogview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_fabricpreviewmodal",
+      "fromNode": "n_curtain",
+      "toNode": "n_fabricpreviewmodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_templateeditor",
+      "fromNode": "n_curtain",
+      "toNode": "n_templateeditor",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_fabricpickersheet",
+      "fromNode": "n_curtain",
+      "toNode": "n_fabricpickersheet",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_bulkuploadmodal",
+      "fromNode": "n_curtain",
+      "toNode": "n_bulkuploadmodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_useruploadedfabrics",
+      "fromNode": "n_curtain",
+      "toNode": "n_useruploadedfabrics",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_curtain_defaultcatalog",
+      "fromNode": "n_curtain",
+      "toNode": "n_defaultcatalog",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_auth_curtaincanvas",
+      "fromNode": "n_auth",
+      "toNode": "n_curtaincanvas",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_auth_roomlightingcontrols",
+      "fromNode": "n_auth",
+      "toNode": "n_roomlightingcontrols",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_auth_header",
+      "fromNode": "n_auth",
+      "toNode": "n_header",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_auth_authmodal",
+      "fromNode": "n_auth",
+      "toNode": "n_authmodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_auth_roomsettings",
+      "fromNode": "n_auth",
+      "toNode": "n_roomsettings",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brandstore_defaultcatalog",
+      "fromNode": "n_brandstore",
+      "toNode": "n_defaultcatalog",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brandstore_brandstore_applyroottheme",
+      "fromNode": "n_brandstore",
+      "toNode": "n_brandstore_applyroottheme",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_brandstore_onboardingwizard",
+      "fromNode": "n_brandstore",
+      "toNode": "n_onboardingwizard",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brandstore_platformadminview",
+      "fromNode": "n_brandstore",
+      "toNode": "n_platformadminview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brandstore_brandsettingsview",
+      "fromNode": "n_brandstore",
+      "toNode": "n_brandsettingsview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brandstore_branddashboard",
+      "fromNode": "n_brandstore",
+      "toNode": "n_branddashboard",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brandstore_templatesgallery",
+      "fromNode": "n_brandstore",
+      "toNode": "n_templatesgallery",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brandstore_cameracapturemodal",
+      "fromNode": "n_brandstore",
+      "toNode": "n_cameracapturemodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brandstore_catalogview",
+      "fromNode": "n_brandstore",
+      "toNode": "n_catalogview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brandstore_brandheader",
+      "fromNode": "n_brandstore",
+      "toNode": "n_brandheader",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brandstore_designdetailview",
+      "fromNode": "n_brandstore",
+      "toNode": "n_designdetailview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brandstore_templateeditor",
+      "fromNode": "n_brandstore",
+      "toNode": "n_templateeditor",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brandstore_fabricpickersheet",
+      "fromNode": "n_brandstore",
+      "toNode": "n_fabricpickersheet",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_brandstore_bulkuploadmodal",
+      "fromNode": "n_brandstore",
+      "toNode": "n_bulkuploadmodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_store_defaultcatalog",
+      "fromNode": "n_store",
+      "toNode": "n_defaultcatalog",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_store_types",
+      "fromNode": "n_store",
+      "toNode": "n_types",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_store_registry",
+      "fromNode": "n_store",
+      "toNode": "n_registry",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_store_sequential_inpainting",
+      "fromNode": "n_store",
+      "toNode": "n_sequential_inpainting",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_store_roomvizstudio",
+      "fromNode": "n_store",
+      "toNode": "n_roomvizstudio",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_store_databaseschemamodal",
+      "fromNode": "n_store",
+      "toNode": "n_databaseschemamodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_store_sequentialprogressoverlay",
+      "fromNode": "n_store",
+      "toNode": "n_sequentialprogressoverlay",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_store_header",
+      "fromNode": "n_store",
+      "toNode": "n_header",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_store_aiprovidersettingsmodal",
+      "fromNode": "n_store",
+      "toNode": "n_aiprovidersettingsmodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_store_cataloglibraryview",
+      "fromNode": "n_store",
+      "toNode": "n_cataloglibraryview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_store_templatesgallery",
+      "fromNode": "n_store",
+      "toNode": "n_templatesgallery",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_store_catalogview",
+      "fromNode": "n_store",
+      "toNode": "n_catalogview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_store_designdetailview",
+      "fromNode": "n_store",
+      "toNode": "n_designdetailview",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_store_templateeditor",
+      "fromNode": "n_store",
+      "toNode": "n_templateeditor",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_sequential_inpainting_registry",
+      "fromNode": "n_sequential_inpainting",
+      "toNode": "n_registry",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_sequential_inpainting_sequential_inpainting_generateregionmask",
+      "fromNode": "n_sequential_inpainting",
+      "toNode": "n_sequential_inpainting_generateregionmask",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_sequential_inpainting_sequential_inpainting_loadimage",
+      "fromNode": "n_sequential_inpainting",
+      "toNode": "n_sequential_inpainting_loadimage",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_sequential_inpainting_sequential_inpainting_compositeregionontocanvas",
+      "fromNode": "n_sequential_inpainting",
+      "toNode": "n_sequential_inpainting_compositeregionontocanvas",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_sequential_inpainting_sequential_inpainting_executesequentialinpainting",
+      "fromNode": "n_sequential_inpainting",
+      "toNode": "n_sequential_inpainting_executesequentialinpainting",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_sequential_inpainting_sequentialprogressoverlay",
+      "fromNode": "n_sequential_inpainting",
+      "toNode": "n_sequentialprogressoverlay",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_sequential_inpainting_generateregionmask_sequential_inpainting_executesequentialinpainting",
+      "fromNode": "n_sequential_inpainting_generateregionmask",
+      "toNode": "n_sequential_inpainting_executesequentialinpainting",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_sequential_inpainting_loadimage_sequential_inpainting_compositeregionontocanvas",
+      "fromNode": "n_sequential_inpainting_loadimage",
+      "toNode": "n_sequential_inpainting_compositeregionontocanvas",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_sequential_inpainting_loadimage_sequential_inpainting_executesequentialinpainting",
+      "fromNode": "n_sequential_inpainting_loadimage",
+      "toNode": "n_sequential_inpainting_executesequentialinpainting",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_sequential_inpainting_compositeregionontocanvas_sequential_inpainting_executesequentialinpainting",
+      "fromNode": "n_sequential_inpainting_compositeregionontocanvas",
+      "toNode": "n_sequential_inpainting_executesequentialinpainting",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_types",
+      "fromNode": "n_registry",
+      "toNode": "n_types",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_openrouter_provider",
+      "fromNode": "n_registry",
+      "toNode": "n_openrouter_provider",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_gemini_provider",
+      "fromNode": "n_registry",
+      "toNode": "n_gemini_provider",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_openai_provider",
+      "fromNode": "n_registry",
+      "toNode": "n_openai_provider",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_replicate_provider",
+      "fromNode": "n_registry",
+      "toNode": "n_replicate_provider",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_stability_provider",
+      "fromNode": "n_registry",
+      "toNode": "n_stability_provider",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_registry_aiproviderregistry",
+      "fromNode": "n_registry",
+      "toNode": "n_registry_aiproviderregistry",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_roomvizstudio",
+      "fromNode": "n_registry",
+      "toNode": "n_roomvizstudio",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_header",
+      "fromNode": "n_registry",
+      "toNode": "n_header",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiprovidersettingsmodal",
+      "fromNode": "n_registry",
+      "toNode": "n_aiprovidersettingsmodal",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_registry_aiproviderregistry_constructor",
+      "fromNode": "n_registry_aiproviderregistry",
+      "toNode": "n_registry_aiproviderregistry_constructor",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_registry_aiproviderregistry_loadpersistedstate",
+      "fromNode": "n_registry_aiproviderregistry",
+      "toNode": "n_registry_aiproviderregistry_loadpersistedstate",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_registry_aiproviderregistry_initproviders",
+      "fromNode": "n_registry_aiproviderregistry",
+      "toNode": "n_registry_aiproviderregistry_initproviders",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_registry_aiproviderregistry_getactiveproviderid",
+      "fromNode": "n_registry_aiproviderregistry",
+      "toNode": "n_registry_aiproviderregistry_getactiveproviderid",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_registry_aiproviderregistry_setactiveproviderid",
+      "fromNode": "n_registry_aiproviderregistry",
+      "toNode": "n_registry_aiproviderregistry_setactiveproviderid",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_registry_aiproviderregistry_getactiveprovider",
+      "fromNode": "n_registry_aiproviderregistry",
+      "toNode": "n_registry_aiproviderregistry_getactiveprovider",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_registry_aiproviderregistry_getprovider",
+      "fromNode": "n_registry_aiproviderregistry",
+      "toNode": "n_registry_aiproviderregistry_getprovider",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_registry_aiproviderregistry_getallmetadata",
+      "fromNode": "n_registry_aiproviderregistry",
+      "toNode": "n_registry_aiproviderregistry_getallmetadata",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_registry_aiproviderregistry_getmetadata",
+      "fromNode": "n_registry_aiproviderregistry",
+      "toNode": "n_registry_aiproviderregistry_getmetadata",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_registry_aiproviderregistry_getapikey",
+      "fromNode": "n_registry_aiproviderregistry",
+      "toNode": "n_registry_aiproviderregistry_getapikey",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_registry_aiproviderregistry_setapikey",
+      "fromNode": "n_registry_aiproviderregistry",
+      "toNode": "n_registry_aiproviderregistry_setapikey",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_registry_aiproviderregistry_clearapikey",
+      "fromNode": "n_registry_aiproviderregistry",
+      "toNode": "n_registry_aiproviderregistry_clearapikey",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_registry_aiproviderregistry_hasapikey",
+      "fromNode": "n_registry_aiproviderregistry",
+      "toNode": "n_registry_aiproviderregistry_hasapikey",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_registry_aiproviderregistry_testprovider",
+      "fromNode": "n_registry_aiproviderregistry",
+      "toNode": "n_registry_aiproviderregistry_testprovider",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_constructor_registry_aiproviderregistry_loadpersistedstate",
+      "fromNode": "n_registry_aiproviderregistry_constructor",
+      "toNode": "n_registry_aiproviderregistry_loadpersistedstate",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_constructor_registry_aiproviderregistry_initproviders",
+      "fromNode": "n_registry_aiproviderregistry_constructor",
+      "toNode": "n_registry_aiproviderregistry_initproviders",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_setactiveproviderid_registry_aiproviderregistry_getactiveprovider",
+      "fromNode": "n_registry_aiproviderregistry_setactiveproviderid",
+      "toNode": "n_registry_aiproviderregistry_getactiveprovider",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_getprovider_registry_aiproviderregistry_testprovider",
+      "fromNode": "n_registry_aiproviderregistry_getprovider",
+      "toNode": "n_registry_aiproviderregistry_testprovider",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_registry_aiproviderregistry_setapikey_registry_aiproviderregistry_clearapikey",
+      "fromNode": "n_registry_aiproviderregistry_setapikey",
+      "toNode": "n_registry_aiproviderregistry_clearapikey",
+      "label": "calls [EXTRACTED]"
+    }
+  ]
+}

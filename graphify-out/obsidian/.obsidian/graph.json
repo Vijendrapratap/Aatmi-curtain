@@ -1,0 +1,130 @@
+{
+  "colorGroups": [
+    {
+      "query": "tag:#community/Camera_Capture_&_Fabric_Catalog_Assets",
+      "color": {
+        "a": 1,
+        "rgb": 5142951
+      }
+    },
+    {
+      "query": "tag:#community/Brand_Management_&_Studio_State",
+      "color": {
+        "a": 1,
+        "rgb": 15896107
+      }
+    },
+    {
+      "query": "tag:#community/Curtain_Canvas_&_Interactive_Rendering",
+      "color": {
+        "a": 1,
+        "rgb": 14767961
+      }
+    },
+    {
+      "query": "tag:#community/AI_Provider_Adapters_&_Inpainting_Routing",
+      "color": {
+        "a": 1,
+        "rgb": 7780274
+      }
+    },
+    {
+      "query": "tag:#community/Catalog_Library_&_Bulk_Upload",
+      "color": {
+        "a": 1,
+        "rgb": 5873999
+      }
+    },
+    {
+      "query": "tag:#community/Provider_Settings_&_Gemini_Client",
+      "color": {
+        "a": 1,
+        "rgb": 15583560
+      }
+    },
+    {
+      "query": "tag:#community/Photorealistic_Photo_Plate_Synthesis",
+      "color": {
+        "a": 1,
+        "rgb": 11565729
+      }
+    },
+    {
+      "query": "tag:#community/AI_Provider_Registry_&_Key_Management",
+      "color": {
+        "a": 1,
+        "rgb": 16752039
+      }
+    },
+    {
+      "query": "tag:#community/Server_API_&_OpenRouter_Gateway",
+      "color": {
+        "a": 1,
+        "rgb": 10253663
+      }
+    },
+    {
+      "query": "tag:#community/Macro_Fabric_Textures_&_Weave_Engine",
+      "color": {
+        "a": 1,
+        "rgb": 12234924
+      }
+    },
+    {
+      "query": "tag:#community/OpenAI_Multi-Modal_Provider",
+      "color": {
+        "a": 1,
+        "rgb": 5142951
+      }
+    },
+    {
+      "query": "tag:#community/Stability_Generative_Provider",
+      "color": {
+        "a": 1,
+        "rgb": 15896107
+      }
+    },
+    {
+      "query": "tag:#community/Replicate_Model_Provider",
+      "color": {
+        "a": 1,
+        "rgb": 14767961
+      }
+    },
+    {
+      "query": "tag:#community/OpenRouter_Unified_Provider",
+      "color": {
+        "a": 1,
+        "rgb": 7780274
+      }
+    },
+    {
+      "query": "tag:#community/Feathered_Masking_&_Inpainting_Pipeline",
+      "color": {
+        "a": 1,
+        "rgb": 5873999
+      }
+    },
+    {
+      "query": "tag:#community/Backend_Server_&_Architecture_Specs",
+      "color": {
+        "a": 1,
+        "rgb": 15583560
+      }
+    },
+    {
+      "query": "tag:#community/Brand_Studio_Onboarding_Stepper",
+      "color": {
+        "a": 1,
+        "rgb": 11565729
+      }
+    },
+    {
+      "query": "tag:#community/Interactive_Onboarding_Tour",
+      "color": {
+        "a": 1,
+        "rgb": 16752039
+      }
+    }
+  ]
+}
