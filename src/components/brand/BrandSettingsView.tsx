@@ -58,7 +58,7 @@ export const BrandSettingsView: React.FC<BrandSettingsViewProps> = ({
   );
   const [keyMode, setKeyMode] = useState<KeyMode>(initialConfig.key_mode);
   const [byoProvider, setByoProvider] = useState<string>(
-    initialConfig.byo_provider || 'gemini'
+    initialConfig.byo_provider || 'openrouter'
   );
   const [byoKeyInput, setByoKeyInput] = useState<string>('');
 
@@ -398,10 +398,11 @@ export const BrandSettingsView: React.FC<BrandSettingsViewProps> = ({
                     <select
                       value={byoProvider}
                       onChange={(e) => setByoProvider(e.target.value)}
-                      className="w-full h-9 px-2.5 text-xs rounded-lg bg-[var(--color-bg-sunken)] border border-[var(--color-border-strong)]"
+                      className="w-full h-9 px-2.5 text-xs rounded-lg bg-[var(--color-bg-sunken)] border border-[var(--color-border-strong)] font-medium"
                     >
+                      <option value="openrouter">OpenRouter (Unified: FLUX.1 + Nano Banana Pro + Claude + Seedream)</option>
                       <option value="gemini">Google Gemini (Nano Banana Pro / Image)</option>
-                      <option value="openai">OpenAI (GPT Image 2)</option>
+                      <option value="openai">OpenAI (GPT Image 2 / GPT-4o)</option>
                       <option value="replicate">Replicate (FLUX.1 Kontext)</option>
                     </select>
                   </div>
@@ -416,12 +417,34 @@ export const BrandSettingsView: React.FC<BrandSettingsViewProps> = ({
                       placeholder={
                         initialConfig.byo_api_key_encrypted
                           ? 'sk-••••••••••••1234'
-                          : 'Paste key here'
+                          : 'sk-or-v1-...'
                       }
                       className="w-full h-9 px-2.5 text-xs rounded-lg bg-[var(--color-bg-sunken)] border border-[var(--color-border-strong)] font-mono"
                     />
                   </div>
                 </div>
+
+                {byoProvider === 'openrouter' && (
+                  <div className="p-3 rounded-xl bg-[var(--color-accent-tint)] border border-[var(--color-accent)]/20 text-xs text-[var(--color-text-primary)] space-y-1">
+                    <div className="flex items-center gap-1.5 font-semibold text-[var(--color-accent)]">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Single API Key Architecture</span>
+                    </div>
+                    <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
+                      With a single OpenRouter key, your atelier connects to <strong>FLUX.1 Fill Pro</strong> for pleat inpainting, <strong>Nano Banana Pro (Gemini 3)</strong> for architectural room visualization, and <strong>Gemini 2.5 Flash / Claude 3.7</strong> for textile vision analysis — no separate accounts needed.
+                    </p>
+                    <div className="pt-0.5">
+                      <a
+                        href="https://openrouter.ai/keys"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[11px] text-[var(--color-accent)] hover:underline font-semibold"
+                      >
+                        Get your OpenRouter API Key &rarr;
+                      </a>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between pt-1">
                   <button

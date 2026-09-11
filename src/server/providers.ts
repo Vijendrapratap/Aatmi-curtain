@@ -1,6 +1,13 @@
 // src/server/providers.ts
 import { GoogleGenAI } from '@google/genai';
 import { RegionEditProvider, RoomPreviewProvider, BrandModelConfig } from '../types/brand';
+import {
+  callOpenRouterInpaint,
+  callOpenRouterRoomViz,
+  testOpenRouterConnection,
+  getEffectiveOpenRouterKey,
+  OPENROUTER_RECOMMENDED_MODELS,
+} from './openrouter';
 
 export interface RegionEditParams {
   baseImage: string; // Base64
@@ -41,6 +48,16 @@ export const REGION_EDIT_MODEL_METADATA: Record<
     providerKey: string;
   }
 > = {
+  openrouter_unified: {
+    id: 'openrouter_unified',
+    name: 'OpenRouter Unified (FLUX.1 Fill Pro)',
+    tagline: 'Single API Key gateway with sub-pixel fold and pleat edge-locking',
+    description:
+      'Routes to FLUX.1 Fill Pro via OpenRouter. Brand only needs one API key for all models.',
+    costEstimate: '~$0.02–0.04 per region',
+    isRecommended: true,
+    providerKey: 'openrouter',
+  },
   flux_kontext: {
     id: 'flux_kontext',
     name: 'FLUX.1 Kontext + Flux Tools',
@@ -48,7 +65,7 @@ export const REGION_EDIT_MODEL_METADATA: Record<
     description:
       'Purpose-built for in-context, structure-preserving local edits. Preserves exact folds and pleats with zero boundary drift.',
     costEstimate: '~$0.02–0.05 per region',
-    isRecommended: true,
+    isRecommended: false,
     providerKey: 'replicate',
   },
   qwen_image_edit: {
@@ -85,6 +102,16 @@ export const ROOM_PREVIEW_MODEL_METADATA: Record<
     providerKey: string;
   }
 > = {
+  openrouter_unified: {
+    id: 'openrouter_unified',
+    name: 'OpenRouter Unified (Nano Banana Pro / Gemini 3)',
+    tagline: 'Single API Key real-room staging with architectural perspective',
+    description:
+      'Composites drapery into real customer rooms using Google Nano Banana Pro via OpenRouter.',
+    costEstimate: '~$0.05–0.08 per scene',
+    isRecommended: true,
+    providerKey: 'openrouter',
+  },
   nano_banana_pro: {
     id: 'nano_banana_pro',
     name: 'Nano Banana Pro (Gemini 3 Pro Image)',
@@ -92,7 +119,7 @@ export const ROOM_PREVIEW_MODEL_METADATA: Record<
     description:
       'Edits the actual uploaded room photo without generating lookalikes — keeps windows, walls, floor parquet, and room proportions exact.',
     costEstimate: '~$0.06–0.09 per scene',
-    isRecommended: true,
+    isRecommended: false,
     providerKey: 'gemini',
   },
   seedream_edit: {
@@ -143,6 +170,20 @@ export class FluxKontextAdapter implements ImageGenProvider {
   name = 'FLUX.1 Kontext (Flux Tools)';
 
   async regionEdit(params: RegionEditParams, apiKey?: string | null): Promise<string> {
+    const openRouterKey = getEffectiveOpenRouterKey(apiKey);
+    if (openRouterKey) {
+      return callOpenRouterInpaint({
+        baseImage: params.baseImage,
+        fabricImage: params.fabricImage,
+        prompt: params.prompt || `Inpaint drapery zone "${params.regionName || 'Selected Zone'}" with fabric "${params.fabricName || 'Target Fabric'}" (${params.fabricWeave || 'woven'}). Preserve pleats and fold shadows.`,
+        zoneName: params.regionName,
+        fabricName: params.fabricName,
+        fabricWeave: params.fabricWeave,
+        model: OPENROUTER_RECOMMENDED_MODELS.inpaintingPro,
+        apiKey: openRouterKey,
+      });
+    }
+
     const geminiKey = apiKey || process.env.GEMINI_API_KEY;
     if (geminiKey) {
       // Execute structure-conditioned edit with Gemini multimodal fallback
@@ -186,6 +227,10 @@ Preserve all original columnar drapery folds, shadows, and window daylight. Keep
   }
 
   async testConnection(apiKey?: string | null): Promise<{ success: boolean; latencyMs: number; message: string }> {
+    const openRouterKey = getEffectiveOpenRouterKey(apiKey);
+    if (openRouterKey) {
+      return testOpenRouterConnection(openRouterKey);
+    }
     const start = Date.now();
     await new Promise((r) => setTimeout(r, 60));
     return {
@@ -204,6 +249,19 @@ export class QwenImageEditAdapter implements ImageGenProvider {
   name = 'Qwen-Image-Edit (20B)';
 
   async regionEdit(params: RegionEditParams, apiKey?: string | null): Promise<string> {
+    const openRouterKey = getEffectiveOpenRouterKey(apiKey);
+    if (openRouterKey) {
+      return callOpenRouterInpaint({
+        baseImage: params.baseImage,
+        fabricImage: params.fabricImage,
+        prompt: params.prompt,
+        zoneName: params.regionName,
+        fabricName: params.fabricName,
+        fabricWeave: params.fabricWeave,
+        model: OPENROUTER_RECOMMENDED_MODELS.visionOpen,
+        apiKey: openRouterKey,
+      });
+    }
     return new FluxKontextAdapter().regionEdit(params, apiKey);
   }
 
@@ -212,12 +270,16 @@ export class QwenImageEditAdapter implements ImageGenProvider {
   }
 
   async testConnection(apiKey?: string | null): Promise<{ success: boolean; latencyMs: number; message: string }> {
+    const openRouterKey = getEffectiveOpenRouterKey(apiKey);
+    if (openRouterKey) {
+      return testOpenRouterConnection(openRouterKey);
+    }
     const start = Date.now();
     await new Promise((r) => setTimeout(r, 70));
     return {
       success: true,
       latencyMs: Date.now() - start + 35,
-      message: 'Qwen-Image-Edit 20B endpoint active (self-hosted / Replicate gateway)',
+      message: 'Qwen-Image-Edit 20B endpoint active (self-hosted / OpenRouter gateway)',
     };
   }
 }
@@ -238,13 +300,17 @@ export class GptImage2Adapter implements ImageGenProvider {
   }
 
   async testConnection(apiKey?: string | null): Promise<{ success: boolean; latencyMs: number; message: string }> {
+    const openRouterKey = getEffectiveOpenRouterKey(apiKey);
+    if (openRouterKey) {
+      return testOpenRouterConnection(openRouterKey);
+    }
     const start = Date.now();
     const key = apiKey || process.env.OPENAI_API_KEY;
     if (!key && !apiKey) {
       return {
         success: false,
         latencyMs: 0,
-        message: 'No OpenAI API key supplied. Enter key in Settings > AI Models.',
+        message: 'No OpenAI or OpenRouter API key supplied. Enter key in Settings > AI Models.',
       };
     }
     await new Promise((r) => setTimeout(r, 80));
@@ -268,9 +334,20 @@ export class NanoBananaProAdapter implements ImageGenProvider {
   }
 
   async roomPreview(params: RoomPreviewParams, apiKey?: string | null): Promise<string> {
+    const openRouterKey = getEffectiveOpenRouterKey(apiKey);
+    if (openRouterKey) {
+      return callOpenRouterRoomViz({
+        roomPhoto: params.roomPhoto,
+        designImage: params.designImage,
+        prompt: params.prompt,
+        model: OPENROUTER_RECOMMENDED_MODELS.roomVizArchitectural,
+        apiKey: openRouterKey,
+      });
+    }
+
     const keyToUse = apiKey || process.env.GEMINI_API_KEY;
     if (!keyToUse) {
-      throw new Error('GEMINI_API_KEY is not configured for Nano Banana Pro room preview.');
+      throw new Error('OPENROUTER_API_KEY or GEMINI_API_KEY is not configured for Nano Banana Pro room preview.');
     }
 
     const ai = new GoogleGenAI({ apiKey: keyToUse });
@@ -311,13 +388,17 @@ ${params.prompt ? `Designer specification: ${params.prompt}` : ''}`;
   }
 
   async testConnection(apiKey?: string | null): Promise<{ success: boolean; latencyMs: number; message: string }> {
+    const openRouterKey = getEffectiveOpenRouterKey(apiKey);
+    if (openRouterKey) {
+      return testOpenRouterConnection(openRouterKey);
+    }
     const start = Date.now();
     const key = apiKey || process.env.GEMINI_API_KEY;
     if (!key) {
       return {
         success: false,
         latencyMs: 0,
-        message: 'No Google Gemini key configured. Set GEMINI_API_KEY.',
+        message: 'No OpenRouter or Google Gemini key configured. Set OPENROUTER_API_KEY in .env.',
       };
     }
     const ai = new GoogleGenAI({ apiKey: key });
@@ -343,10 +424,24 @@ export class SeedreamEditAdapter implements ImageGenProvider {
   }
 
   async roomPreview(params: RoomPreviewParams, apiKey?: string | null): Promise<string> {
+    const openRouterKey = getEffectiveOpenRouterKey(apiKey);
+    if (openRouterKey) {
+      return callOpenRouterRoomViz({
+        roomPhoto: params.roomPhoto,
+        designImage: params.designImage,
+        prompt: params.prompt,
+        model: OPENROUTER_RECOMMENDED_MODELS.roomVizHighRes,
+        apiKey: openRouterKey,
+      });
+    }
     return new NanoBananaProAdapter().roomPreview(params, apiKey);
   }
 
   async testConnection(apiKey?: string | null): Promise<{ success: boolean; latencyMs: number; message: string }> {
+    const openRouterKey = getEffectiveOpenRouterKey(apiKey);
+    if (openRouterKey) {
+      return testOpenRouterConnection(openRouterKey);
+    }
     const start = Date.now();
     await new Promise((r) => setTimeout(r, 65));
     return {
@@ -358,10 +453,48 @@ export class SeedreamEditAdapter implements ImageGenProvider {
 }
 
 // ----------------------------------------------------
+// 6. OpenRouter Unified Adapter (All-in-One Engine)
+// ----------------------------------------------------
+export class OpenRouterUnifiedAdapter implements ImageGenProvider {
+  id = 'openrouter_unified';
+  name = 'OpenRouter Unified Gateway';
+
+  async regionEdit(params: RegionEditParams, apiKey?: string | null): Promise<string> {
+    const promptText = `FLUX.1 Inpainting: Apply fabric "${params.fabricName || 'textile'}" (${params.fabricWeave || 'couture weave'}) to zone "${params.regionName || 'drapery zone'}". Preserve authentic vertical pleats, daylight highlights, and shadow creases. Zero drift outside zone.`;
+    return callOpenRouterInpaint({
+      baseImage: params.baseImage,
+      fabricImage: params.fabricImage,
+      prompt: params.prompt || promptText,
+      zoneName: params.regionName,
+      fabricName: params.fabricName,
+      fabricWeave: params.fabricWeave,
+      model: OPENROUTER_RECOMMENDED_MODELS.inpaintingPro,
+      apiKey,
+    });
+  }
+
+  async roomPreview(params: RoomPreviewParams, apiKey?: string | null): Promise<string> {
+    return callOpenRouterRoomViz({
+      roomPhoto: params.roomPhoto,
+      designImage: params.designImage,
+      prompt: params.prompt,
+      model: OPENROUTER_RECOMMENDED_MODELS.roomVizArchitectural,
+      apiKey,
+    });
+  }
+
+  async testConnection(apiKey?: string | null): Promise<{ success: boolean; latencyMs: number; message: string }> {
+    return testOpenRouterConnection(apiKey);
+  }
+}
+
+// ----------------------------------------------------
 // Registry & Factory
 // ----------------------------------------------------
 export function getRegionEditProvider(providerId: RegionEditProvider): ImageGenProvider {
   switch (providerId) {
+    case 'openrouter_unified':
+      return new OpenRouterUnifiedAdapter();
     case 'flux_kontext':
       return new FluxKontextAdapter();
     case 'qwen_image_edit':
@@ -369,12 +502,14 @@ export function getRegionEditProvider(providerId: RegionEditProvider): ImageGenP
     case 'gpt_image_2':
       return new GptImage2Adapter();
     default:
-      return new FluxKontextAdapter();
+      return new OpenRouterUnifiedAdapter();
   }
 }
 
 export function getRoomPreviewProvider(providerId: RoomPreviewProvider): ImageGenProvider {
   switch (providerId) {
+    case 'openrouter_unified':
+      return new OpenRouterUnifiedAdapter();
     case 'nano_banana_pro':
       return new NanoBananaProAdapter();
     case 'seedream_edit':
@@ -382,6 +517,6 @@ export function getRoomPreviewProvider(providerId: RoomPreviewProvider): ImageGe
     case 'gpt_image_2':
       return new GptImage2Adapter();
     default:
-      return new NanoBananaProAdapter();
+      return new OpenRouterUnifiedAdapter();
   }
 }
