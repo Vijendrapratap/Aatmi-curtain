@@ -79,6 +79,7 @@ export const CatalogLibraryView: React.FC = () => {
       reader.onload = () => {
         const base64 = reader.result as string;
         addCustomFabric({
+          id: 'fab-custom-' + Date.now(),
           name: file.name.replace(/\.[^/.]+$/, ''),
           image_url: base64,
           category: 'Custom',

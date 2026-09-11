@@ -1,0 +1,614 @@
+// src/components/brand/BrandSettingsView.tsx
+import React, { useState, useEffect } from 'react';
+import { useBrandStore } from '../../lib/brandStore';
+import {
+  RegionEditProvider,
+  RoomPreviewProvider,
+  KeyMode,
+  validateAccentContrast,
+  deriveAccentPalette,
+} from '../../types/brand';
+import {
+  REGION_EDIT_MODEL_METADATA,
+  ROOM_PREVIEW_MODEL_METADATA,
+} from '../../server/providers';
+import {
+  Cpu,
+  Shield,
+  Key,
+  CreditCard,
+  Building2,
+  Users,
+  Check,
+  AlertCircle,
+  Sparkles,
+  Zap,
+} from 'lucide-react';
+
+interface BrandSettingsViewProps {
+  initialTab?: 'models' | 'profile' | 'team' | 'billing';
+}
+
+export const BrandSettingsView: React.FC<BrandSettingsViewProps> = ({
+  initialTab = 'models',
+}) => {
+  const {
+    currentBrandId,
+    brands,
+    updateBrand,
+    getModelConfig,
+    updateModelConfig,
+    testProviderConnection,
+    currentUser,
+  } = useBrandStore();
+
+  const brand = brands.find((b) => b.id === currentBrandId) || brands[0];
+  const initialConfig = getModelConfig(currentBrandId);
+
+  const [activeTab, setActiveTab] = useState<'models' | 'profile' | 'team' | 'billing'>(
+    initialTab
+  );
+
+  // Model Form State
+  const [regionProvider, setRegionProvider] = useState<RegionEditProvider>(
+    initialConfig.region_edit_provider
+  );
+  const [roomProvider, setRoomProvider] = useState<RoomPreviewProvider>(
+    initialConfig.room_preview_provider
+  );
+  const [keyMode, setKeyMode] = useState<KeyMode>(initialConfig.key_mode);
+  const [byoProvider, setByoProvider] = useState<string>(
+    initialConfig.byo_provider || 'gemini'
+  );
+  const [byoKeyInput, setByoKeyInput] = useState<string>('');
+
+  // Dirty state tracking for sticky bar
+  const [isDirty, setIsDirty] = useState(false);
+  const [saveNotice, setSaveNotice] = useState<string | null>(null);
+
+  // Connection testing state
+  const [isTesting, setIsTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
+
+  // Profile Form State
+  const [profileName, setProfileName] = useState(brand.name);
+  const [profileAccent, setProfileAccent] = useState(brand.theme_accent_color);
+  const [profileContact, setProfileContact] = useState(brand.primary_contact_name);
+  const [profileEmail, setProfileEmail] = useState(brand.primary_contact_email);
+  const contrastCheck = validateAccentContrast(profileAccent);
+
+  useEffect(() => {
+    const dirty =
+      regionProvider !== initialConfig.region_edit_provider ||
+      roomProvider !== initialConfig.room_preview_provider ||
+      keyMode !== initialConfig.key_mode ||
+      Boolean(byoKeyInput.trim());
+    setIsDirty(dirty);
+  }, [regionProvider, roomProvider, keyMode, byoKeyInput, initialConfig]);
+
+  const handleTestConnection = async () => {
+    setIsTesting(true);
+    setTestResult(null);
+    try {
+      const result = await testProviderConnection(byoProvider, byoKeyInput);
+      setTestResult(result);
+    } catch (e: any) {
+      setTestResult({ success: false, message: e.message || 'Connection test failed' });
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    await updateModelConfig(currentBrandId, {
+      region_edit_provider: regionProvider,
+      room_preview_provider: roomProvider,
+      key_mode: keyMode,
+      byo_provider: keyMode === 'brand_byo_key' ? byoProvider : null,
+      byo_api_key_encrypted: byoKeyInput ? byoKeyInput : initialConfig.byo_api_key_encrypted,
+    });
+
+    setSaveNotice('Settings updated successfully');
+    setIsDirty(false);
+    setTimeout(() => setSaveNotice(null), 3000);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!contrastCheck.isValid) return;
+    await updateBrand(currentBrandId, {
+      name: profileName,
+      theme_accent_color: profileAccent,
+      primary_contact_name: profileContact,
+      primary_contact_email: profileEmail,
+    });
+    setSaveNotice('Brand profile saved');
+    setTimeout(() => setSaveNotice(null), 3000);
+  };
+
+  const cap = initialConfig.monthly_generation_cap || 250;
+  const used = initialConfig.monthly_generations_used || 0;
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6 animate-in fade-in duration-200">
+      {/* Settings Navigation Tabs */}
+      <div className="flex items-center gap-2 border-b border-[var(--color-border-subtle)] pb-3">
+        {[
+          { id: 'models', label: 'AI Models', icon: Cpu },
+          { id: 'profile', label: 'Brand Profile & Theme', icon: Building2 },
+          { id: 'team', label: 'Team Members', icon: Users },
+          { id: 'billing', label: 'Billing & Quotas', icon: CreditCard },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                isActive
+                  ? 'bg-[var(--color-bg-sunken)] text-[var(--color-text-primary)] font-bold border border-[var(--color-border-subtle)] shadow-2xs'
+                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {saveNotice && (
+        <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2">
+          <Check className="w-4 h-4 text-emerald-600" />
+          <span>{saveNotice}</span>
+        </div>
+      )}
+
+      {/* TAB 1: AI MODELS SCREEN (Section 3.4) */}
+      {activeTab === 'models' && (
+        <div className="max-w-2xl mx-auto space-y-6 pb-24">
+          {/* Header (Section 3.4.1) */}
+          <div>
+            <h1 className="text-2xl font-display font-semibold text-[var(--color-text-primary)]">
+              AI Models
+            </h1>
+            <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+              Choose which AI powers your fabric renders. We recommend the defaults — change only if you know what you're picking.
+            </p>
+          </div>
+
+          {/* CARD 1: Fabric Region Editing (Section 3.4.2) */}
+          <div className="brand-card p-6 space-y-4">
+            <div>
+              <div className="eyebrow-label text-[var(--color-accent)] font-semibold">TASK A</div>
+              <h2 className="text-base font-display font-semibold text-[var(--color-text-primary)]">
+                Fabric Region Editing
+              </h2>
+              <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
+                Controls inpainting swaps inside selected drapery zones without altering background pixels.
+              </p>
+            </div>
+
+            {/* Radio-style model selector */}
+            <div className="space-y-2.5">
+              {(
+                Object.values(REGION_EDIT_MODEL_METADATA) as Array<
+                  typeof REGION_EDIT_MODEL_METADATA[RegionEditProvider]
+                >
+              ).map((m) => {
+                const isSelected = regionProvider === m.id;
+                return (
+                  <label
+                    key={m.id}
+                    className={`p-4 rounded-2xl border transition cursor-pointer flex items-start gap-3.5 block ${
+                      isSelected
+                        ? 'bg-[var(--color-bg-surface)] border-[var(--color-accent)] ring-2 ring-[var(--color-accent)]/15 shadow-sm'
+                        : 'bg-[var(--color-bg-sunken)] border-[var(--color-border-subtle)] hover:border-[var(--color-border-strong)]'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="region_edit_provider"
+                      value={m.id}
+                      checked={isSelected}
+                      onChange={() => setRegionProvider(m.id)}
+                      className="mt-1 text-[var(--color-accent)] focus:ring-[var(--color-accent)] cursor-pointer"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-[var(--color-text-primary)] font-display">
+                            {m.name}
+                          </span>
+                          {m.isRecommended && (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold">
+                              Recommended
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[11px] font-mono text-[var(--color-text-secondary)]">
+                          {m.costEstimate}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[var(--color-text-secondary)] mt-1 leading-relaxed">
+                        {m.description}
+                      </p>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+
+            {/* Static Example Image Pair (Section 3.4.2) */}
+            <div className="pt-2">
+              <span className="eyebrow-label text-[var(--color-text-secondary)] block mb-2">
+                Quality Comparison Example (Single-Region Swap)
+              </span>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <div className="w-full aspect-[4/3] rounded-xl bg-neutral-100 overflow-hidden relative">
+                    <img
+                      src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&auto=format&fit=crop&q=80"
+                      alt="Before"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/60 text-[9px] font-mono text-white">
+                      ORIGINAL
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-[var(--color-text-secondary)]">
+                    Base curtain with pleats
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <div className="w-full aspect-[4/3] rounded-xl bg-neutral-100 overflow-hidden relative border border-[var(--color-accent)]">
+                    <img
+                      src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&auto=format&fit=crop&q=80"
+                      alt="After"
+                      className="w-full h-full object-cover filter contrast-125"
+                    />
+                    <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-[var(--color-accent)] text-[9px] font-mono text-white font-semibold">
+                      INPAINTED
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-[var(--color-text-secondary)]">
+                    Folds &amp; lighting preserved
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CARD 2: Room Preview (Section 3.4.3) */}
+          <div className="brand-card p-6 space-y-4">
+            <div>
+              <div className="eyebrow-label text-[var(--color-accent)] font-semibold">TASK B</div>
+              <h2 className="text-base font-display font-semibold text-[var(--color-text-primary)]">
+                Room Preview
+              </h2>
+              <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
+                Integrates finished drapes onto window tracks in real customer rooms.
+              </p>
+            </div>
+
+            <div className="space-y-2.5">
+              {(
+                Object.values(ROOM_PREVIEW_MODEL_METADATA) as Array<
+                  typeof ROOM_PREVIEW_MODEL_METADATA[RoomPreviewProvider]
+                >
+              ).map((m) => {
+                const isSelected = roomProvider === m.id;
+                return (
+                  <label
+                    key={m.id}
+                    className={`p-4 rounded-2xl border transition cursor-pointer flex items-start gap-3.5 block ${
+                      isSelected
+                        ? 'bg-[var(--color-bg-surface)] border-[var(--color-accent)] ring-2 ring-[var(--color-accent)]/15 shadow-sm'
+                        : 'bg-[var(--color-bg-sunken)] border-[var(--color-border-subtle)] hover:border-[var(--color-border-strong)]'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="room_preview_provider"
+                      value={m.id}
+                      checked={isSelected}
+                      onChange={() => setRoomProvider(m.id)}
+                      className="mt-1 text-[var(--color-accent)] focus:ring-[var(--color-accent)] cursor-pointer"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-[var(--color-text-primary)] font-display">
+                            {m.name}
+                          </span>
+                          {m.isRecommended && (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold">
+                              Recommended
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[11px] font-mono text-[var(--color-text-secondary)]">
+                          {m.costEstimate}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[var(--color-text-secondary)] mt-1 leading-relaxed">
+                        {m.description}
+                      </p>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* CARD 3: Billing Mode (Section 3.4.4) */}
+          <div className="brand-card p-6 space-y-4">
+            <div>
+              <h2 className="text-base font-display font-semibold text-[var(--color-text-primary)]">
+                Billing &amp; API Keys
+              </h2>
+              <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
+                Choose between managed platform credits or bringing your own enterprise key.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <label className="flex items-center gap-3 p-3 rounded-xl bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)] cursor-pointer">
+                <input
+                  type="radio"
+                  name="key_mode"
+                  checked={keyMode === 'platform_managed'}
+                  onChange={() => setKeyMode('platform_managed')}
+                  className="text-[var(--color-accent)] cursor-pointer"
+                />
+                <div className="flex-1">
+                  <div className="text-xs font-semibold">Use Pratap-managed credits (Default)</div>
+                  <div className="text-[11px] text-[var(--color-text-secondary)]">
+                    Current plan allowance: {cap} renders/month ({used} used this billing period).
+                  </div>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 rounded-xl bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)] cursor-pointer">
+                <input
+                  type="radio"
+                  name="key_mode"
+                  checked={keyMode === 'brand_byo_key'}
+                  onChange={() => setKeyMode('brand_byo_key')}
+                  className="text-[var(--color-accent)] cursor-pointer"
+                />
+                <div className="flex-1">
+                  <div className="text-xs font-semibold">Use my own API key (BYO Key)</div>
+                  <div className="text-[11px] text-[var(--color-text-secondary)]">
+                    Billed directly to your Google Cloud, OpenAI, or Replicate account.
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            {keyMode === 'brand_byo_key' && (
+              <div className="p-4 rounded-2xl bg-white border border-[var(--color-border-strong)] space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-medium mb-1">BYO Provider</label>
+                    <select
+                      value={byoProvider}
+                      onChange={(e) => setByoProvider(e.target.value)}
+                      className="w-full h-9 px-2.5 text-xs rounded-lg bg-[var(--color-bg-sunken)] border border-[var(--color-border-strong)]"
+                    >
+                      <option value="gemini">Google Gemini (Nano Banana Pro / Image)</option>
+                      <option value="openai">OpenAI (GPT Image 2)</option>
+                      <option value="replicate">Replicate (FLUX.1 Kontext)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium mb-1">
+                      API Secret Key
+                    </label>
+                    <input
+                      type="password"
+                      value={byoKeyInput}
+                      onChange={(e) => setByoKeyInput(e.target.value)}
+                      placeholder={
+                        initialConfig.byo_api_key_encrypted
+                          ? 'sk-••••••••••••1234'
+                          : 'Paste key here'
+                      }
+                      className="w-full h-9 px-2.5 text-xs rounded-lg bg-[var(--color-bg-sunken)] border border-[var(--color-border-strong)] font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <button
+                    type="button"
+                    onClick={handleTestConnection}
+                    disabled={isTesting}
+                    className="px-3 py-1.5 rounded-lg border border-[var(--color-border-strong)] text-xs font-semibold hover:bg-[var(--color-bg-sunken)] cursor-pointer"
+                  >
+                    {isTesting ? 'Testing Ping...' : 'Test Connection'}
+                  </button>
+                  {testResult && (
+                    <span
+                      className={`text-xs font-mono font-medium ${
+                        testResult.success ? 'text-emerald-700' : 'text-red-600'
+                      }`}
+                    >
+                      {testResult.message}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* STICKY SAVE BAR (Section 3.4.5) */}
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-[var(--color-border-subtle)] shadow-2xl z-30">
+            <div className="max-w-2xl mx-auto flex items-center justify-between">
+              <span className="text-xs text-[var(--color-text-secondary)]">
+                {isDirty ? 'Unsaved model changes' : 'All model settings saved'}
+              </span>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  disabled={!isDirty}
+                  onClick={() => {
+                    setRegionProvider(initialConfig.region_edit_provider);
+                    setRoomProvider(initialConfig.room_preview_provider);
+                    setKeyMode(initialConfig.key_mode);
+                    setByoKeyInput('');
+                  }}
+                  className="px-4 py-2 text-xs font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={!isDirty}
+                  onClick={handleSaveChanges}
+                  className="px-6 py-2 rounded-[var(--radius-button)] bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-xs font-semibold cursor-pointer tactile-press disabled:opacity-40 disabled:cursor-not-allowed shadow-xs"
+                >
+                  Save changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: BRAND PROFILE & THEME (Section 7, Screen 10) */}
+      {activeTab === 'profile' && (
+        <div className="max-w-2xl mx-auto brand-card p-6 space-y-6">
+          <div>
+            <h2 className="text-lg font-display font-semibold">Brand Profile &amp; Theming</h2>
+            <p className="text-xs text-[var(--color-text-secondary)]">
+              Update brand contact information and interactive accent color.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium mb-1">Brand Name</label>
+              <input
+                type="text"
+                value={profileName}
+                onChange={(e) => setProfileName(e.target.value)}
+                className="w-full h-10 px-3 text-xs rounded-[var(--radius-input)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)]"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium mb-1">Primary Contact</label>
+                <input
+                  type="text"
+                  value={profileContact}
+                  onChange={(e) => setProfileContact(e.target.value)}
+                  className="w-full h-10 px-3 text-xs rounded-[var(--radius-input)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)]"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1">Contact Email</label>
+                <input
+                  type="email"
+                  value={profileEmail}
+                  onChange={(e) => setProfileEmail(e.target.value)}
+                  className="w-full h-10 px-3 text-xs rounded-[var(--radius-input)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)]"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium mb-2">Theme Accent Color</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={profileAccent}
+                  onChange={(e) => setProfileAccent(e.target.value)}
+                  className="w-10 h-10 rounded-xl cursor-pointer p-1 bg-white border border-[var(--color-border-strong)]"
+                />
+                <input
+                  type="text"
+                  value={profileAccent}
+                  onChange={(e) => setProfileAccent(e.target.value)}
+                  className="w-28 h-9 px-2 text-xs font-mono rounded-lg bg-[var(--color-bg-sunken)] border border-[var(--color-border-strong)]"
+                />
+                <div
+                  className={`text-xs px-2.5 py-1 rounded-full font-mono font-medium ${
+                    contrastCheck.isValid
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-amber-100 text-amber-800'
+                  }`}
+                >
+                  {contrastCheck.isValid
+                    ? `WCAG AA Valid (${contrastCheck.contrastRatio}:1)`
+                    : `Low Contrast (${contrastCheck.contrastRatio}:1)`}
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleSaveProfile}
+              className="px-5 py-2.5 rounded-[var(--radius-button)] bg-[var(--color-accent)] text-white text-xs font-semibold cursor-pointer tactile-press shadow-xs"
+            >
+              Save Profile
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: TEAM MEMBERS */}
+      {activeTab === 'team' && (
+        <div className="max-w-2xl mx-auto brand-card p-6 space-y-4">
+          <h2 className="text-lg font-display font-semibold">Team Members</h2>
+          <p className="text-xs text-[var(--color-text-secondary)]">
+            Manage designers and staff with access to {brand.name}'s private catalog and templates.
+          </p>
+
+          <div className="p-4 rounded-xl bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)] flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full bg-[var(--color-accent)] text-white flex items-center justify-center font-bold text-xs">
+                {currentUser?.name ? currentUser.name[0] : 'U'}
+              </div>
+              <div>
+                <div className="font-semibold">{currentUser?.name}</div>
+                <div className="text-[11px] text-[var(--color-text-secondary)]">
+                  {currentUser?.email}
+                </div>
+              </div>
+            </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-semibold">
+              {currentUser?.role === 'brand_admin' ? 'Brand Admin' : 'Staff'}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: BILLING */}
+      {activeTab === 'billing' && (
+        <div className="max-w-2xl mx-auto brand-card p-6 space-y-4">
+          <h2 className="text-lg font-display font-semibold">Billing &amp; Monthly Capacity</h2>
+          <div className="p-4 rounded-2xl bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)] space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold">Atelier Enterprise Plan</span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold">
+                ACTIVE
+              </span>
+            </div>
+            <div className="text-xs text-[var(--color-text-secondary)]">
+              Includes FLUX.1 Kontext high-res inpainting, Nano Banana Pro room visualization, and unlimited fabric catalog storage.
+            </div>
+            <div className="pt-2 text-xs font-mono font-semibold">
+              {used} / {cap} renders used this month
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
