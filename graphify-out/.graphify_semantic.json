@@ -1,0 +1,1250 @@
+{
+  "nodes": [
+    {
+      "id": "readme_md",
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "README.md"
+    },
+    {
+      "id": "readme_aatmi_couture_drapery_ai",
+      "label": "Aatmi Couture Drapery AI",
+      "file_type": "document",
+      "source_file": "README.md"
+    },
+    {
+      "id": "readme_openrouter_gateway",
+      "label": "OpenRouter Unified API Gateway",
+      "file_type": "document",
+      "source_file": "README.md"
+    },
+    {
+      "id": "readme_gemini_25_flash",
+      "label": "Google Gemini 2.5 Flash VLM",
+      "file_type": "document",
+      "source_file": "README.md"
+    },
+    {
+      "id": "readme_flux_fill_pro",
+      "label": "FLUX.1 Fill Pro Inpainting",
+      "file_type": "document",
+      "source_file": "README.md"
+    },
+    {
+      "id": "readme_gemini_3_pro_image",
+      "label": "Gemini 3 Pro Image (Nano Banana Pro)",
+      "file_type": "document",
+      "source_file": "README.md"
+    },
+    {
+      "id": "readme_seedream_45",
+      "label": "ByteDance Seedream 4.5",
+      "file_type": "document",
+      "source_file": "README.md"
+    },
+    {
+      "id": "readme_dual_synthesis_pipeline",
+      "label": "Dual Synthesis Pipeline",
+      "file_type": "document",
+      "source_file": "README.md"
+    },
+    {
+      "id": "readme_real_room_staging",
+      "label": "Real-Room Architectural Staging",
+      "file_type": "document",
+      "source_file": "README.md"
+    },
+    {
+      "id": "readme_tactile_loupe",
+      "label": "40x Tactile Optical Loupe",
+      "file_type": "document",
+      "source_file": "README.md"
+    },
+    {
+      "id": "readme_spec_sheet_generator",
+      "label": "Printable Spec Sheet & Yardage Docket",
+      "file_type": "document",
+      "source_file": "README.md"
+    },
+    {
+      "id": "readme_multi_tenant_brand",
+      "label": "Multi-Tenant Brand Platform",
+      "file_type": "document",
+      "source_file": "README.md"
+    },
+    {
+      "id": "roadmap_md",
+      "label": "aatmi-curtain-roadmap.md",
+      "file_type": "document",
+      "source_file": "aatmi-curtain-roadmap.md"
+    },
+    {
+      "id": "roadmap_visualizer_roadmap",
+      "label": "Visualizer Setup & Implementation Roadmap",
+      "file_type": "document",
+      "source_file": "aatmi-curtain-roadmap.md"
+    },
+    {
+      "id": "roadmap_freehand_raster_masking",
+      "label": "Freehand Raster Masking Tool",
+      "file_type": "document",
+      "source_file": "aatmi-curtain-roadmap.md"
+    },
+    {
+      "id": "roadmap_sequential_synthesis",
+      "label": "Sequential Generative Inpainting Pipeline",
+      "file_type": "document",
+      "source_file": "aatmi-curtain-roadmap.md"
+    },
+    {
+      "id": "roadmap_supabase_data_schema",
+      "label": "Supabase Multi-Zone & Swatch Schema",
+      "file_type": "document",
+      "source_file": "aatmi-curtain-roadmap.md"
+    },
+    {
+      "id": "tpl_linen_embroidery_border",
+      "label": "Belgian Linen Embroidery Border Template",
+      "file_type": "image",
+      "source_file": "public/templates/tpl-linen-embroidery-border.png"
+    },
+    {
+      "id": "tpl_velvet_houndstooth",
+      "label": "Midnight Velvet Houndstooth Template",
+      "file_type": "image",
+      "source_file": "public/templates/tpl-velvet-houndstooth.png"
+    },
+    {
+      "id": "tpl_ivory_gold_border",
+      "label": "Ivory Gold Border Tailored Template",
+      "file_type": "image",
+      "source_file": "public/templates/tpl-ivory-gold-border.png"
+    },
+    {
+      "id": "tpl_colorblock_navy_camel",
+      "label": "Modern Colorblock Navy Camel Template",
+      "file_type": "image",
+      "source_file": "public/templates/tpl-colorblock-navy-camel.png"
+    },
+    {
+      "id": "tpl_camel_black_duo",
+      "label": "Camel Black Duo Panel Template",
+      "file_type": "image",
+      "source_file": "public/templates/tpl-camel-black-duo.png"
+    },
+    {
+      "id": "tpl_ivory_chevron_band",
+      "label": "Ivory Chevron Band Pinch Pleat Template",
+      "file_type": "image",
+      "source_file": "public/templates/tpl-ivory-chevron-band.png"
+    },
+    {
+      "id": "fabric_ikat_sage",
+      "label": "Eucalyptus Ikat Chevron Flame",
+      "file_type": "image",
+      "source_file": "public/fabrics/fabric-ikat-sage.png"
+    },
+    {
+      "id": "fabric_harlequin_charcoal",
+      "label": "Geometric Argyle Diamond Jacquard",
+      "file_type": "image",
+      "source_file": "public/fabrics/fabric-harlequin-charcoal.png"
+    },
+    {
+      "id": "fabric_floral_aqua",
+      "label": "Heritage French Floral Embroidered Linen",
+      "file_type": "image",
+      "source_file": "public/fabrics/fabric-floral-aqua.png"
+    },
+    {
+      "id": "fabric_chevron_black",
+      "label": "Bold Graphic Noir Chevron",
+      "file_type": "image",
+      "source_file": "public/fabrics/fabric-chevron-black.png"
+    },
+    {
+      "id": "fabric_palm_taupe",
+      "label": "Bronze Plume Jacquard",
+      "file_type": "image",
+      "source_file": "public/fabrics/fabric-palm-taupe.png"
+    },
+    {
+      "id": "fabric_damask_parchment",
+      "label": "Art Nouveau Scrolled Damask",
+      "file_type": "image",
+      "source_file": "public/fabrics/fabric-damask-parchment.png"
+    },
+    {
+      "id": "fabric_herringbone_cream",
+      "label": "Micro-Tweed Tailored Herringbone",
+      "file_type": "image",
+      "source_file": "public/fabrics/fabric-herringbone-cream.png"
+    },
+    {
+      "id": "fabric_botanical_sheer",
+      "label": "Botanical Skeleton Leaf Voile",
+      "file_type": "image",
+      "source_file": "public/fabrics/fabric-botanical-sheer.png"
+    },
+    {
+      "id": "fabric_velvet_forest",
+      "label": "Deep Forest Moss Velvet",
+      "file_type": "image",
+      "source_file": "public/fabrics/fabric-velvet-forest.png"
+    },
+    {
+      "id": "fabric_velvet_spa",
+      "label": "Celadon Ribbed Palm Herringbone",
+      "file_type": "image",
+      "source_file": "public/fabrics/fabric-velvet-spa.png"
+    },
+    {
+      "id": "fabric_chevron_natural",
+      "label": "Artisan Herringbone Chevron Twill",
+      "file_type": "image",
+      "source_file": "public/fabrics/fabric-chevron-natural.png"
+    },
+    {
+      "id": "fabric_diamond_ivory",
+      "label": "Quilted Trellis Diamond Lattice",
+      "file_type": "image",
+      "source_file": "public/fabrics/fabric-diamond-ivory.png"
+    },
+    {
+      "id": "fabric_embroidery_linen",
+      "label": "Aatmi Tribal Diamond Embroidered Linen",
+      "file_type": "image",
+      "source_file": "public/fabrics/fabric-embroidery-linen.png"
+    },
+    {
+      "id": "tpl_screenshot_134409",
+      "label": "Curtain Studio Layout Reference",
+      "file_type": "image",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134409.png"
+    },
+    {
+      "id": "tpl_screenshot_134239",
+      "label": "Pinch Pleat Zone Mask Reference",
+      "file_type": "image",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134239.png"
+    },
+    {
+      "id": "tpl_screenshot_134144",
+      "label": "Header & Border Reference",
+      "file_type": "image",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134144.png"
+    },
+    {
+      "id": "tpl_screenshot_134257",
+      "label": "Colorblock Zone Reference",
+      "file_type": "image",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134257.png"
+    },
+    {
+      "id": "tpl_screenshot_134330",
+      "label": "Architectural Track Reference",
+      "file_type": "image",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134330.png"
+    },
+    {
+      "id": "tpl_screenshot_134311",
+      "label": "Window Bay Framing Reference",
+      "file_type": "image",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134311.png"
+    },
+    {
+      "id": "fabric_raw_162205",
+      "label": "Raw Swatch: Ikat Sage",
+      "file_type": "image",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162205.png"
+    },
+    {
+      "id": "fabric_raw_162255",
+      "label": "Raw Swatch: Harlequin Charcoal",
+      "file_type": "image",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162255.png"
+    },
+    {
+      "id": "fabric_raw_162330",
+      "label": "Raw Swatch: Floral Aqua",
+      "file_type": "image",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162330.png"
+    },
+    {
+      "id": "fabric_raw_162320",
+      "label": "Raw Swatch: Chevron Black",
+      "file_type": "image",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162320.png"
+    },
+    {
+      "id": "fabric_raw_162210",
+      "label": "Raw Swatch: Bronze Plume",
+      "file_type": "image",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162210.png"
+    },
+    {
+      "id": "fabric_raw_162218",
+      "label": "Raw Swatch: Scrolled Damask",
+      "file_type": "image",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162218.png"
+    },
+    {
+      "id": "fabric_raw_162315",
+      "label": "Raw Swatch: Herringbone Cream",
+      "file_type": "image",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162315.png"
+    },
+    {
+      "id": "fabric_raw_162146",
+      "label": "Raw Swatch: Skeleton Leaf Sheer",
+      "file_type": "image",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162146.png"
+    },
+    {
+      "id": "fabric_raw_162154",
+      "label": "Raw Swatch: Forest Velvet",
+      "file_type": "image",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162154.png"
+    },
+    {
+      "id": "fabric_raw_162307",
+      "label": "Raw Swatch: Celadon Palm",
+      "file_type": "image",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162307.png"
+    },
+    {
+      "id": "fabric_raw_162226",
+      "label": "Raw Swatch: Chevron Twill",
+      "file_type": "image",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162226.png"
+    },
+    {
+      "id": "fabric_raw_162243",
+      "label": "Raw Swatch: Quilted Trellis",
+      "file_type": "image",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162243.png"
+    },
+    {
+      "id": "fabric_raw_162137",
+      "label": "Raw Swatch: Tribal Diamond Linen",
+      "file_type": "image",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162137.png"
+    }
+  ],
+  "edges": [
+    {
+      "source": "readme_md",
+      "target": "readme_aatmi_couture_drapery_ai",
+      "relation": "describes",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_aatmi_couture_drapery_ai",
+      "target": "readme_openrouter_gateway",
+      "relation": "integrates_with",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_aatmi_couture_drapery_ai",
+      "target": "readme_dual_synthesis_pipeline",
+      "relation": "features",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_aatmi_couture_drapery_ai",
+      "target": "readme_real_room_staging",
+      "relation": "features",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_aatmi_couture_drapery_ai",
+      "target": "readme_multi_tenant_brand",
+      "relation": "architected_as",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_openrouter_gateway",
+      "target": "providers",
+      "relation": "implemented_by",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_openrouter_gateway",
+      "target": "readme_gemini_25_flash",
+      "relation": "routes_to",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_openrouter_gateway",
+      "target": "readme_flux_fill_pro",
+      "relation": "routes_to",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_openrouter_gateway",
+      "target": "readme_gemini_3_pro_image",
+      "relation": "routes_to",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_openrouter_gateway",
+      "target": "readme_seedream_45",
+      "relation": "routes_to",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_gemini_25_flash",
+      "target": "providers",
+      "relation": "analyzes_geometry",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_flux_fill_pro",
+      "target": "providers_fluxkontextadapter",
+      "relation": "powers_inpainting",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_dual_synthesis_pipeline",
+      "target": "fabricrenderer",
+      "relation": "renders_via",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_dual_synthesis_pipeline",
+      "target": "curtaincanvas",
+      "relation": "displays_on",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_real_room_staging",
+      "target": "app",
+      "relation": "mounted_in",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_tactile_loupe",
+      "target": "tactileloupemodal",
+      "relation": "inspected_via",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_spec_sheet_generator",
+      "target": "specsheetmodal",
+      "relation": "generated_by",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_multi_tenant_brand",
+      "target": "brand",
+      "relation": "configured_in",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "weight": 1.0
+    },
+    {
+      "source": "roadmap_md",
+      "target": "roadmap_visualizer_roadmap",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "aatmi-curtain-roadmap.md",
+      "weight": 1.0
+    },
+    {
+      "source": "roadmap_visualizer_roadmap",
+      "target": "roadmap_freehand_raster_masking",
+      "relation": "specifies",
+      "confidence": "EXTRACTED",
+      "source_file": "aatmi-curtain-roadmap.md",
+      "weight": 1.0
+    },
+    {
+      "source": "roadmap_visualizer_roadmap",
+      "target": "roadmap_sequential_synthesis",
+      "relation": "specifies",
+      "confidence": "EXTRACTED",
+      "source_file": "aatmi-curtain-roadmap.md",
+      "weight": 1.0
+    },
+    {
+      "source": "roadmap_visualizer_roadmap",
+      "target": "roadmap_supabase_data_schema",
+      "relation": "specifies",
+      "confidence": "EXTRACTED",
+      "source_file": "aatmi-curtain-roadmap.md",
+      "weight": 1.0
+    },
+    {
+      "source": "roadmap_freehand_raster_masking",
+      "target": "newtemplatemodal",
+      "relation": "implemented_in",
+      "confidence": "EXTRACTED",
+      "source_file": "aatmi-curtain-roadmap.md",
+      "weight": 1.0
+    },
+    {
+      "source": "roadmap_sequential_synthesis",
+      "target": "server",
+      "relation": "orchestrated_by",
+      "confidence": "EXTRACTED",
+      "source_file": "aatmi-curtain-roadmap.md",
+      "weight": 1.0
+    },
+    {
+      "source": "roadmap_supabase_data_schema",
+      "target": "app",
+      "relation": "persisted_in",
+      "confidence": "EXTRACTED",
+      "source_file": "aatmi-curtain-roadmap.md",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_linen_embroidery_border",
+      "target": "defaultcatalog",
+      "relation": "registered_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/templates/tpl-linen-embroidery-border.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_linen_embroidery_border",
+      "target": "curtaincanvas",
+      "relation": "rendered_by",
+      "confidence": "INFERRED",
+      "source_file": "public/templates/tpl-linen-embroidery-border.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_velvet_houndstooth",
+      "target": "defaultcatalog",
+      "relation": "registered_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/templates/tpl-velvet-houndstooth.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_velvet_houndstooth",
+      "target": "curtaincanvas",
+      "relation": "rendered_by",
+      "confidence": "INFERRED",
+      "source_file": "public/templates/tpl-velvet-houndstooth.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_ivory_gold_border",
+      "target": "defaultcatalog",
+      "relation": "registered_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/templates/tpl-ivory-gold-border.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_ivory_gold_border",
+      "target": "curtaincanvas",
+      "relation": "rendered_by",
+      "confidence": "INFERRED",
+      "source_file": "public/templates/tpl-ivory-gold-border.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_colorblock_navy_camel",
+      "target": "defaultcatalog",
+      "relation": "registered_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/templates/tpl-colorblock-navy-camel.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_colorblock_navy_camel",
+      "target": "curtaincanvas",
+      "relation": "rendered_by",
+      "confidence": "INFERRED",
+      "source_file": "public/templates/tpl-colorblock-navy-camel.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_camel_black_duo",
+      "target": "defaultcatalog",
+      "relation": "registered_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/templates/tpl-camel-black-duo.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_camel_black_duo",
+      "target": "curtaincanvas",
+      "relation": "rendered_by",
+      "confidence": "INFERRED",
+      "source_file": "public/templates/tpl-camel-black-duo.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_ivory_chevron_band",
+      "target": "defaultcatalog",
+      "relation": "registered_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/templates/tpl-ivory-chevron-band.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_ivory_chevron_band",
+      "target": "curtaincanvas",
+      "relation": "rendered_by",
+      "confidence": "INFERRED",
+      "source_file": "public/templates/tpl-ivory-chevron-band.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_ikat_sage",
+      "target": "defaultcatalog",
+      "relation": "cataloged_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-ikat-sage.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_ikat_sage",
+      "target": "tactileloupemodal",
+      "relation": "optical_zoom_target",
+      "confidence": "INFERRED",
+      "source_file": "public/fabrics/fabric-ikat-sage.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_ikat_sage",
+      "target": "fabricrenderer",
+      "relation": "texture_mapped_by",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-ikat-sage.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_harlequin_charcoal",
+      "target": "defaultcatalog",
+      "relation": "cataloged_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-harlequin-charcoal.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_harlequin_charcoal",
+      "target": "tactileloupemodal",
+      "relation": "optical_zoom_target",
+      "confidence": "INFERRED",
+      "source_file": "public/fabrics/fabric-harlequin-charcoal.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_harlequin_charcoal",
+      "target": "fabricrenderer",
+      "relation": "texture_mapped_by",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-harlequin-charcoal.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_floral_aqua",
+      "target": "defaultcatalog",
+      "relation": "cataloged_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-floral-aqua.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_floral_aqua",
+      "target": "tactileloupemodal",
+      "relation": "optical_zoom_target",
+      "confidence": "INFERRED",
+      "source_file": "public/fabrics/fabric-floral-aqua.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_floral_aqua",
+      "target": "fabricrenderer",
+      "relation": "texture_mapped_by",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-floral-aqua.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_chevron_black",
+      "target": "defaultcatalog",
+      "relation": "cataloged_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-chevron-black.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_chevron_black",
+      "target": "tactileloupemodal",
+      "relation": "optical_zoom_target",
+      "confidence": "INFERRED",
+      "source_file": "public/fabrics/fabric-chevron-black.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_chevron_black",
+      "target": "fabricrenderer",
+      "relation": "texture_mapped_by",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-chevron-black.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_palm_taupe",
+      "target": "defaultcatalog",
+      "relation": "cataloged_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-palm-taupe.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_palm_taupe",
+      "target": "tactileloupemodal",
+      "relation": "optical_zoom_target",
+      "confidence": "INFERRED",
+      "source_file": "public/fabrics/fabric-palm-taupe.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_palm_taupe",
+      "target": "fabricrenderer",
+      "relation": "texture_mapped_by",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-palm-taupe.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_damask_parchment",
+      "target": "defaultcatalog",
+      "relation": "cataloged_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-damask-parchment.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_damask_parchment",
+      "target": "tactileloupemodal",
+      "relation": "optical_zoom_target",
+      "confidence": "INFERRED",
+      "source_file": "public/fabrics/fabric-damask-parchment.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_damask_parchment",
+      "target": "fabricrenderer",
+      "relation": "texture_mapped_by",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-damask-parchment.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_herringbone_cream",
+      "target": "defaultcatalog",
+      "relation": "cataloged_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-herringbone-cream.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_herringbone_cream",
+      "target": "tactileloupemodal",
+      "relation": "optical_zoom_target",
+      "confidence": "INFERRED",
+      "source_file": "public/fabrics/fabric-herringbone-cream.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_herringbone_cream",
+      "target": "fabricrenderer",
+      "relation": "texture_mapped_by",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-herringbone-cream.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_botanical_sheer",
+      "target": "defaultcatalog",
+      "relation": "cataloged_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-botanical-sheer.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_botanical_sheer",
+      "target": "tactileloupemodal",
+      "relation": "optical_zoom_target",
+      "confidence": "INFERRED",
+      "source_file": "public/fabrics/fabric-botanical-sheer.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_botanical_sheer",
+      "target": "fabricrenderer",
+      "relation": "texture_mapped_by",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-botanical-sheer.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_velvet_forest",
+      "target": "defaultcatalog",
+      "relation": "cataloged_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-velvet-forest.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_velvet_forest",
+      "target": "tactileloupemodal",
+      "relation": "optical_zoom_target",
+      "confidence": "INFERRED",
+      "source_file": "public/fabrics/fabric-velvet-forest.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_velvet_forest",
+      "target": "fabricrenderer",
+      "relation": "texture_mapped_by",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-velvet-forest.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_velvet_spa",
+      "target": "defaultcatalog",
+      "relation": "cataloged_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-velvet-spa.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_velvet_spa",
+      "target": "tactileloupemodal",
+      "relation": "optical_zoom_target",
+      "confidence": "INFERRED",
+      "source_file": "public/fabrics/fabric-velvet-spa.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_velvet_spa",
+      "target": "fabricrenderer",
+      "relation": "texture_mapped_by",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-velvet-spa.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_chevron_natural",
+      "target": "defaultcatalog",
+      "relation": "cataloged_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-chevron-natural.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_chevron_natural",
+      "target": "tactileloupemodal",
+      "relation": "optical_zoom_target",
+      "confidence": "INFERRED",
+      "source_file": "public/fabrics/fabric-chevron-natural.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_chevron_natural",
+      "target": "fabricrenderer",
+      "relation": "texture_mapped_by",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-chevron-natural.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_diamond_ivory",
+      "target": "defaultcatalog",
+      "relation": "cataloged_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-diamond-ivory.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_diamond_ivory",
+      "target": "tactileloupemodal",
+      "relation": "optical_zoom_target",
+      "confidence": "INFERRED",
+      "source_file": "public/fabrics/fabric-diamond-ivory.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_diamond_ivory",
+      "target": "fabricrenderer",
+      "relation": "texture_mapped_by",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-diamond-ivory.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_embroidery_linen",
+      "target": "defaultcatalog",
+      "relation": "cataloged_in",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-embroidery-linen.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_embroidery_linen",
+      "target": "tactileloupemodal",
+      "relation": "optical_zoom_target",
+      "confidence": "INFERRED",
+      "source_file": "public/fabrics/fabric-embroidery-linen.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_embroidery_linen",
+      "target": "fabricrenderer",
+      "relation": "texture_mapped_by",
+      "confidence": "EXTRACTED",
+      "source_file": "public/fabrics/fabric-embroidery-linen.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_screenshot_134409",
+      "target": "tpl_linen_embroidery_border",
+      "relation": "source_reference_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134409.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_screenshot_134409",
+      "target": "newtemplatemodal",
+      "relation": "guides_segmentation",
+      "confidence": "INFERRED",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134409.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_screenshot_134239",
+      "target": "tpl_velvet_houndstooth",
+      "relation": "source_reference_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134239.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_screenshot_134239",
+      "target": "newtemplatemodal",
+      "relation": "guides_segmentation",
+      "confidence": "INFERRED",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134239.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_screenshot_134144",
+      "target": "tpl_ivory_gold_border",
+      "relation": "source_reference_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134144.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_screenshot_134144",
+      "target": "newtemplatemodal",
+      "relation": "guides_segmentation",
+      "confidence": "INFERRED",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134144.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_screenshot_134257",
+      "target": "tpl_colorblock_navy_camel",
+      "relation": "source_reference_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134257.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_screenshot_134257",
+      "target": "newtemplatemodal",
+      "relation": "guides_segmentation",
+      "confidence": "INFERRED",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134257.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_screenshot_134330",
+      "target": "tpl_camel_black_duo",
+      "relation": "source_reference_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134330.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_screenshot_134330",
+      "target": "newtemplatemodal",
+      "relation": "guides_segmentation",
+      "confidence": "INFERRED",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134330.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_screenshot_134311",
+      "target": "tpl_ivory_chevron_band",
+      "relation": "source_reference_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134311.png",
+      "weight": 1.0
+    },
+    {
+      "source": "tpl_screenshot_134311",
+      "target": "newtemplatemodal",
+      "relation": "guides_segmentation",
+      "confidence": "INFERRED",
+      "source_file": "Design Templates/Screenshot 2026-09-09 134311.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162205",
+      "target": "fabric_ikat_sage",
+      "relation": "specimen_photo_of",
+      "confidence": "EXTRACTED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162205.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162205",
+      "target": "cameracapturemodal",
+      "relation": "processed_by",
+      "confidence": "INFERRED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162205.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162255",
+      "target": "fabric_harlequin_charcoal",
+      "relation": "specimen_photo_of",
+      "confidence": "EXTRACTED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162255.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162255",
+      "target": "cameracapturemodal",
+      "relation": "processed_by",
+      "confidence": "INFERRED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162255.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162330",
+      "target": "fabric_floral_aqua",
+      "relation": "specimen_photo_of",
+      "confidence": "EXTRACTED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162330.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162330",
+      "target": "cameracapturemodal",
+      "relation": "processed_by",
+      "confidence": "INFERRED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162330.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162320",
+      "target": "fabric_chevron_black",
+      "relation": "specimen_photo_of",
+      "confidence": "EXTRACTED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162320.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162320",
+      "target": "cameracapturemodal",
+      "relation": "processed_by",
+      "confidence": "INFERRED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162320.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162210",
+      "target": "fabric_palm_taupe",
+      "relation": "specimen_photo_of",
+      "confidence": "EXTRACTED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162210.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162210",
+      "target": "cameracapturemodal",
+      "relation": "processed_by",
+      "confidence": "INFERRED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162210.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162218",
+      "target": "fabric_damask_parchment",
+      "relation": "specimen_photo_of",
+      "confidence": "EXTRACTED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162218.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162218",
+      "target": "cameracapturemodal",
+      "relation": "processed_by",
+      "confidence": "INFERRED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162218.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162315",
+      "target": "fabric_herringbone_cream",
+      "relation": "specimen_photo_of",
+      "confidence": "EXTRACTED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162315.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162315",
+      "target": "cameracapturemodal",
+      "relation": "processed_by",
+      "confidence": "INFERRED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162315.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162146",
+      "target": "fabric_botanical_sheer",
+      "relation": "specimen_photo_of",
+      "confidence": "EXTRACTED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162146.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162146",
+      "target": "cameracapturemodal",
+      "relation": "processed_by",
+      "confidence": "INFERRED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162146.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162154",
+      "target": "fabric_velvet_forest",
+      "relation": "specimen_photo_of",
+      "confidence": "EXTRACTED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162154.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162154",
+      "target": "cameracapturemodal",
+      "relation": "processed_by",
+      "confidence": "INFERRED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162154.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162307",
+      "target": "fabric_velvet_spa",
+      "relation": "specimen_photo_of",
+      "confidence": "EXTRACTED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162307.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162307",
+      "target": "cameracapturemodal",
+      "relation": "processed_by",
+      "confidence": "INFERRED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162307.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162226",
+      "target": "fabric_chevron_natural",
+      "relation": "specimen_photo_of",
+      "confidence": "EXTRACTED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162226.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162226",
+      "target": "cameracapturemodal",
+      "relation": "processed_by",
+      "confidence": "INFERRED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162226.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162243",
+      "target": "fabric_diamond_ivory",
+      "relation": "specimen_photo_of",
+      "confidence": "EXTRACTED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162243.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162243",
+      "target": "cameracapturemodal",
+      "relation": "processed_by",
+      "confidence": "INFERRED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162243.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162137",
+      "target": "fabric_embroidery_linen",
+      "relation": "specimen_photo_of",
+      "confidence": "EXTRACTED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162137.png",
+      "weight": 1.0
+    },
+    {
+      "source": "fabric_raw_162137",
+      "target": "cameracapturemodal",
+      "relation": "processed_by",
+      "confidence": "INFERRED",
+      "source_file": "Fabrics/Screenshot 2026-09-10 162137.png",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
