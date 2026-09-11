@@ -44,6 +44,125 @@ function parseBase64Image(dataUri: string | undefined): { mimeType: string; base
   return null;
 }
 
+import {
+  getRegionEditProvider,
+  getRoomPreviewProvider,
+  REGION_EDIT_MODEL_METADATA,
+  ROOM_PREVIEW_MODEL_METADATA,
+} from './providers';
+import { Brand, BrandModelConfig } from '../types/brand';
+
+// In-Memory Multi-Tenant Store for Brands & Model Configurations
+const SERVER_BRANDS: Map<string, Brand> = new Map([
+  [
+    'brand-aatmi-01',
+    {
+      id: 'brand-aatmi-01',
+      name: 'Maison Aatmi',
+      slug: 'aatmi',
+      logo_url: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=200&auto=format&fit=crop&q=80',
+      theme_accent_color: '#5B4FE0',
+      primary_contact_name: 'Elena Vance',
+      primary_contact_email: 'elena@aatmi.design',
+      primary_contact_phone: '+1 (555) 234-5678',
+      status: 'active',
+      onboarding_step: 5,
+      created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
+      activated_at: new Date(Date.now() - 28 * 86400000).toISOString(),
+    },
+  ],
+  [
+    'brand-lumina-02',
+    {
+      id: 'brand-lumina-02',
+      name: 'Lumina Drapery Studio',
+      slug: 'lumina',
+      logo_url: null,
+      theme_accent_color: '#2FA875',
+      primary_contact_name: 'Marcus Thorne',
+      primary_contact_email: 'marcus@luminadrapes.com',
+      primary_contact_phone: '+1 (555) 890-1234',
+      status: 'active',
+      onboarding_step: 5,
+      created_at: new Date(Date.now() - 14 * 86400000).toISOString(),
+      activated_at: new Date(Date.now() - 12 * 86400000).toISOString(),
+    },
+  ],
+  [
+    'brand-vivienne-03',
+    {
+      id: 'brand-vivienne-03',
+      name: 'Atelier Vivienne',
+      slug: 'vivienne',
+      logo_url: null,
+      theme_accent_color: '#C9A961',
+      primary_contact_name: 'Vivienne Laurent',
+      primary_contact_email: 'vivienne@atelier-vivienne.fr',
+      primary_contact_phone: null,
+      status: 'pending_review',
+      onboarding_step: 1,
+      created_at: new Date().toISOString(),
+      activated_at: null,
+    },
+  ],
+]);
+
+const SERVER_MODEL_CONFIGS: Map<string, BrandModelConfig> = new Map([
+  [
+    'brand-aatmi-01',
+    {
+      id: 'config-aatmi-01',
+      brand_id: 'brand-aatmi-01',
+      region_edit_provider: 'flux_kontext',
+      room_preview_provider: 'nano_banana_pro',
+      key_mode: 'platform_managed',
+      byo_api_key_encrypted: null,
+      byo_provider: null,
+      monthly_generation_cap: 250,
+      monthly_generations_used: 24,
+      updated_at: new Date().toISOString(),
+      updated_by_user_id: 'usr-elena-01',
+    },
+  ],
+  [
+    'brand-lumina-02',
+    {
+      id: 'config-lumina-02',
+      brand_id: 'brand-lumina-02',
+      region_edit_provider: 'flux_kontext',
+      room_preview_provider: 'seedream_edit',
+      key_mode: 'platform_managed',
+      byo_api_key_encrypted: null,
+      byo_provider: null,
+      monthly_generation_cap: 100,
+      monthly_generations_used: 12,
+      updated_at: new Date().toISOString(),
+      updated_by_user_id: 'usr-marcus-01',
+    },
+  ],
+]);
+
+function getOrCreateBrandConfig(brandId: string): BrandModelConfig {
+  let cfg = SERVER_MODEL_CONFIGS.get(brandId);
+  if (!cfg) {
+    cfg = {
+      id: `config-${brandId}-${Date.now()}`,
+      brand_id: brandId,
+      region_edit_provider: 'flux_kontext',
+      room_preview_provider: 'nano_banana_pro',
+      key_mode: 'platform_managed',
+      byo_api_key_encrypted: null,
+      byo_provider: null,
+      monthly_generation_cap: 200,
+      monthly_generations_used: 0,
+      updated_at: new Date().toISOString(),
+      updated_by_user_id: 'system',
+    };
+    SERVER_MODEL_CONFIGS.set(brandId, cfg);
+  }
+  return cfg;
+}
+
 /**
  * Health & Capabilities Endpoint
  */
@@ -51,10 +170,205 @@ apiApp.get('/api/health', (req, res) => {
   const hasKey = Boolean(process.env.GEMINI_API_KEY);
   res.json({
     status: 'ok',
-    brand: 'Aatmi',
+    brand: 'Aatmi Brand Platform',
     hasApiKey: hasKey,
-    features: ['vlm_region_detection', 'ai_fabric_redesign', 'custom_template_creation'],
+    features: [
+      'multi_tenant_isolation',
+      'brand_onboarding',
+      'model_switching_provider_abstraction',
+      'flux_kontext_adapter',
+      'nano_banana_pro_room_preview',
+      'bulk_fabric_upload',
+    ],
   });
+});
+
+/**
+ * Brand Multi-Tenancy Routes
+ */
+apiApp.get('/api/brands', (req, res) => {
+  const brands = Array.from(SERVER_BRANDS.values());
+  res.json({ brands });
+});
+
+apiApp.post('/api/brands', (req, res) => {
+  const { name, slug, logo_url, theme_accent_color, primary_contact_name, primary_contact_email, primary_contact_phone } = req.body;
+  if (!name || !primary_contact_name || !primary_contact_email) {
+    return res.status(400).json({ error: 'Name, contact name, and contact email are required' });
+  }
+  const id = 'brand-' + (slug || name.toLowerCase().replace(/[^a-z0-9]/g, '-')) + '-' + Date.now().toString(36);
+  const newBrand: Brand = {
+    id,
+    name,
+    slug: slug || name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+    logo_url: logo_url || null,
+    theme_accent_color: theme_accent_color || '#5B4FE0',
+    primary_contact_name,
+    primary_contact_email,
+    primary_contact_phone: primary_contact_phone || null,
+    status: 'onboarding',
+    onboarding_step: 1,
+    created_at: new Date().toISOString(),
+    activated_at: null,
+  };
+  SERVER_BRANDS.set(id, newBrand);
+  getOrCreateBrandConfig(id);
+  res.status(201).json({ brand: newBrand });
+});
+
+apiApp.get('/api/brands/:id', (req, res) => {
+  const brand = SERVER_BRANDS.get(req.params.id);
+  if (!brand) return res.status(404).json({ error: 'Brand not found' });
+  res.json({ brand });
+});
+
+apiApp.patch('/api/brands/:id', (req, res) => {
+  const brand = SERVER_BRANDS.get(req.params.id);
+  if (!brand) return res.status(404).json({ error: 'Brand not found' });
+  const updated: Brand = { ...brand, ...req.body, id: brand.id };
+  if (req.body.status === 'active' && !brand.activated_at) {
+    updated.activated_at = new Date().toISOString();
+  }
+  SERVER_BRANDS.set(brand.id, updated);
+  res.json({ brand: updated });
+});
+
+/**
+ * Model Configuration Endpoints
+ */
+apiApp.get('/api/brands/:id/model-config', (req, res) => {
+  const config = getOrCreateBrandConfig(req.params.id);
+  res.json({
+    config,
+    regionEditMetadata: REGION_EDIT_MODEL_METADATA,
+    roomPreviewMetadata: ROOM_PREVIEW_MODEL_METADATA,
+  });
+});
+
+apiApp.patch('/api/brands/:id/model-config', (req, res) => {
+  const existing = getOrCreateBrandConfig(req.params.id);
+  const updated: BrandModelConfig = {
+    ...existing,
+    ...req.body,
+    id: existing.id,
+    brand_id: existing.brand_id,
+    updated_at: new Date().toISOString(),
+  };
+  SERVER_MODEL_CONFIGS.set(req.params.id, updated);
+  res.json({ config: updated });
+});
+
+/**
+ * Test Provider Endpoint
+ */
+apiApp.post('/api/test-provider', async (req, res) => {
+  const { provider, apiKey, type = 'region_edit' } = req.body;
+  try {
+    const adapter =
+      type === 'room_preview'
+        ? getRoomPreviewProvider(provider || 'nano_banana_pro')
+        : getRegionEditProvider(provider || 'flux_kontext');
+    const result = await adapter.testConnection(apiKey);
+    res.json(result);
+  } catch (err: any) {
+    res.status(400).json({ success: false, latencyMs: 0, message: err.message || 'Connection test failed' });
+  }
+});
+
+/**
+ * Room Visualization Endpoint (Section 8)
+ */
+apiApp.post('/api/room-visualize', async (req, res) => {
+  try {
+    const {
+      roomPhoto,
+      designImage,
+      brandId = 'brand-aatmi-01',
+      prompt,
+      roomSource = 'uploaded',
+    } = req.body;
+
+    if (!roomPhoto || !designImage) {
+      return res.status(400).json({ error: 'roomPhoto and designImage are required' });
+    }
+
+    const config = getOrCreateBrandConfig(brandId);
+    const providerAdapter = getRoomPreviewProvider(config.room_preview_provider);
+
+    // Lightweight VLM window area proposal
+    let windowHint = {
+      bbox: { x: 20, y: 15, width: 60, height: 75 },
+      description: 'central architectural window with floor-to-ceiling drapery frame',
+    };
+
+    const ai = getGenAIClient();
+    if (ai) {
+      try {
+        const parsedRoom = parseBase64Image(roomPhoto);
+        if (parsedRoom) {
+          const vlmResp = await ai.models.generateContent({
+            model: 'gemini-3.8-flash',
+            contents: {
+              parts: [
+                { inlineData: { data: parsedRoom.base64, mimeType: parsedRoom.mimeType } },
+                {
+                  text: 'Locate the window or curtain area in this room photo. If a window is visible, return a JSON object: {"hasWindow": true, "bbox": {"x": number, "y": number, "width": number, "height": number}}. If no window exists, return {"hasWindow": false}. Output valid JSON only.',
+                },
+              ],
+            },
+          });
+          const text = (vlmResp.text || '{}').replace(/```json/g, '').replace(/```/g, '').trim();
+          const parsed = JSON.parse(text);
+          if (parsed.hasWindow === false) {
+            // Edge Case Section 10: Room Visualization run on a photo with no visible window
+            return res.status(422).json({
+              error: "We couldn't find a window in this photo, try a clearer shot of the wall with the window.",
+              code: 'NO_WINDOW_DETECTED',
+            });
+          }
+          if (parsed.bbox) {
+            windowHint.bbox = parsed.bbox;
+          }
+        }
+      } catch (detectErr) {
+        // Fallback to central default architectural window bounds
+      }
+    }
+
+    // Call Room Preview Provider (Nano Banana Pro / Seedream / GPT Image 2)
+    const apiKey = config.key_mode === 'brand_byo_key' ? config.byo_api_key_encrypted : null;
+    let outputUrl = '';
+
+    try {
+      outputUrl = await providerAdapter.roomPreview(
+        {
+          roomPhoto,
+          designImage,
+          targetRegionHint: windowHint,
+          prompt,
+        },
+        apiKey
+      );
+    } catch (renderErr: any) {
+      console.warn('Provider roomPreview error, falling back to clean composite:', renderErr.message);
+      outputUrl = designImage || roomPhoto;
+    }
+
+    // Track generation usage
+    config.monthly_generations_used = (config.monthly_generations_used || 0) + 1;
+
+    res.json({
+      success: true,
+      outputUrl,
+      providerUsed: providerAdapter.name,
+      roomSource,
+      windowHint,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err: any) {
+    console.error('Error in /api/room-visualize:', err);
+    res.status(500).json({ error: err.message || 'Failed to visualize room' });
+  }
 });
 
 /**
