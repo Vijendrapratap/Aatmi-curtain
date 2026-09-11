@@ -40,7 +40,7 @@ export const TemplatesGallery: React.FC<TemplatesGalleryProps> = ({ onOpenNewTem
   });
 
   const handleSelectTemplate = (tpl: CurtainTemplate) => {
-    selectTemplate(tpl.id);
+    selectTemplate(tpl.id, brandTemplates);
     setActiveView('editor');
   };
 

@@ -29,9 +29,11 @@ export default function App() {
     brands,
     designs,
     activeDesignId,
+    brandFabrics,
   } = useBrandStore();
 
-  const { assignments, fabrics } = useStudioStore();
+  const { assignments } = useStudioStore();
+  const fabrics = brandFabrics.filter((f) => f.brand_id === currentBrandId || !f.brand_id);
 
   // Authentication state
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);

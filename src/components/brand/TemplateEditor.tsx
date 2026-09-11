@@ -248,7 +248,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenSpecModal:
             <select
               aria-label="Curtain template"
               value={currentTemplate.id}
-              onChange={(e) => selectTemplate(e.target.value)}
+              onChange={(e) => selectTemplate(e.target.value, brandTemplates)}
               className="w-full cursor-pointer appearance-none bg-transparent py-0.5 pr-7 font-display text-[1.35rem] font-semibold tracking-tight text-[var(--color-text-primary)] outline-none"
             >
               {templates.map((tpl) => (
