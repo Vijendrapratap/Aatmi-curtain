@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { CurtainTemplate, Region } from '../types/curtain';
-import { X, Upload, Sparkles, Check, AlertCircle, Eye, Plus, Trash2, LayoutTemplate, Camera, Layers, Sliders } from 'lucide-react';
+import { X, Upload, Sparkles, Check, AlertCircle, Eye, Plus, Trash2, LayoutTemplate, Camera, Layers, Sliders, Paintbrush } from 'lucide-react';
 import { generateRealisticPlate } from '../utils/realisticPhotoPlates';
+import { FreehandMaskCanvas } from './FreehandMaskCanvas';
 
 interface NewTemplateModalProps {
   isOpen: boolean;
@@ -45,7 +46,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
           { x: 14, y: 5 }, { x: 86, y: 5 }, { x: 86, y: 40 }, { x: 50, y: 46 }, { x: 14, y: 40 }
         ],
         default_color: '#DDD6C7',
-        accent_color: '#4F46E5',
+        accent_color: '#D4AF37',
       },
       {
         name: 'chevron_band',
@@ -90,7 +91,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
           { x: 15, y: 5 }, { x: 85, y: 5 }, { x: 85, y: 30 }, { x: 15, y: 30 }
         ],
         default_color: '#E8E3D8',
-        accent_color: '#4F46E5',
+        accent_color: '#D4AF37',
       },
       {
         name: 'mid_body',
@@ -209,7 +210,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
           { x: 52, y: 5 }, { x: 90, y: 5 }, { x: 90, y: 97 }, { x: 52, y: 97 }
         ],
         default_color: '#151D2A',
-        accent_color: '#4F46E5',
+        accent_color: '#D4AF37',
       },
     ],
   },
@@ -262,7 +263,20 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
   const [styleCode, setStyleCode] = useState<string>(`AATMI-STN-${Math.floor(Math.random() * 900 + 100)}`);
   const [detectedRegions, setDetectedRegions] = useState<Region[]>([]);
   const [activeRefineRegionId, setActiveRefineRegionId] = useState<string | null>(null);
+  const [refineMode, setRefineMode] = useState<'brush' | 'polygon'>('brush');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleUpdateRegionMask = (regionId: string, maskDataUrl: string) => {
+    setDetectedRegions((prev) =>
+      prev.map((r) => (r.id === regionId ? { ...r, mask_url: maskDataUrl } : r))
+    );
+  };
+
+  const handleClearRegionMask = (regionId: string) => {
+    setDetectedRegions((prev) =>
+      prev.map((r) => (r.id === regionId ? { ...r, mask_url: undefined } : r))
+    );
+  };
 
   if (!isOpen) return null;
 
@@ -344,7 +358,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
 
       const data = await res.json();
       if (data.regions && Array.isArray(data.regions)) {
-        const colors = ['#4F46E5', '#D97706', '#059669', '#2563EB', '#DC2626'];
+        const colors = ['#D4AF37', '#D97706', '#059669', '#2563EB', '#DC2626'];
         const formatted: Region[] = data.regions.map((r: any, idx: number) => ({
           id: `reg-custom-${Date.now()}-${idx}`,
           name: r.name || `region_${idx + 1}`,
@@ -386,7 +400,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
             { x: 15, y: 5 }, { x: 85, y: 5 }, { x: 85, y: 75 }, { x: 15, y: 75 }
           ],
           default_color: '#DDD6C7',
-          accent_color: '#4F46E5',
+          accent_color: '#D4AF37',
         },
         {
           id: `reg-custom-hem-${Date.now()}`,
@@ -463,34 +477,39 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-stone-950/80 backdrop-blur-xs">
-      <div className="bg-white sm:rounded-2xl shadow-2xl border-0 sm:border border-stone-200 w-full sm:max-w-4xl h-full sm:h-auto sm:max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-white/85 backdrop-blur-md">
+      <div className="bg-white sm:rounded-2xl shadow-2xl border-0 sm:border border-[#C49A1E]/20 w-full sm:max-w-4xl h-full sm:h-auto sm:max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in duration-200" style={{boxShadow:'0 0 0 1px rgba(212,175,55,0.12), 0 32px 80px rgba(0,0,0,0.75)'}}>
         {/* Header */}
-        <div className="px-4 sm:px-6 py-3.5 border-b border-stone-200 flex items-center justify-between bg-stone-50">
-          <div className="min-w-0 pr-2">
-            <h3 className="font-serif text-base sm:text-lg font-bold text-stone-900 truncate">
-              Curtain Design & Stencil
-            </h3>
-            <p className="text-[11px] sm:text-xs text-stone-500 truncate">
-              Select an architectural curtain stencil or upload showroom photo.
-            </p>
+        <div className="px-4 sm:px-6 py-3.5 border-b border-[#D4AF37]/15 flex items-center justify-between bg-[#F8F5F0]">
+          <div className="min-w-0 pr-2 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#F5DE8B] to-[#8C7322] flex items-center justify-center shrink-0">
+              <LayoutTemplate className="w-4 h-4 text-[#0A0B0E]" />
+            </div>
+            <div>
+              <h3 className="font-serif text-base sm:text-lg font-bold text-[#1A1714] truncate">
+                Curtain Design &amp; Stencil Studio
+              </h3>
+              <p className="text-[11px] sm:text-xs text-[#6B5F54] truncate">
+                Select an architectural curtain stencil or upload showroom photo.
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-200/60 transition cursor-pointer shrink-0"
+            className="p-1.5 text-[#9E9088] hover:text-[#1A1714] rounded-lg hover:bg-[#F0EBE4] transition cursor-pointer shrink-0 tactile-press"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Mode Toggle Tabs */}
-        <div className="px-4 sm:px-6 pt-2.5 pb-1 border-b border-stone-200 bg-stone-100/50 flex items-center gap-3 sm:gap-4 overflow-x-auto scrollbar-none">
+        <div className="px-4 sm:px-6 pt-2.5 pb-0 border-b border-[#D4AF37]/10 bg-[#F0EBE4] flex items-center gap-3 sm:gap-4 overflow-x-auto scrollbar-none">
           <button
             onClick={() => setCreationMode('stencil')}
-            className={`pb-2 text-xs font-semibold flex items-center gap-1.5 cursor-pointer border-b-2 transition whitespace-nowrap ${
+            className={`pb-2.5 text-xs font-semibold flex items-center gap-1.5 cursor-pointer border-b-2 transition whitespace-nowrap ${
               creationMode === 'stencil'
-                ? 'border-amber-700 text-amber-900'
-                : 'border-transparent text-stone-500 hover:text-stone-800'
+                ? 'border-[#D4AF37] text-[#B8900F]'
+                : 'border-transparent text-[#9E9088] hover:text-[#4A3F35]'
             }`}
           >
             <LayoutTemplate className="w-3.5 h-3.5" />
@@ -499,25 +518,25 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
 
           <button
             onClick={() => setCreationMode('upload')}
-            className={`pb-2 text-xs font-semibold flex items-center gap-1.5 cursor-pointer border-b-2 transition whitespace-nowrap ${
+            className={`pb-2.5 text-xs font-semibold flex items-center gap-1.5 cursor-pointer border-b-2 transition whitespace-nowrap ${
               creationMode === 'upload'
-                ? 'border-amber-700 text-amber-900'
-                : 'border-transparent text-stone-500 hover:text-stone-800'
+                ? 'border-[#D4AF37] text-[#B8900F]'
+                : 'border-transparent text-[#9E9088] hover:text-[#4A3F35]'
             }`}
           >
             <Camera className="w-3.5 h-3.5" />
-            <span>Upload Photo & Auto-Segment</span>
+            <span>Upload Photo &amp; Auto-Segment</span>
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
+        <div className="p-4 sm:p-6 flex-1 overflow-y-auto bg-white">
           {/* MODE A: STENCIL PRESETS */}
           {creationMode === 'stencil' && (
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
               {/* Left 5 Cols: Stencil Selection List */}
               <div className="md:col-span-5 space-y-2.5 max-h-[480px] overflow-y-auto pr-1">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 block mb-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#9E9088] block mb-1">
                   Architectural Stencil Archetypes
                 </span>
 
@@ -527,26 +546,26 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                     <div
                       key={stn.id}
                       onClick={() => handleSelectStencil(stn)}
-                      className={`p-3 rounded-xl border text-xs cursor-pointer transition flex items-start gap-3 ${
+                      className={`p-3 rounded-xl border text-xs cursor-pointer transition flex items-start gap-3 tactile-press ${
                         isSelected
-                          ? 'border-amber-600 bg-amber-50/60 shadow-xs'
-                          : 'border-stone-200 hover:bg-stone-50'
+                          ? 'border-[#D4AF37]/60 bg-[#D4AF37]/8 shadow-[0_0_0_1px_rgba(212,175,55,0.15)]'
+                          : 'border-[#E2D9CE] bg-[#F8F5F0] hover:bg-[#F0EBE4] hover:border-[#C9BFB4]'
                       }`}
                     >
-                      <div className="w-10 h-10 rounded-lg bg-stone-900 text-white flex items-center justify-center shrink-0 font-serif font-bold text-xs">
+                      <div className="w-10 h-10 rounded-lg bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#B8900F] flex items-center justify-center shrink-0 font-serif font-bold text-xs">
                         {stn.regions.length}Z
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-1">
-                          <span className="font-semibold text-stone-900 truncate">
+                          <span className="font-semibold text-[#1A1714] truncate">
                             {stn.name}
                           </span>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-amber-700 shrink-0" />}
+                          {isSelected && <Check className="w-3.5 h-3.5 text-[#C49A1E] shrink-0" />}
                         </div>
-                        <span className="text-[10px] font-medium text-amber-800 block">
+                        <span className="text-[10px] font-medium text-[#C49A1E]/80 block">
                           {stn.category}
                         </span>
-                        <p className="text-[11px] text-stone-500 line-clamp-1 mt-0.5">
+                        <p className="text-[11px] text-[#9E9088] line-clamp-1 mt-0.5">
                           {stn.tagline}
                         </p>
                       </div>
@@ -560,35 +579,35 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                 <div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
-                      <label className="block text-[11px] font-semibold text-stone-600 mb-1">
+                      <label className="block text-[11px] font-semibold text-[#6B5F54] mb-1">
                         Stencil Title
                       </label>
                       <input
                         type="text"
                         value={templateName}
                         onChange={(e) => setTemplateName(e.target.value)}
-                        className="w-full text-xs px-3 py-1.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium"
+                        className="w-full text-xs px-3 py-1.5 bg-white border border-[#C9BFB4] text-[#1A1714] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#D4AF37] font-medium placeholder-[#4A4E5A]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-semibold text-stone-600 mb-1">
+                      <label className="block text-[11px] font-semibold text-[#6B5F54] mb-1">
                         Style Code
                       </label>
                       <input
                         type="text"
                         value={styleCode}
                         onChange={(e) => setStyleCode(e.target.value)}
-                        className="w-full text-xs px-3 py-1.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
+                        className="w-full text-xs px-3 py-1.5 bg-white border border-[#C9BFB4] text-[#1A1714] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#D4AF37] font-mono placeholder-[#4A4E5A]"
                       />
                     </div>
                   </div>
 
                   {/* Visual Silhouette SVG of the Stencil */}
-                  <div className="relative aspect-[4/3] bg-stone-900 rounded-xl overflow-hidden border border-stone-700 shadow-inner flex items-center justify-center p-3">
+                  <div className="relative aspect-[4/3] bg-[#F0EBE4] rounded-xl overflow-hidden border border-[#C49A1E]/20 shadow-inner flex items-center justify-center p-3">
                     {/* Architectural Window Frame & Rod Backdrop */}
-                    <div className="absolute top-2 inset-x-8 h-1 bg-amber-400/80 rounded" />
-                    <div className="absolute top-1.5 left-7 w-2 h-2 rounded-full bg-amber-300" />
-                    <div className="absolute top-1.5 right-7 w-2 h-2 rounded-full bg-amber-300" />
+                    <div className="absolute top-2 inset-x-8 h-1 bg-[#D4AF37]/70 rounded" />
+                    <div className="absolute top-1.5 left-7 w-2 h-2 rounded-full bg-[#F5DE8B]/80" />
+                    <div className="absolute top-1.5 right-7 w-2 h-2 rounded-full bg-[#F5DE8B]/80" />
 
                     {/* Stencil Polygons */}
                     <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -610,35 +629,35 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                       })}
                     </svg>
 
-                    <div className="absolute top-3 left-3 bg-stone-900/90 text-stone-200 text-[10px] px-2 py-0.5 rounded border border-stone-700 font-mono">
-                      Stencil Geometry & Pleat Cuts
+                    <div className="absolute top-3 left-3 bg-[#F8F5F0]/90 text-[#4A3F35] text-[10px] px-2 py-0.5 rounded border border-[#C9BFB4] font-mono">
+                      Stencil Geometry &amp; Pleat Cuts
                     </div>
 
-                    <div className="absolute bottom-3 right-3 bg-amber-500/90 text-stone-950 text-[10px] font-semibold px-2 py-0.5 rounded">
+                    <div className="absolute bottom-3 right-3 bg-[#D4AF37]/85 text-[#0A0B0E] text-[10px] font-semibold px-2 py-0.5 rounded">
                       Photographic Plate: {selectedStencil.plateId}
                     </div>
                   </div>
 
                   {/* Defined Regions in Stencil */}
                   <div className="mt-3 space-y-1.5">
-                    <span className="text-[11px] font-bold text-stone-600 block uppercase tracking-wide">
+                    <span className="text-[11px] font-bold text-[#6B5F54] block uppercase tracking-wide">
                       Segmented Zones ({selectedStencil.regions.length})
                     </span>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {selectedStencil.regions.map((reg, idx) => (
                         <div
                           key={reg.name}
-                          className="p-2 bg-stone-50 border border-stone-200 rounded-lg text-xs flex items-center gap-2"
+                          className="p-2 bg-[#F8F5F0] border border-[#E2D9CE] rounded-lg text-xs flex items-center gap-2"
                         >
                           <span
                             className="w-3 h-3 rounded-full shrink-0"
                             style={{ backgroundColor: reg.accent_color }}
                           />
                           <div className="min-w-0">
-                            <span className="font-semibold text-stone-900 block truncate">
+                            <span className="font-semibold text-[#1A1714] block truncate">
                               {reg.display_name}
                             </span>
-                            <span className="text-[10px] text-stone-500 block">
+                            <span className="text-[10px] text-[#9E9088] block">
                               {reg.location}
                             </span>
                           </div>
@@ -649,13 +668,13 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                 </div>
 
                 {/* Save Stencil Button */}
-                <div className="pt-3 border-t border-stone-200 flex items-center justify-between">
-                  <span className="text-xs text-stone-500">
+                <div className="pt-3 border-t border-[#E2D9CE] flex items-center justify-between">
+                  <span className="text-xs text-[#9E9088]">
                     Saves as an editable curtain template in your Studio.
                   </span>
                   <button
                     onClick={handleSaveStencilAsTemplate}
-                    className="px-5 py-2 text-xs font-semibold bg-amber-700 hover:bg-amber-800 text-white rounded-lg transition shadow-xs cursor-pointer flex items-center gap-1.5"
+                    className="px-5 py-2 text-xs font-semibold bg-gradient-to-r from-[#F5DE8B] via-[#D4AF37] to-[#8C7322] hover:brightness-110 text-[#0A0B0E] rounded-lg transition shadow-md cursor-pointer flex items-center gap-1.5 tactile-press"
                   >
                     <Check className="w-3.5 h-3.5" />
                     <span>Create Template from Stencil</span>
@@ -672,20 +691,20 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                 <div className="space-y-4 max-w-lg mx-auto py-4">
                   <label
                     htmlFor="curtain-photo-upload"
-                    className="border-2 border-dashed border-stone-300 hover:border-amber-600 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer bg-stone-50 hover:bg-amber-50/20 transition group"
+                    className="border-2 border-dashed border-[#C9BFB4] hover:border-[#D4AF37]/60 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer bg-white/2 hover:bg-[#D4AF37]/4 transition group"
                   >
-                    <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 group-hover:scale-105 transition">
+                    <div className="w-14 h-14 rounded-full bg-[#D4AF37]/12 flex items-center justify-center text-[#C49A1E] group-hover:scale-105 transition">
                       <Upload className="w-7 h-7" />
                     </div>
                     <div className="text-center">
-                      <span className="text-sm font-semibold text-stone-800 block">
+                      <span className="text-sm font-semibold text-[#1A1714] block">
                         Upload Real Curtain Photo
                       </span>
-                      <span className="text-xs text-stone-500 mt-1 block">
+                      <span className="text-xs text-[#9E9088] mt-1 block">
                         Real showroom or camera photo with authentic drapery folds
                       </span>
                     </div>
-                    <span className="text-[11px] font-mono bg-stone-200 text-stone-600 px-2.5 py-1 rounded">
+                    <span className="text-[11px] font-mono bg-white/6 text-[#6B5F54] px-2.5 py-1 rounded border border-[#C9BFB4]">
                       JPG, PNG, WebP up to 30MB
                     </span>
                     <input
@@ -697,10 +716,10 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                     />
                   </label>
 
-                  <div className="bg-amber-50/60 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-900 flex items-start gap-2.5">
-                    <Sparkles className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                  <div className="bg-[#D4AF37]/6 border border-[#C49A1E]/20 rounded-xl p-3.5 text-xs text-[#C49A1E]/90 flex items-start gap-2.5">
+                    <Sparkles className="w-4 h-4 text-[#C49A1E] shrink-0 mt-0.5" />
                     <div>
-                      <span className="font-semibold block mb-0.5">Real Photographic Pipeline:</span>
+                      <span className="font-semibold block mb-0.5 text-[#B8900F]">Real Photographic Pipeline:</span>
                       Your real photograph will be preserved as the master plate, allowing you to re-drape any region with new fabrics while keeping authentic folds, lighting, and room ambiance.
                     </div>
                   </div>
@@ -709,13 +728,13 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
 
               {step === 'analyzing' && (
                 <div className="py-12 flex flex-col items-center justify-center text-center">
-                  <div className="w-14 h-14 rounded-full border-3 border-amber-600/30 border-t-amber-600 animate-spin flex items-center justify-center mb-4">
-                    <Sparkles className="w-6 h-6 text-amber-600" />
+                  <div className="w-14 h-14 rounded-full border-2 border-[#D4AF37]/30 border-t-[#D4AF37] animate-spin flex items-center justify-center mb-4">
+                    <Sparkles className="w-6 h-6 text-[#C49A1E]" />
                   </div>
-                  <h4 className="font-serif text-lg font-bold text-stone-900 mb-1">
+                  <h4 className="font-serif text-lg font-bold text-[#1A1714] mb-1">
                     Analyzing Real Curtain Topology...
                   </h4>
-                  <p className="text-xs text-stone-500 max-w-sm">
+                  <p className="text-xs text-[#9E9088] max-w-sm">
                     Segmenting fabric sections, identifying pleat columns, and preparing real drapery masks.
                   </p>
                 </div>
@@ -724,78 +743,119 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
               {step === 'refine' && uploadedImage && (
                 <div className="space-y-6">
                   {errorMessage && (
-                    <div className="bg-amber-50 border border-amber-200 text-amber-900 text-xs p-3 rounded-lg flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
+                    <div className="bg-[#D4AF37]/8 border border-[#C49A1E]/25 text-[#B8900F] text-xs p-3 rounded-lg flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-[#C49A1E] shrink-0" />
                       <span>{errorMessage}</span>
                     </div>
                   )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-stone-700 mb-1">
+                      <label className="block text-xs font-semibold text-[#6B5F54] mb-1">
                         Template Name
                       </label>
                       <input
                         type="text"
                         value={templateName}
                         onChange={(e) => setTemplateName(e.target.value)}
-                        className="w-full text-xs px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        className="w-full text-xs px-3 py-2 bg-white border border-[#C9BFB4] text-[#1A1714] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-stone-700 mb-1">
+                      <label className="block text-xs font-semibold text-[#6B5F54] mb-1">
                         Style Code
                       </label>
                       <input
                         type="text"
                         value={styleCode}
                         onChange={(e) => setStyleCode(e.target.value)}
-                        className="w-full text-xs px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                        className="w-full text-xs px-3 py-2 bg-white border border-[#C9BFB4] text-[#1A1714] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4AF37] font-mono"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Left: Real Photo with Overlays */}
-                    <div className="relative aspect-[4/5] bg-stone-900 rounded-xl overflow-hidden border border-stone-200">
-                      <img
-                        src={uploadedImage}
-                        alt="Uploaded Real Curtain"
-                        className="w-full h-full object-cover"
-                      />
-                      <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                        {detectedRegions.map((r) => {
-                          const isSelected = activeRefineRegionId === r.id;
-                          const pointsStr = r.polygon_coords
-                            .map((c) => `${c.x}%,${c.y}%`)
-                            .join(' ');
-                          return (
-                            <polygon
-                              key={r.id}
-                              points={pointsStr}
-                              fill={isSelected ? `${r.accent_color}40` : `${r.accent_color}20`}
-                              stroke={r.accent_color || '#4F46E5'}
-                              strokeWidth={isSelected ? '2.5' : '1.5'}
-                              strokeDasharray={isSelected ? 'none' : '4,2'}
-                            />
-                          );
-                        })}
-                      </svg>
-                      <div className="absolute bottom-2 left-2 bg-stone-900/80 text-white text-[10px] px-2 py-0.5 rounded font-mono">
-                        {detectedRegions.length} Real Photo Zones
+                    {/* Left: Interactive Mask Canvas / Overlays */}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 p-1 bg-white/4 rounded-lg text-[11px] font-semibold border border-[#E2D9CE]">
+                          <button
+                            type="button"
+                            onClick={() => setRefineMode('brush')}
+                            className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 tactile-press ${
+                              refineMode === 'brush'
+                                ? 'bg-gradient-to-r from-[#F5DE8B] to-[#D4AF37] text-[#0A0B0E] shadow-xs'
+                                : 'text-[#6B5F54] hover:text-[#3D3329]'
+                            }`}
+                          >
+                            <Paintbrush className="w-3 h-3" />
+                            <span>Organic Brush &amp; Eraser</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setRefineMode('polygon')}
+                            className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 tactile-press ${
+                              refineMode === 'polygon'
+                                ? 'bg-gradient-to-r from-[#F5DE8B] to-[#D4AF37] text-[#0A0B0E] shadow-xs'
+                                : 'text-[#6B5F54] hover:text-[#3D3329]'
+                            }`}
+                          >
+                            <Layers className="w-3 h-3" />
+                            <span>Polygon Snapping</span>
+                          </button>
+                        </div>
                       </div>
+
+                      {refineMode === 'brush' ? (
+                        <FreehandMaskCanvas
+                          backgroundImageUrl={uploadedImage}
+                          regions={detectedRegions}
+                          activeRegionId={activeRefineRegionId}
+                          onUpdateRegionMask={handleUpdateRegionMask}
+                          onClearRegionMask={handleClearRegionMask}
+                        />
+                      ) : (
+                        <div className="relative aspect-[4/5] bg-[#F0EBE4] rounded-xl overflow-hidden border border-[#C9BFB4]">
+                          <img
+                            src={uploadedImage}
+                            alt="Uploaded Real Curtain"
+                            className="w-full h-full object-cover"
+                          />
+                          <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                            {detectedRegions.map((r) => {
+                              const isSelected = activeRefineRegionId === r.id;
+                              const pointsStr = r.polygon_coords
+                                .map((c) => `${c.x}%,${c.y}%`)
+                                .join(' ');
+                              return (
+                                <polygon
+                                  key={r.id}
+                                  points={pointsStr}
+                                  fill={isSelected ? `${r.accent_color}40` : `${r.accent_color}20`}
+                                  stroke={r.accent_color || '#D4AF37'}
+                                  strokeWidth={isSelected ? '2.5' : '1.5'}
+                                  strokeDasharray={isSelected ? 'none' : '4,2'}
+                                />
+                              );
+                            })}
+                          </svg>
+                          <div className="absolute bottom-2 left-2 bg-[#F8F5F0]/90 text-[#4A3F35] text-[10px] px-2 py-0.5 rounded font-mono border border-[#C9BFB4]">
+                            {detectedRegions.length} Real Photo Zones
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Right: Regions Manager */}
                     <div className="space-y-3 flex flex-col justify-between">
                       <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-stone-800 uppercase tracking-wide">
+                          <span className="text-xs font-bold text-[#1A1714] uppercase tracking-wide">
                             Fabric Regions
                           </span>
                           <button
                             onClick={handleAddNewRegion}
-                            className="text-[11px] font-semibold text-amber-800 hover:text-amber-950 flex items-center gap-1 cursor-pointer"
+                            className="text-[11px] font-semibold text-[#C49A1E] hover:text-[#B8900F] flex items-center gap-1 cursor-pointer tactile-press"
                           >
                             <Plus className="w-3.5 h-3.5" />
                             Add Zone
@@ -808,8 +868,8 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                             onClick={() => setActiveRefineRegionId(reg.id)}
                             className={`p-2.5 rounded-lg border text-xs cursor-pointer transition ${
                               activeRefineRegionId === reg.id
-                                ? 'border-amber-600 bg-amber-50/50 shadow-2xs'
-                                : 'border-stone-200 hover:bg-stone-50'
+                                ? 'border-[#D4AF37]/60 bg-[#D4AF37]/6 shadow-[0_0_0_1px_rgba(212,175,55,0.12)]'
+                                : 'border-[#E2D9CE] bg-white/2 hover:bg-white/4'
                             }`}
                           >
                             <div className="flex items-center justify-between gap-2">
@@ -822,7 +882,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                                   type="text"
                                   value={reg.display_name}
                                   onChange={(e) => handleUpdateRegionName(reg.id, e.target.value)}
-                                  className="w-full bg-transparent font-semibold text-stone-900 focus:outline-none"
+                                  className="w-full bg-transparent font-semibold text-[#1A1714] focus:outline-none"
                                 />
                               </div>
                               <button
@@ -830,37 +890,37 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                                   e.stopPropagation();
                                   handleRemoveRegion(reg.id);
                                 }}
-                                className="text-stone-400 hover:text-red-600 p-1 cursor-pointer"
+                                className="text-[#4A4E5A] hover:text-red-400 p-1 cursor-pointer"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
-                            <p className="text-[11px] text-stone-500 mt-1 pl-5">
+                            <p className="text-[11px] text-[#9E9088] mt-1 pl-5">
                               {reg.description}
                             </p>
                           </div>
                         ))}
                       </div>
 
-                      <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-600">
-                        <p className="font-semibold text-stone-900 mb-0.5">Real Photo Preserved</p>
-                        <p className="text-[11px] text-stone-500">
+                      <div className="p-3 bg-[#F8F5F0] rounded-xl border border-[#E2D9CE] text-xs text-[#6B5F54]">
+                        <p className="font-semibold text-[#1A1714] mb-0.5">Real Photo Preserved</p>
+                        <p className="text-[11px] text-[#9E9088]">
                           This real photograph will serve as your base drape plate in the Aatmi Studio.
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-stone-200 flex items-center justify-between">
+                  <div className="pt-3 border-t border-[#E2D9CE] flex items-center justify-between">
                     <button
                       onClick={() => setStep('upload')}
-                      className="px-4 py-2 text-xs font-medium text-stone-600 hover:bg-stone-200 rounded-lg cursor-pointer"
+                      className="px-4 py-2 text-xs font-medium text-[#6B5F54] hover:bg-[#F0EBE4] rounded-lg cursor-pointer transition"
                     >
                       Change Photo
                     </button>
                     <button
                       onClick={handleFinishCustomSave}
-                      className="px-5 py-2 text-xs font-semibold bg-amber-700 hover:bg-amber-800 text-white rounded-lg transition shadow-xs cursor-pointer flex items-center gap-1.5"
+                      className="px-5 py-2 text-xs font-semibold bg-gradient-to-r from-[#F5DE8B] via-[#D4AF37] to-[#8C7322] hover:brightness-110 text-[#0A0B0E] rounded-lg transition shadow-md cursor-pointer flex items-center gap-1.5 tactile-press"
                     >
                       <Check className="w-3.5 h-3.5" />
                       <span>Save Real Curtain Template</span>

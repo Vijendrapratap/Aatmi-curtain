@@ -50,7 +50,7 @@ export const CatalogLibraryView: React.FC = () => {
   ];
 
   const colorPalette = [
-    { name: 'Gold / Champagne', hex: '#D4AF37' },
+    { name: 'Gold / Champagne', hex: '#C49A1E' },
     { name: 'Emerald', hex: '#0D4A37' },
     { name: 'Midnight Navy', hex: '#1A2942' },
     { name: 'Burgundy / Crimson', hex: '#631B27' },
@@ -78,24 +78,22 @@ export const CatalogLibraryView: React.FC = () => {
       const reader = new FileReader();
       reader.onload = () => {
         const base64 = reader.result as string;
-        const newFabric: Fabric = {
-          id: 'fab-custom-' + Date.now(),
-          name: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
-          category: 'Custom',
+        addCustomFabric({
+          name: file.name.replace(/\.[^/.]+$/, ''),
           image_url: base64,
+          category: 'Custom',
           tileable: true,
-          tags: ['custom', 'couture', 'uploaded', 'swatch'],
+          tags: ['custom', 'uploaded'],
           metadata: {
-            weave: 'Bespoke Atelier Weave',
+            weave: 'Custom Swatch Weave',
             scale: 'medium',
             sheen: 'Subtle Luster',
-            weight: 'Heavyweight Drapery',
-            composition: 'Custom Textile',
+            weight: 'Medium',
+            composition: 'Uploaded Fabric Sample',
           },
-          color_hex: '#D4AF37',
+          color_hex: '#C49A1E',
           is_custom: true,
-        };
-        addCustomFabric(newFabric);
+        });
         setIsUploading(false);
       };
       reader.readAsDataURL(file);
@@ -103,28 +101,28 @@ export const CatalogLibraryView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden bg-[#0D0E11] text-[#F9F6F0]">
+    <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden bg-[#F8F6F0] text-[#1A1714]">
       {/* Left Sidebar: Collections & Filter Column */}
-      <div className="w-full md:w-72 border-b md:border-b-0 md:border-r border-[#252832] bg-[#121318] p-4 flex flex-col justify-between overflow-y-auto">
+      <div className="w-full md:w-72 border-b md:border-b-0 md:border-r border-[#E8E2D8] bg-[#FAF8F3] p-4 sm:p-5 flex flex-col justify-between overflow-y-auto">
         <div className="space-y-5">
           {/* Section Title */}
-          <div className="flex items-center justify-between pb-3 border-b border-[#252832]">
+          <div className="flex items-center justify-between pb-3 border-b border-[#E8E2D8]">
             <div className="flex items-center gap-2">
-              <Folder className="w-4 h-4 text-[#D4AF37]" />
-              <h3 className="font-serif text-sm font-bold text-[#F9F6F0] tracking-wide">
-                Catalogs & Collections
+              <Folder className="w-4 h-4 text-[#C49A1E]" />
+              <h3 className="font-serif text-sm font-bold text-[#1A1714] tracking-wide">
+                Catalogs &amp; Collections
               </h3>
             </div>
           </div>
 
           {/* Asset Type Selector */}
-          <div className="flex p-1 bg-[#1A1C23] rounded-xl border border-[#2B2E3A]">
+          <div className="flex p-1 bg-[#EAE4DC] rounded-xl border border-[#D4C9BC]">
             <button
               onClick={() => setActiveTypeTab('fabric')}
               className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer ${
                 activeTypeTab === 'fabric'
-                  ? 'bg-[#D4AF37] text-[#0D0E10] shadow-sm'
-                  : 'text-[#8C909C] hover:text-[#F9F6F0]'
+                  ? 'bg-white text-[#1A1714] font-bold shadow-xs border border-[#E2D9CE]'
+                  : 'text-[#6B5F54] hover:text-[#1A1714]'
               }`}
             >
               Fabrics ({fabrics.length})
@@ -133,8 +131,8 @@ export const CatalogLibraryView: React.FC = () => {
               onClick={() => setActiveTypeTab('template')}
               className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer ${
                 activeTypeTab === 'template'
-                  ? 'bg-[#D4AF37] text-[#0D0E10] shadow-sm'
-                  : 'text-[#8C909C] hover:text-[#F9F6F0]'
+                  ? 'bg-white text-[#1A1714] font-bold shadow-xs border border-[#E2D9CE]'
+                  : 'text-[#6B5F54] hover:text-[#1A1714]'
               }`}
             >
               Templates ({templates.length})
@@ -143,20 +141,20 @@ export const CatalogLibraryView: React.FC = () => {
 
           {/* Folder List */}
           <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#8C909C] font-semibold block mb-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#9E9088] font-bold block mb-1">
               Curated Folders
             </span>
 
             <div
               onClick={() => setActiveCatalogId(null)}
-              className={`p-2.5 rounded-lg text-xs flex items-center justify-between cursor-pointer transition ${
+              className={`p-2.5 rounded-xl text-xs flex items-center justify-between cursor-pointer transition ${
                 activeCatalogId === null
-                  ? 'bg-[#1C1E26] text-[#D4AF37] font-semibold border border-[#D4AF37]/30'
-                  : 'text-[#A0A4B0] hover:bg-[#181920]'
+                  ? 'bg-[#FFF8E6] text-[#C49A1E] font-bold border border-[#C49A1E]/30 shadow-2xs'
+                  : 'text-[#6B5F54] hover:bg-[#F0EBE4] hover:text-[#1A1714]'
               }`}
             >
               <span>All Master Assets</span>
-              <span className="text-[10px] font-mono bg-black/40 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-mono bg-[#EAE4DC] px-2 py-0.5 rounded-md font-semibold text-[#1A1714]">
                 {fabrics.length + templates.length}
               </span>
             </div>
@@ -165,16 +163,16 @@ export const CatalogLibraryView: React.FC = () => {
               <div
                 key={cat.id}
                 onClick={() => setActiveCatalogId(cat.id)}
-                className={`p-2.5 rounded-lg text-xs flex items-center justify-between cursor-pointer transition ${
+                className={`p-2.5 rounded-xl text-xs flex items-center justify-between cursor-pointer transition ${
                   activeCatalogId === cat.id
-                    ? 'bg-[#1C1E26] text-[#D4AF37] font-semibold border border-[#D4AF37]/30'
-                    : 'text-[#A0A4B0] hover:bg-[#181920]'
+                    ? 'bg-[#FFF8E6] text-[#C49A1E] font-bold border border-[#C49A1E]/30 shadow-2xs'
+                    : 'text-[#6B5F54] hover:bg-[#F0EBE4] hover:text-[#1A1714]'
                 }`}
               >
                 <div className="truncate pr-2">
                   <span className="block truncate">{cat.name}</span>
                 </div>
-                <span className="text-[10px] font-mono bg-black/40 px-1.5 py-0.5 rounded shrink-0">
+                <span className="text-[10px] font-mono bg-[#EAE4DC] px-2 py-0.5 rounded-md font-semibold text-[#1A1714] shrink-0">
                   {cat.itemCount}
                 </span>
               </div>
@@ -183,9 +181,9 @@ export const CatalogLibraryView: React.FC = () => {
 
           {/* Color Filter Palette */}
           {activeTypeTab === 'fabric' && (
-            <div className="space-y-2 pt-3 border-t border-[#252832]">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#8C909C] font-semibold block">
-                Color Palette
+            <div className="space-y-2 pt-3 border-t border-[#E8E2D8]">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[#9E9088] font-bold block">
+                Colorway Filter
               </span>
               <div className="flex flex-wrap gap-2">
                 {colorPalette.map((col) => (
@@ -197,8 +195,8 @@ export const CatalogLibraryView: React.FC = () => {
                     title={col.name}
                     className={`w-6 h-6 rounded-full border transition-all cursor-pointer ${
                       selectedColor === col.hex
-                        ? 'ring-2 ring-[#D4AF37] scale-110 border-white'
-                        : 'border-white/20 hover:scale-105'
+                        ? 'ring-2 ring-[#C49A1E] scale-110 border-white'
+                        : 'border-[#D4C9BC] hover:scale-105 shadow-2xs'
                     }`}
                     style={{ backgroundColor: col.hex }}
                   />
@@ -208,56 +206,56 @@ export const CatalogLibraryView: React.FC = () => {
           )}
 
           {/* Upload Swatch Card */}
-          <div className="pt-3 border-t border-[#252832]">
-            <label className="flex flex-col items-center justify-center p-4 border border-dashed border-[#353947] hover:border-[#D4AF37] rounded-xl bg-[#16171E] hover:bg-[#1A1C25] transition cursor-pointer">
+          <div className="pt-3 border-t border-[#E8E2D8]">
+            <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-[#D4C9BC] hover:border-[#C49A1E] rounded-2xl bg-white hover:bg-[#FFFDF8] transition cursor-pointer shadow-2xs">
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleUploadFabric}
                 className="hidden"
               />
-              <Upload className="w-5 h-5 text-[#D4AF37] mb-1" />
-              <span className="text-xs font-semibold text-[#F9F6F0]">Upload Fabric Swatch</span>
-              <span className="text-[10px] text-[#7A7E89] text-center mt-0.5">
-                Auto VLM tagging & seamless tile parsing
+              <Upload className="w-5 h-5 text-[#C49A1E] mb-1" />
+              <span className="text-xs font-bold text-[#1A1714]">Upload Fabric Swatch</span>
+              <span className="text-[10px] text-[#6B5F54] text-center mt-0.5">
+                Seamless swatch &amp; physical texture tile
               </span>
             </label>
           </div>
         </div>
 
         {/* Storage Info */}
-        <div className="pt-4 border-t border-[#252832] text-[10px] text-[#7A7E89]">
-          <span>Connected to Supabase Storage: bucket /fabrics</span>
+        <div className="pt-4 border-t border-[#E8E2D8] text-[10px] text-[#9E9088] font-mono">
+          <span>Aatmi Storage Bucket: /fabrics</span>
         </div>
       </div>
 
       {/* Main Grid View */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Filter Bar */}
-        <div className="p-4 border-b border-[#252832] bg-[#121318] flex flex-wrap items-center justify-between gap-3">
+        <div className="p-4 border-b border-[#E8E2D8] bg-[#FAF8F3] flex flex-wrap items-center justify-between gap-3">
           {/* Search Box */}
           <div className="relative min-w-[240px] flex-1 max-w-md">
-            <Search className="w-4 h-4 text-[#7A7E89] absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#9E9088] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={fabricSearchQuery}
               onChange={(e) => setFabricSearchQuery(e.target.value)}
-              placeholder="Search textiles by name, weave (velvet, bouclé), or tag..."
-              className="w-full bg-[#171920] border border-[#2B2E3A] text-xs text-[#F9F6F0] pl-9 pr-3 py-2 rounded-lg focus:outline-none focus:border-[#D4AF37] placeholder:text-[#5E626E]"
+              placeholder="Search textiles by weave (velvet, bouclé, linen)..."
+              className="w-full bg-white border border-[#D4C9BC] text-xs text-[#1A1714] pl-9 pr-3 py-2 rounded-xl focus:outline-none focus:border-[#C49A1E] placeholder:text-[#9E9088] shadow-2xs"
             />
           </div>
 
           {/* Material Category Pills */}
           {activeTypeTab === 'fabric' && (
-            <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-1 sm:pb-0">
+            <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-none">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActiveFabricCategory(cat)}
-                  className={`text-xs px-2.5 py-1.5 rounded-lg whitespace-nowrap transition cursor-pointer ${
+                  className={`text-xs px-3 py-1.5 rounded-xl whitespace-nowrap transition cursor-pointer font-semibold ${
                     activeFabricCategory === cat
-                      ? 'bg-[#D4AF37] text-[#0D0E10] font-bold shadow-sm'
-                      : 'bg-[#181920] text-[#A0A4B0] hover:text-[#F9F6F0] border border-[#272A35]'
+                      ? 'bg-[#C49A1E] text-white shadow-xs'
+                      : 'bg-white text-[#6B5F54] hover:text-[#1A1714] hover:bg-[#EFEAE2] border border-[#D4C9BC]'
                   }`}
                 >
                   {cat}
@@ -268,17 +266,17 @@ export const CatalogLibraryView: React.FC = () => {
         </div>
 
         {/* Grid Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#0D0E11]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#F8F6F0]">
           {activeTypeTab === 'fabric' ? (
-            /* Fabric Swatches Masonry Grid */
+            /* Fabric Swatches Grid */
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {filteredFabrics.map((fabric) => (
                 <div
                   key={fabric.id}
-                  className="group bg-[#15161D] border border-[#272A35] hover:border-[#D4AF37] rounded-xl overflow-hidden transition-all duration-200 shadow-md hover:shadow-xl flex flex-col justify-between"
+                  className="group bg-white border border-[#E5DDD0] hover:border-[#C49A1E] rounded-2xl overflow-hidden transition-all duration-200 shadow-xs hover:shadow-md flex flex-col justify-between"
                 >
                   {/* Swatch Image */}
-                  <div className="relative aspect-square overflow-hidden bg-[#1D1F28]">
+                  <div className="relative aspect-square overflow-hidden bg-[#EDE7DF]">
                     <img
                       src={fabric.image_url}
                       alt={fabric.name}
@@ -286,7 +284,7 @@ export const CatalogLibraryView: React.FC = () => {
                     />
                     <div className="absolute top-2 right-2 flex items-center gap-1">
                       <span
-                        className="w-3.5 h-3.5 rounded-full border border-white/40 shadow-sm"
+                        className="w-3.5 h-3.5 rounded-full border border-white shadow-xs"
                         style={{ backgroundColor: fabric.color_hex }}
                       />
                     </div>
@@ -295,19 +293,19 @@ export const CatalogLibraryView: React.FC = () => {
                   {/* Metadata */}
                   <div className="p-3 space-y-1.5">
                     <div className="flex items-start justify-between gap-1">
-                      <h4 className="font-serif text-xs font-bold text-[#F9F6F0] truncate">
+                      <h4 className="font-serif text-xs font-bold text-[#1A1714] truncate">
                         {fabric.name}
                       </h4>
                     </div>
 
-                    <div className="flex items-center gap-1 text-[10px] text-[#A68832] font-mono">
+                    <div className="flex items-center gap-1 text-[10px] text-[#C49A1E] font-mono font-medium">
                       <span>{fabric.category}</span>
                       <span>·</span>
                       <span className="truncate">{fabric.metadata.weave}</span>
                     </div>
 
-                    <div className="pt-2 border-t border-[#23252E] flex items-center justify-between">
-                      <span className="text-[10px] text-[#7A7E89] truncate">
+                    <div className="pt-2 border-t border-[#E8E2D8] flex items-center justify-between">
+                      <span className="text-[10px] text-[#9E9088] truncate max-w-[90px]">
                         {fabric.metadata.composition}
                       </span>
                       <button
@@ -318,7 +316,7 @@ export const CatalogLibraryView: React.FC = () => {
                             setActiveTab('atelier');
                           }
                         }}
-                        className="text-[10px] bg-[#D4AF37]/20 hover:bg-[#D4AF37] text-[#D4AF37] hover:text-[#0D0E10] font-bold px-2 py-0.5 rounded transition cursor-pointer"
+                        className="text-[10px] bg-[#FFF8E6] hover:bg-[#C49A1E] text-[#C49A1E] hover:text-white font-bold px-2.5 py-1 rounded-lg transition cursor-pointer border border-[#C49A1E]/30"
                       >
                         Apply →
                       </button>
@@ -337,33 +335,33 @@ export const CatalogLibraryView: React.FC = () => {
                     selectTemplate(tpl.id);
                     setActiveTab('atelier');
                   }}
-                  className={`bg-[#15161D] border rounded-xl overflow-hidden transition-all duration-200 cursor-pointer shadow-lg group ${
+                  className={`bg-white border rounded-2xl overflow-hidden transition-all duration-200 cursor-pointer shadow-xs hover:shadow-md group ${
                     selectedTemplateId === tpl.id
-                      ? 'border-[#D4AF37] ring-1 ring-[#D4AF37]/50'
-                      : 'border-[#272A35] hover:border-[#3E4250]'
+                      ? 'border-2 border-[#C49A1E] ring-1 ring-[#C49A1E]/30'
+                      : 'border-[#E5DDD0] hover:border-[#C49A1E]/60'
                   }`}
                 >
-                  <div className="aspect-4/3 bg-[#1B1D25] overflow-hidden relative">
+                  <div className="aspect-4/3 bg-[#EDE7DF] overflow-hidden relative">
                     <img
                       src={tpl.real_photo_url || tpl.original_image_url}
                       alt={tpl.name}
                       className="w-full h-full object-cover group-hover:scale-102 transition duration-300"
                     />
-                    <span className="absolute bottom-2 left-2 bg-black/75 backdrop-blur-md text-[#D4AF37] text-[10px] font-mono px-2 py-0.5 rounded border border-white/10">
-                      {tpl.regions.length} Replaceable Zones
+                    <span className="absolute bottom-2 left-2 bg-white/95 backdrop-blur-md text-[#C49A1E] text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-md border border-[#D4C9BC] shadow-2xs">
+                      {tpl.regions.length} Drape Zones
                     </span>
                   </div>
 
                   <div className="p-4 space-y-1.5">
-                    <h4 className="font-serif text-sm font-bold text-[#F9F6F0]">
+                    <h4 className="font-serif text-sm font-bold text-[#1A1714]">
                       {tpl.name}
                     </h4>
-                    <p className="text-xs text-[#8C909C] line-clamp-2">
+                    <p className="text-xs text-[#6B5F54] line-clamp-2 leading-relaxed">
                       {tpl.description}
                     </p>
-                    <div className="pt-2 border-t border-[#23252E] flex items-center justify-between text-[11px]">
-                      <span className="text-[#A68832] font-mono">{tpl.style_code}</span>
-                      <span className="text-[#D4AF37] font-semibold group-hover:underline">
+                    <div className="pt-2 border-t border-[#E8E2D8] flex items-center justify-between text-[11px]">
+                      <span className="text-[#C49A1E] font-mono font-semibold">{tpl.style_code}</span>
+                      <span className="text-[#1A1714] font-bold group-hover:text-[#C49A1E] transition">
                         Open in Atelier →
                       </span>
                     </div>

@@ -700,7 +700,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
     style_code: 'AATMI-CHV-01',
     tagline: 'Dual Drapery Pairing Full Chevron Panel with Inset Ribbon Band',
     description: 'Authentic designer drapery as photographed: A dramatic left drape in black & gold chevron weave, paired with a right cream drape highlighted by a mid-height chevron accent band framed by metallic gold ribbon trims.',
-    original_image_url: 'template_chevron_accent',
+    original_image_url: '/templates/tpl-ivory-chevron-band.png',
     plate_id: 'plate-chevron-accent',
     stencil_preset: 'chevron_accent',
     structure_maps: {},
@@ -738,7 +738,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         suggested_sam_prompt: 'cream white textured bouclé curtain drapery body',
         default_fabric_id: 'fab-cream-boucle',
         default_color: '#F5F2EB',
-        accent_color: '#4F46E5',
+        accent_color: '#D4AF37',
         polygon_coords: [
           { x: 47, y: 0 }, { x: 96, y: 0 }, { x: 96, y: 22 }, { x: 47, y: 22 }
         ],
@@ -817,7 +817,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
     style_code: 'AATMI-CBT-02',
     tagline: 'Architectural Window Framing with Inverted 3-Tone Color Blocks',
     description: 'Crisp contemporary interior setting: Twin pinch-pleat drapes featuring asymmetric color-blocking with warm champagne linen, terracotta rust accent stripes, and midnight navy velvet pooling on hardwood floors.',
-    original_image_url: 'template_colorblock_trio',
+    original_image_url: '/templates/tpl-colorblock-navy-camel.png',
     plate_id: 'plate-colorblock-trio',
     stencil_preset: 'color_block_trio',
     structure_maps: {},
@@ -934,7 +934,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
     style_code: 'AATMI-VHT-03',
     tagline: 'Deep Midnight Velvet Header with Brass Satin Trim & Houndstooth Skirt',
     description: 'Opulent salon drapery: Upper 50% in deep lustrous charcoal velvet, divided by a gleaming mirror-finish brass satin horizontal band, and falling into a tailored black & white houndstooth pleated skirt.',
-    original_image_url: 'template_velvet_houndstooth',
+    original_image_url: '/templates/tpl-velvet-houndstooth.png',
     plate_id: 'plate-velvet-houndstooth',
     stencil_preset: 'velvet_houndstooth',
     structure_maps: {},
@@ -956,7 +956,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         suggested_sam_prompt: 'top dark lustrous velvet curtain drapery header',
         default_fabric_id: 'fab-charcoal-slate',
         default_color: '#1E2024',
-        accent_color: '#4F46E5',
+        accent_color: '#D4AF37',
         polygon_coords: [
           { x: 8, y: 0 }, { x: 80, y: 0 }, { x: 80, y: 50 }, { x: 8, y: 50 }
         ],
@@ -1003,7 +1003,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
     style_code: 'AATMI-GKF-04',
     tagline: 'Mitered L-Shape Frame Border with Embroidered Greek Key Ribbon',
     description: 'Bespoke architectural drapery: Soft ivory cream velvet center field framed by an embroidered Greek key fretwork ribbon and an outer mustard gold velvet perimeter border.',
-    original_image_url: 'template_greek_key_frame',
+    original_image_url: '/templates/tpl-ivory-gold-border.png',
     plate_id: 'plate-greek-key-frame',
     stencil_preset: 'greek_key_frame',
     structure_maps: {},
@@ -1025,7 +1025,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         suggested_sam_prompt: 'ivory cream soft velvet main curtain drapery body',
         default_fabric_id: 'fab-cream-boucle',
         default_color: '#F2ECE1',
-        accent_color: '#4F46E5',
+        accent_color: '#D4AF37',
         polygon_coords: [
           { x: 5, y: 0 }, { x: 74, y: 0 }, { x: 74, y: 74 }, { x: 5, y: 74 }
         ],
@@ -1074,7 +1074,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
     style_code: 'AATMI-CMB-05',
     tagline: 'Tailored 2-Tone Horizontal Split with Sheer Voile Background',
     description: 'Classic grand drapery: Upper 25% pleated header in camel tan twill, flowing into a heavy midnight charcoal blackout drape gathered with an antique gold tassel rope tieback.',
-    original_image_url: 'template_twotone_camel_black',
+    original_image_url: '/templates/tpl-camel-black-duo.png',
     plate_id: 'plate-twotone-camel-black',
     stencil_preset: 'camel_midnight_header',
     structure_maps: {},
@@ -1112,7 +1112,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         suggested_sam_prompt: 'midnight black charcoal velvet drapery gathered with tieback',
         default_fabric_id: 'fab-charcoal-slate',
         default_color: '#1D2126',
-        accent_color: '#4F46E5',
+        accent_color: '#D4AF37',
         polygon_coords: [
           { x: 6, y: 29 }, { x: 94, y: 29 }, { x: 94, y: 95 }, { x: 6, y: 95 }
         ],
@@ -1127,7 +1127,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
     style_code: 'AATMI-PTE-06',
     tagline: 'Grand Natural Flax Linen Drape with Vertical Persian Tapestry Stencil',
     description: 'High-ceiling architectural salon: Natural Belgian oatmeal linen drapery accented by an exquisite multi-color Persian floral arabesque embroidered tapestry along the leading edge.',
-    original_image_url: 'template_persian_tapestry',
+    original_image_url: '/templates/tpl-linen-embroidery-border.png',
     plate_id: 'plate-persian-tapestry',
     stencil_preset: 'persian_tapestry',
     structure_maps: {},
@@ -1149,7 +1149,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         suggested_sam_prompt: 'natural oatmeal belgian linen curtain drapery body',
         default_fabric_id: 'fab-belgian-oatmeal',
         default_color: '#E5DEC9',
-        accent_color: '#4F46E5',
+        accent_color: '#D4AF37',
         polygon_coords: [
           { x: 5, y: 0 }, { x: 33, y: 0 }, { x: 33, y: 100 }, { x: 5, y: 100 }
         ],
@@ -1197,7 +1197,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         suggested_sam_prompt: 'natural oatmeal belgian linen curtain drapery body',
         default_fabric_id: 'fab-belgian-oatmeal',
         default_color: '#E5DEC9',
-        accent_color: '#4F46E5',
+        accent_color: '#D4AF37',
         polygon_coords: [
           { x: 67, y: 0 }, { x: 95, y: 0 }, { x: 95, y: 100 }, { x: 67, y: 100 }
         ],
@@ -1210,7 +1210,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
     style_code: 'AATMI-GRN-03',
     tagline: 'Deep Pinch Pleats with High-Impact Mid Band & Weighted Hem',
     description: 'Based on the signature Granada design: A large vertical main panel with dramatic folds, accented by an eye-catching horizontal band and finished with a dark tailored hem border.',
-    original_image_url: 'template_granada',
+    original_image_url: '/templates/tpl-linen-embroidery-border.png',
     structure_maps: {
       canny_url: 'canny_granada',
       depth_url: 'depth_granada',
@@ -1232,7 +1232,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         suggested_sam_prompt: 'large vertical drape curtain folds light fabric body',
         default_fabric_id: 'fab-belgian-oatmeal',
         default_color: '#DDD6C7',
-        accent_color: '#4F46E5',
+        accent_color: '#D4AF37',
         polygon_coords: [
           { x: 12, y: 4 },
           { x: 88, y: 4 },
@@ -1284,7 +1284,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
     style_code: 'AATMI-VRT-02',
     tagline: 'Deep Continuous Folds with Architectural Leading Edge Border',
     description: 'Classic European pinch pleat drape featuring a full-height main drapery body highlighted by an elegant vertical decorative border running down the leading edge.',
-    original_image_url: 'template_vertical',
+    original_image_url: '/templates/tpl-ivory-chevron-band.png',
     structure_maps: {},
     metadata: {
       created_at: '2026-03-02T00:00:00Z',
@@ -1303,7 +1303,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         suggested_sam_prompt: 'full height beige fabric with deep pinch pleats',
         default_fabric_id: 'fab-belgian-oatmeal',
         default_color: '#E8E2D5',
-        accent_color: '#4F46E5',
+        accent_color: '#D4AF37',
         polygon_coords: [
           { x: 12, y: 4 },
           { x: 70, y: 4 },
@@ -1337,7 +1337,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
     style_code: 'AATMI-DBL-04',
     tagline: 'Bilateral Embroidered Borders with Connecting Weighted Bottom Band',
     description: 'High-end tailored drapery pairing dual vertical flank borders with an interconnected floor hem border framing an expansive center drape panel.',
-    original_image_url: 'template_double_border',
+    original_image_url: '/templates/tpl-ivory-gold-border.png',
     structure_maps: {},
     metadata: {
       created_at: '2026-03-03T00:00:00Z',
@@ -1356,7 +1356,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         suggested_sam_prompt: 'central main drapery fabric body',
         default_fabric_id: 'fab-rose-dupioni',
         default_color: '#E5C2BC',
-        accent_color: '#4F46E5',
+        accent_color: '#D4AF37',
         polygon_coords: [
           { x: 26, y: 4 },
           { x: 74, y: 4 },
@@ -1426,7 +1426,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
     style_code: 'AATMI-RFL-03',
     tagline: 'Scalloped Swag Header with Grand Drop Curtains and Edge Piping',
     description: 'Opulent palace-inspired drapery featuring an arched sculpted top valance swag, grand floor-length drop panels, and contrast edge piping.',
-    original_image_url: 'template_valance',
+    original_image_url: '/templates/tpl-camel-black-duo.png',
     structure_maps: {},
     metadata: {
       created_at: '2026-03-04T00:00:00Z',
@@ -1464,7 +1464,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         suggested_sam_prompt: 'grand vertical drop drapery panels',
         default_fabric_id: 'fab-midnight-navy-boucle',
         default_color: '#162033',
-        accent_color: '#4F46E5',
+        accent_color: '#D4AF37',
         polygon_coords: [
           { x: 12, y: 26 },
           { x: 88, y: 26 },
