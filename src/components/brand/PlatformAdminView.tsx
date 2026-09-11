@@ -35,21 +35,13 @@ export const PlatformAdminView: React.FC = () => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8 animate-in fade-in duration-200">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="eyebrow-label text-purple-700 font-semibold flex items-center gap-1.5">
-            <ShieldAlert className="w-3.5 h-3.5" />
-            <span>PRATAP AI OPS PLATFORM GOVERNANCE</span>
-          </div>
-          <h1 className="text-2xl font-display font-semibold text-[var(--color-text-primary)]">
-            Cross-Brand Operations &amp; Approvals
-          </h1>
-          <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-            Manage multi-tenant brand onboarding approvals, model allow-lists, and aggregate usage.
-          </p>
-        </div>
+    <div className="page-shell space-y-8">
+      <div>
+        <p className="eyebrow-label">Platform</p>
+        <h1 className="page-title">Operations</h1>
+        <p className="page-lede">
+          Approve brand workspaces, review model routing, and watch aggregate render usage.
+        </p>
       </div>
 
       {/* Cross-Brand Analytics Cards */}

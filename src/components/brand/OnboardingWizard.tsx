@@ -130,13 +130,12 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
   const previewPalette = deriveAccentPalette(accentColor);
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)] flex flex-col justify-between p-4 sm:p-8 max-w-4xl mx-auto">
-      {/* Top Bar: Progress */}
-      <div className="w-full mb-8 pt-4">
-        <div className="flex items-center justify-between mb-2">
+    <div className="mx-auto flex min-h-dvh max-w-4xl flex-col justify-between bg-[var(--color-bg-base)] p-4 text-[var(--color-text-primary)] sm:p-8">
+      <div className="mb-8 w-full pt-4">
+        <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="eyebrow-label text-[var(--color-accent)] font-semibold">
-              STEP {step} OF 5
+            <span className="eyebrow-label">
+              Step {step} of 5
             </span>
             <span className="text-xs text-[var(--color-text-secondary)]">
               {step === 1 && '— Brand Profile'}
@@ -187,7 +186,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
                     value={brandName}
                     onChange={(e) => setBrandName(e.target.value)}
                     placeholder="e.g. Maison Aatmi"
-                    className="w-full h-10 px-3 text-xs rounded-[var(--radius-input)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:ring-2 focus:ring-[var(--color-accent)] focus:outline-none"
+                    className="field"
                   />
                 </div>
 
@@ -199,7 +198,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
                     value={contactName}
                     onChange={(e) => setContactName(e.target.value)}
                     placeholder="e.g. Elena Vance"
-                    className="w-full h-10 px-3 text-xs rounded-[var(--radius-input)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:ring-2 focus:ring-[var(--color-accent)] focus:outline-none"
+                    className="field"
                   />
                 </div>
 
@@ -211,7 +210,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
                     value={contactEmail}
                     onChange={(e) => setContactEmail(e.target.value)}
                     placeholder="elena@aatmi.design"
-                    className="w-full h-10 px-3 text-xs rounded-[var(--radius-input)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:ring-2 focus:ring-[var(--color-accent)] focus:outline-none"
+                    className="field"
                   />
                 </div>
 
@@ -222,7 +221,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
                     value={contactPhone}
                     onChange={(e) => setContactPhone(e.target.value)}
                     placeholder="+1 (555) 000-0000"
-                    className="w-full h-10 px-3 text-xs rounded-[var(--radius-input)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:ring-2 focus:ring-[var(--color-accent)] focus:outline-none"
+                    className="field"
                   />
                 </div>
               </div>
@@ -690,7 +689,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
               <button
                 type="button"
                 onClick={() => setStep(step - 1)}
-                className="px-4 py-2 rounded-[var(--radius-button)] border border-[var(--color-border-strong)] bg-white text-xs font-semibold text-[var(--color-text-primary)] cursor-pointer tactile-press"
+                className="btn btn-secondary"
               >
                 Back
               </button>
@@ -704,7 +703,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
                 (step === 4 && !isStep4Valid)
               }
               onClick={handleNextStep}
-              className="px-6 py-2.5 rounded-[var(--radius-button)] bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-xs font-semibold flex items-center gap-2 cursor-pointer tactile-press disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+              className="btn btn-primary"
             >
               <span>{step === 5 ? 'Finish & Launch Studio' : 'Continue'}</span>
               <ArrowRight className="w-4 h-4" />

@@ -86,7 +86,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--color-bg-base)] text-[var(--color-text-primary)] font-sans antialiased">
+    <div className="flex min-h-dvh flex-col bg-[var(--color-bg-base)] font-sans text-[var(--color-text-primary)] antialiased">
       {/* Top Header with Multi-Tenant Switcher, Navigation & Usage Meter */}
       <BrandHeader onSignOut={() => setIsAuthenticated(false)} />
 

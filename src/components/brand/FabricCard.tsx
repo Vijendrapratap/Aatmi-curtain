@@ -2,13 +2,11 @@
 import React, { useState } from 'react';
 import { Fabric } from '../../types/curtain';
 import {
-  Sparkles,
   Eye,
   MoreVertical,
   FolderPlus,
   Edit2,
   Archive,
-  Check,
   Palette,
 } from 'lucide-react';
 
@@ -37,12 +35,19 @@ export const FabricCard: React.FC<FabricCardProps> = ({
 
   return (
     <div
+      className="brand-card group relative flex cursor-pointer flex-col overflow-hidden"
       onClick={() => onPreview(fabric)}
-      className="brand-card overflow-hidden hover:translate-y-[-2px] transition group relative flex flex-col justify-between cursor-pointer select-none bg-white border border-[var(--color-border-subtle)] hover:border-[var(--color-accent)]"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onPreview(fabric);
+        }
+      }}
+      role="button"
+      tabIndex={0}
     >
-      {/* Thumbnail Box */}
       <div
-        className={`w-full relative overflow-hidden bg-neutral-100 ${
+        className={`media-frame relative ${
           viewSize === 'comfortable' ? 'aspect-[4/3] sm:aspect-square' : 'aspect-square'
         }`}
         style={{ backgroundColor: fabric.color_hex || '#EDE8DE' }}
@@ -50,85 +55,68 @@ export const FabricCard: React.FC<FabricCardProps> = ({
         {!imgError ? (
           <img
             src={fabric.image_url}
-            alt={fabric.name}
+            alt=""
             onError={() => setImgError(true)}
             loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
           />
         ) : (
           <div
-            className="w-full h-full flex flex-col items-center justify-center p-4 text-center text-white"
-            style={{
-              backgroundColor: fabric.color_hex || '#5B4FE0',
-              backgroundImage:
-                'repeating-linear-gradient(45deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 2px, transparent 2px, transparent 6px)',
-            }}
+            className="flex h-full w-full flex-col items-center justify-center p-4 text-center text-white"
+            style={{ backgroundColor: fabric.color_hex || '#5348C8' }}
           >
-            <Palette className="w-8 h-8 mb-1 opacity-80" />
-            <span className="text-[11px] font-semibold truncate max-w-full px-2">
-              {fabric.name}
-            </span>
-            <span className="text-[9px] font-mono opacity-80">{fabric.color_hex}</span>
+            <Palette className="mb-1 h-7 w-7 opacity-80" />
+            <span className="max-w-full truncate px-2 text-[11px] font-semibold">{fabric.name}</span>
           </div>
         )}
 
-        {/* Hover Action Overlay: "Quick Preview & Apply" */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center p-3 gap-2 backdrop-blur-2xs">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#1A1814]/45 p-3 opacity-0 backdrop-blur-[2px] transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               onPreview(fabric);
             }}
-            className="w-full py-1.5 px-3 rounded-lg bg-white/95 hover:bg-white text-[var(--color-text-primary)] text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md tactile-press"
+            className="btn btn-secondary btn-sm w-full"
           >
-            <Eye className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-            <span>Preview &amp; Inspect</span>
+            <Eye className="h-3.5 w-3.5" />
+            Inspect
           </button>
-
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               onApplyDirect(fabric);
             }}
-            className="w-full py-1.5 px-3 rounded-lg bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md tactile-press"
+            className="btn btn-primary btn-sm w-full"
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Apply to Curtain</span>
+            Apply
           </button>
         </div>
 
-        {/* Top-Left Pill: Visibility (Catalog vs Session-only) */}
         <div className="absolute top-2 left-2 pointer-events-none">
-          <span
-            className={`text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full shadow-xs ${
-              isCatalog
-                ? 'bg-white/90 backdrop-blur-xs text-[var(--color-accent)] border border-[var(--color-accent)]/20'
-                : 'bg-neutral-800/85 text-neutral-200 backdrop-blur-xs'
-            }`}
-          >
-            {isCatalog ? 'Catalog' : 'Session-only'}
+          <span className={isCatalog ? 'badge badge-muted' : 'badge badge-accent'}>
+            {isCatalog ? 'Catalog' : 'Session'}
           </span>
         </div>
 
-        {/* Top-Right Kebab ⋮ Menu */}
         <div className="absolute top-2 right-2 z-10">
           <button
             type="button"
+            aria-label="Fabric actions"
             onClick={(e) => {
               e.stopPropagation();
-              setIsMenuOpen(!isMenuOpen);
+              setIsMenuOpen((open) => !open);
             }}
-            className="p-1 rounded-full bg-white/85 hover:bg-white text-[var(--color-text-primary)] shadow-xs transition cursor-pointer"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--color-bg-surface)]/90 text-[var(--color-text-primary)] shadow-[var(--shadow-ring)]"
           >
-            <MoreVertical className="w-3.5 h-3.5" />
+            <MoreVertical className="h-3.5 w-3.5" />
           </button>
 
           {isMenuOpen && (
             <div
               onClick={(e) => e.stopPropagation()}
-              className="absolute right-0 top-full mt-1 w-36 rounded-xl bg-white border border-[var(--color-border-strong)] shadow-xl p-1.5 z-30 text-xs animate-in fade-in zoom-in-95 duration-100"
+              className="menu-panel absolute top-full right-0 z-30 mt-1 w-40 text-[12px]"
             >
               {!isCatalog && onPromoteToCatalog && (
                 <button
@@ -137,13 +125,12 @@ export const FabricCard: React.FC<FabricCardProps> = ({
                     setIsMenuOpen(false);
                     onPromoteToCatalog(fabric);
                   }}
-                  className="w-full px-2 py-1.5 text-left rounded-lg hover:bg-[var(--color-accent-tint)] text-[var(--color-accent)] font-semibold flex items-center gap-2 cursor-pointer"
+                  className="flex w-full items-center gap-2 rounded-[8px] px-2 py-1.5 text-left text-[var(--color-accent)] hover:bg-[var(--color-accent-tint)]"
                 >
-                  <FolderPlus className="w-3.5 h-3.5" />
-                  <span>Add to catalog</span>
+                  <FolderPlus className="h-3.5 w-3.5" />
+                  Add to catalog
                 </button>
               )}
-
               {onRename && (
                 <button
                   type="button"
@@ -151,13 +138,12 @@ export const FabricCard: React.FC<FabricCardProps> = ({
                     setIsMenuOpen(false);
                     onRename(fabric);
                   }}
-                  className="w-full px-2 py-1.5 text-left rounded-lg hover:bg-[var(--color-bg-sunken)] text-[var(--color-text-primary)] flex items-center gap-2 cursor-pointer"
+                  className="flex w-full items-center gap-2 rounded-[8px] px-2 py-1.5 text-left hover:bg-[var(--color-bg-sunken)]"
                 >
-                  <Edit2 className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" />
-                  <span>Rename</span>
+                  <Edit2 className="h-3.5 w-3.5 text-[var(--color-text-tertiary)]" />
+                  Rename
                 </button>
               )}
-
               {onArchive && (
                 <button
                   type="button"
@@ -165,50 +151,29 @@ export const FabricCard: React.FC<FabricCardProps> = ({
                     setIsMenuOpen(false);
                     onArchive(fabric);
                   }}
-                  className="w-full px-2 py-1.5 text-left rounded-lg hover:bg-red-50 text-red-600 flex items-center gap-2 cursor-pointer"
+                  className="flex w-full items-center gap-2 rounded-[8px] px-2 py-1.5 text-left text-[var(--color-error)] hover:bg-[rgba(201,75,72,0.08)]"
                 >
-                  <Archive className="w-3.5 h-3.5" />
-                  <span>Archive</span>
+                  <Archive className="h-3.5 w-3.5" />
+                  Archive
                 </button>
               )}
             </div>
           )}
         </div>
 
-        {/* Bottom-Right Color Dot */}
         <div
-          className="absolute bottom-2 right-2 w-4 h-4 rounded-full border border-white shadow-xs"
-          style={{ backgroundColor: fabric.color_hex || '#5B4FE0' }}
-          title={`Color tone: ${fabric.color_hex}`}
+          className="absolute right-2 bottom-2 h-3.5 w-3.5 rounded-full border border-white shadow-[var(--shadow-ring)]"
+          style={{ backgroundColor: fabric.color_hex || '#5348C8' }}
+          title={fabric.color_hex}
         />
       </div>
 
-      {/* Card Body Details & Quick Action Footer */}
-      <div className="p-3 space-y-2">
-        <div>
-          <h4 className="text-xs font-display font-semibold text-[var(--color-text-primary)] truncate group-hover:text-[var(--color-accent)] transition">
-            {fabric.name}
-          </h4>
-          <div className="text-[10px] text-[var(--color-text-secondary)] mt-0.5 flex items-center justify-between">
-            <span>{fabric.category}</span>
-            <span className="font-mono text-[9px] truncate max-w-[80px]">
-              {fabric.metadata?.sheen || 'Matte'}
-            </span>
-          </div>
+      <div className="p-3">
+        <h4 className="truncate font-display text-[13px] font-semibold">{fabric.name}</h4>
+        <div className="mt-0.5 flex items-center justify-between text-[11px] text-[var(--color-text-tertiary)]">
+          <span>{fabric.category}</span>
+          <span className="font-mono text-[10px]">{fabric.metadata?.sheen || 'Matte'}</span>
         </div>
-
-        {/* 1-Click "Apply to Curtain" Footer Button */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onApplyDirect(fabric);
-          }}
-          className="w-full py-1.5 px-2.5 rounded-lg bg-[var(--color-bg-sunken)] hover:bg-[var(--color-accent-tint)] text-[var(--color-text-primary)] hover:text-[var(--color-accent)] text-[11px] font-semibold flex items-center justify-center gap-1.5 transition border border-[var(--color-border-subtle)] hover:border-[var(--color-accent)]/30 cursor-pointer tactile-press"
-        >
-          <Sparkles className="w-3 h-3 text-[var(--color-accent)]" />
-          <span>Apply to Curtain</span>
-        </button>
       </div>
     </div>
   );

@@ -60,16 +60,12 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({
   if (!design) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-4">
-        <h2 className="text-xl font-display font-semibold">No Design Selected</h2>
-        <p className="text-xs text-[var(--color-text-secondary)]">
-          Generate and finalize a curtain design in the studio editor to inspect details and preview in rooms.
+        <h2 className="page-title">No design selected</h2>
+        <p className="page-lede mx-auto">
+          Save a curtain in the studio to inspect specs and stage it in a room.
         </p>
-        <button
-          type="button"
-          onClick={() => setActiveView('editor')}
-          className="px-4 py-2 rounded-[var(--radius-button)] bg-[var(--color-accent)] text-white text-xs font-semibold"
-        >
-          Go to Studio Editor
+        <button type="button" onClick={() => setActiveView('editor')} className="btn btn-primary">
+          Open studio
         </button>
       </div>
     );
@@ -162,38 +158,31 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6 animate-in fade-in duration-200">
-      {/* Top Bar: Title & Breadcrumbs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="page-shell max-w-6xl space-y-6">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <button
             type="button"
             onClick={() => setActiveView('editor')}
-            className="text-xs font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1 mb-1 cursor-pointer"
+            className="btn btn-ghost btn-sm mb-2 -ml-2"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Studio Editor</span>
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Back to studio
           </button>
-          <h1 className="text-2xl font-display font-semibold text-[var(--color-text-primary)]">
-            {design.name}
-          </h1>
-          <div className="text-xs text-[var(--color-text-secondary)] font-mono mt-0.5">
-            Template: {design.template_name} • {design.assignments.length} Fabric Zones Assigned
-          </div>
+          <h1 className="page-title">{design.name}</h1>
+          <p className="page-lede">
+            {design.template_name} · {design.assignments.length} zones
+          </p>
         </div>
 
-        {/* Two Tabs at Top (Section 8.1): [ Curtain Design ] [ In Your Room ] */}
-        <div className="flex items-center p-1 rounded-2xl bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)] self-start sm:self-auto">
+        <div className="segmented self-start">
           <button
             type="button"
             onClick={() => setActiveTab('curtain')}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
-              activeTab === 'curtain'
-                ? 'bg-white text-[var(--color-text-primary)] shadow-2xs font-bold'
-                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
-            }`}
+            className={`segmented-item ${activeTab === 'curtain' ? 'is-active' : ''}`}
+            aria-pressed={activeTab === 'curtain'}
           >
-            Curtain Design
+            Curtain
           </button>
           <button
             type="button"
@@ -203,18 +192,12 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({
                 setIsRoomChooserOpen(true);
               }
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
-              activeTab === 'room'
-                ? 'bg-white text-[var(--color-text-primary)] shadow-2xs font-bold'
-                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
-            }`}
+            className={`segmented-item ${activeTab === 'room' ? 'is-active' : ''}`}
+            aria-pressed={activeTab === 'room'}
           >
-            <Sparkles className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-            <span>In Your Room</span>
+            In room
             {roomPreviews.length > 0 && (
-              <span className="w-4 h-4 rounded-full bg-[var(--color-accent-tint)] text-[var(--color-accent)] text-[10px] flex items-center justify-center font-mono">
-                {roomPreviews.length}
-              </span>
+              <span className="ml-1 font-mono text-[10px] tabular-nums">{roomPreviews.length}</span>
             )}
           </button>
         </div>
@@ -241,14 +224,14 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({
         {/* TAB 1: Curtain Design View */}
         {activeTab === 'curtain' && (
           <div className="w-full flex flex-col items-center">
-            <div className="relative w-full max-w-2xl aspect-[4/5] rounded-2xl overflow-hidden bg-neutral-100 shadow-md">
+            <div className="media-frame relative aspect-[4/5] w-full max-w-2xl overflow-hidden rounded-[16px] bg-[var(--color-bg-sunken)]">
               <img
                 src={design.final_image_url}
                 alt={design.name}
-                className="w-full h-full object-cover"
+                className="h-full w-full object-cover"
               />
-              <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-xs text-white text-[11px] font-mono">
-                FLUX.1 Kontext Render
+              <div className="absolute top-3 left-3">
+                <span className="badge badge-muted">Studio render</span>
               </div>
             </div>
           </div>

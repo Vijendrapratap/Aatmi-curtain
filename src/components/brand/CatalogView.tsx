@@ -10,11 +10,8 @@ import {
   Upload,
   Filter,
   Check,
-  Sparkles,
-  Layers,
   LayoutGrid,
   Grid3X3,
-  SlidersHorizontal,
 } from 'lucide-react';
 import { CameraCaptureModal } from './CameraCaptureModal';
 import { BulkUploadModal } from './BulkUploadModal';
@@ -147,91 +144,73 @@ export const CatalogView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6 animate-in fade-in duration-200">
-      {/* Toast Notification */}
+    <div className="page-shell space-y-7">
       {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 p-3.5 rounded-2xl bg-white border border-[var(--color-accent)] text-xs text-[var(--color-text-primary)] shadow-xl flex items-center gap-2.5 animate-in slide-in-from-top-4">
-          <div className="w-5 h-5 rounded-full bg-[var(--color-accent)] text-white flex items-center justify-center shrink-0">
-            <Check className="w-3.5 h-3.5" />
+        <div className="fixed top-20 right-6 z-50 flex items-center gap-2.5 rounded-[14px] bg-[var(--color-bg-surface)] px-4 py-3 text-[13px] shadow-[var(--shadow-modal)]">
+          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent)] text-white">
+            <Check className="h-3.5 w-3.5" />
           </div>
-          <span className="font-semibold">{toastMessage}</span>
+          <span className="font-medium">{toastMessage}</span>
           <button
             type="button"
             onClick={() => setActiveView('editor')}
-            className="ml-2 underline text-[var(--color-accent)] font-bold cursor-pointer hover:no-underline"
+            className="ml-1 font-semibold text-[var(--color-accent)]"
           >
-            View in Studio →
+            View in studio
           </button>
         </div>
       )}
 
-      {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <div className="eyebrow-label text-[var(--color-accent)] font-semibold">
-            CURATED TEXTILES &amp; SWATCHES
-          </div>
-          <h1 className="text-2xl font-display font-semibold text-[var(--color-text-primary)]">
-            Fabric Catalog
-          </h1>
-          <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-            Browse high-resolution textiles, inspect macro weave textures, and 1-click apply swatches to your active curtain design.
+          <p className="eyebrow-label">Textiles</p>
+          <h1 className="page-title">Fabric catalog</h1>
+          <p className="page-lede">
+            Inspect weave, then apply a swatch to the active drapery zone.
           </p>
         </div>
 
-        {/* "+ Add Fabric" Dropdown Button */}
-        <div className="relative self-start sm:self-auto flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setActiveView('editor')}
-            className="px-3.5 py-2.5 rounded-[var(--radius-button)] bg-white hover:bg-[var(--color-bg-sunken)] border border-[var(--color-border-strong)] text-xs font-semibold text-[var(--color-text-primary)] flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-            <span>Open Studio Editor</span>
+        <div className="relative flex items-center gap-2 self-start">
+          <button type="button" onClick={() => setActiveView('editor')} className="btn btn-secondary">
+            Open studio
           </button>
-
           <button
             type="button"
             onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
-            className="px-4 py-2.5 rounded-[var(--radius-button)] bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-xs font-semibold flex items-center gap-2 transition tactile-press cursor-pointer shadow-sm"
+            className="btn btn-primary"
           >
-            <Plus className="w-4 h-4" />
-            <span>+ Add Fabric</span>
+            <Plus className="h-4 w-4" />
+            Add fabric
           </button>
 
           {isAddMenuOpen && (
-            <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl bg-white border border-[var(--color-border-strong)] shadow-xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div className="menu-panel absolute top-full right-0 z-50 mt-2 w-60">
               <button
                 type="button"
                 onClick={() => {
                   setIsAddMenuOpen(false);
                   setIsCameraModalOpen(true);
                 }}
-                className="w-full p-2 rounded-xl text-left text-xs font-medium text-[var(--color-text-primary)] hover:bg-[var(--color-bg-sunken)] flex items-center gap-2.5 transition cursor-pointer"
+                className="flex w-full items-start gap-2.5 rounded-[10px] p-2.5 text-left hover:bg-[var(--color-bg-sunken)]"
               >
-                <Camera className="w-4 h-4 text-[var(--color-accent)]" />
+                <Camera className="mt-0.5 h-4 w-4 text-[var(--color-accent)]" />
                 <div>
-                  <div className="font-semibold">Camera Capture</div>
-                  <div className="text-[10px] text-[var(--color-text-secondary)]">
-                    Photograph physical swatch
-                  </div>
+                  <div className="text-[13px] font-semibold">Camera capture</div>
+                  <div className="text-[11px] text-[var(--color-text-tertiary)]">Photograph a physical swatch</div>
                 </div>
               </button>
-
               <button
                 type="button"
                 onClick={() => {
                   setIsAddMenuOpen(false);
                   setIsBulkModalOpen(true);
                 }}
-                className="w-full p-2 rounded-xl text-left text-xs font-medium text-[var(--color-text-primary)] hover:bg-[var(--color-bg-sunken)] flex items-center gap-2.5 transition cursor-pointer mt-1"
+                className="flex w-full items-start gap-2.5 rounded-[10px] p-2.5 text-left hover:bg-[var(--color-bg-sunken)]"
               >
-                <Upload className="w-4 h-4 text-amber-700" />
+                <Upload className="mt-0.5 h-4 w-4 text-[var(--color-premium)]" />
                 <div>
-                  <div className="font-semibold">Bulk Catalog Upload</div>
-                  <div className="text-[10px] text-[var(--color-text-secondary)]">
-                    Ingest multi-swatch folder
-                  </div>
+                  <div className="text-[13px] font-semibold">Bulk upload</div>
+                  <div className="text-[11px] text-[var(--color-text-tertiary)]">Ingest a swatch folder</div>
                 </div>
               </button>
             </div>
@@ -242,49 +221,40 @@ export const CatalogView: React.FC = () => {
       {/* Main Layout: Left Filter Rail + Responsive Right Grid */}
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         {/* Left Filter Rail */}
-        <aside className="w-full lg:w-64 shrink-0 brand-card p-5 space-y-6">
-          <div className="flex items-center gap-2 pb-3 border-b border-[var(--color-border-subtle)]">
-            <Filter className="w-4 h-4 text-[var(--color-text-secondary)]" />
-            <span className="text-xs font-semibold text-[var(--color-text-primary)]">
-              Filters &amp; Categories
-            </span>
+        <aside className="w-full shrink-0 space-y-6 rounded-[18px] bg-[var(--color-bg-surface)] p-5 shadow-[var(--shadow-card)] lg:w-60">
+          <div className="flex items-center gap-2 border-b border-[var(--color-border-subtle)] pb-3">
+            <Filter className="h-4 w-4 text-[var(--color-text-tertiary)]" />
+            <span className="text-[13px] font-semibold">Filters</span>
           </div>
 
           {/* Quick Filter: Authentic Real Photos */}
           <div className="space-y-1.5">
-            <span className="eyebrow-label text-[var(--color-accent)] block mb-1">
-              Curated Collections
-            </span>
+            <span className="eyebrow-label mb-1 block">Collections</span>
             <button
               type="button"
               onClick={() => setQuickFilter(quickFilter === 'all' ? 'authentic_real' : 'all')}
-              className={`w-full px-3 py-2 rounded-xl text-left text-xs transition cursor-pointer flex items-center justify-between border ${
+              className={`flex w-full cursor-pointer items-center justify-between rounded-[12px] px-3 py-2 text-left text-[13px] transition-colors ${
                 quickFilter === 'authentic_real'
-                  ? 'bg-[var(--color-accent-tint)] border-[var(--color-accent)] text-[var(--color-accent)] font-semibold shadow-2xs'
-                  : 'bg-white border-[var(--color-border-subtle)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-sunken)]'
+                  ? 'bg-[var(--color-accent-tint)] font-semibold text-[var(--color-accent)]'
+                  : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-sunken)]'
               }`}
             >
-              <span className="flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-                <span>13 Real Atelier Samples</span>
-              </span>
-              {quickFilter === 'authentic_real' && <Check className="w-3.5 h-3.5" />}
+              <span>Atelier samples</span>
+              {quickFilter === 'authentic_real' && <Check className="h-3.5 w-3.5" />}
             </button>
           </div>
 
           {/* Search bar */}
           <div>
-            <label className="block text-[11px] font-medium text-[var(--color-text-secondary)] mb-1.5">
-              Search Swatches
-            </label>
+            <label className="field-label">Search</label>
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-[var(--color-text-disabled)] absolute left-3 top-2.5" />
+              <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-[var(--color-text-disabled)]" />
               <input
-                type="text"
+                type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Name, velvet, damask..."
-                className="w-full h-8 pl-8 pr-3 text-xs rounded-xl bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                placeholder="Velvet, damask…"
+                className="field pl-9"
               />
             </div>
           </div>
@@ -299,9 +269,9 @@ export const CatalogView: React.FC = () => {
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs transition cursor-pointer flex items-center justify-between ${
+                className={`flex w-full cursor-pointer items-center justify-between rounded-[8px] px-2.5 py-1.5 text-left text-[13px] transition-colors ${
                   selectedCategory === cat
-                    ? 'bg-[var(--color-accent-tint)] text-[var(--color-accent)] font-semibold'
+                    ? 'bg-[var(--color-accent-tint)] font-semibold text-[var(--color-accent)]'
                     : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-sunken)] hover:text-[var(--color-text-primary)]'
                 }`}
               >
@@ -326,9 +296,9 @@ export const CatalogView: React.FC = () => {
                 key={src.id}
                 type="button"
                 onClick={() => setSelectedSource(src.id)}
-                className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs transition cursor-pointer flex items-center justify-between ${
+                className={`flex w-full cursor-pointer items-center justify-between rounded-[8px] px-2.5 py-1.5 text-left text-[13px] transition-colors ${
                   selectedSource === src.id
-                    ? 'bg-[var(--color-accent-tint)] text-[var(--color-accent)] font-semibold'
+                    ? 'bg-[var(--color-accent-tint)] font-semibold text-[var(--color-accent)]'
                     : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-sunken)]'
                 }`}
               >
@@ -352,9 +322,9 @@ export const CatalogView: React.FC = () => {
                 key={vis.id}
                 type="button"
                 onClick={() => setSelectedVisibility(vis.id)}
-                className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs transition cursor-pointer flex items-center justify-between ${
+                className={`flex w-full cursor-pointer items-center justify-between rounded-[8px] px-2.5 py-1.5 text-left text-[13px] transition-colors ${
                   selectedVisibility === vis.id
-                    ? 'bg-[var(--color-accent-tint)] text-[var(--color-accent)] font-semibold'
+                    ? 'bg-[var(--color-accent-tint)] font-semibold text-[var(--color-accent)]'
                     : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-sunken)]'
                 }`}
               >
@@ -367,36 +337,29 @@ export const CatalogView: React.FC = () => {
 
         {/* Right Grid of Fabric Swatches */}
         <main className="flex-1 w-full space-y-4">
-          <div className="flex items-center justify-between text-xs text-[var(--color-text-secondary)] px-1">
+          <div className="flex items-center justify-between px-1 text-[13px] text-[var(--color-text-secondary)]">
             <span>
-              Showing <strong className="text-[var(--color-text-primary)]">{filteredFabrics.length}</strong> of {scopedFabrics.length} swatches • Click any swatch to inspect texture &amp; apply
+              <strong className="font-semibold text-[var(--color-text-primary)] tabular-nums">{filteredFabrics.length}</strong>
+              {' '}of {scopedFabrics.length}
             </span>
-
-            {/* View Size Switcher */}
-            <div className="flex items-center gap-1 bg-[var(--color-bg-sunken)] p-0.5 rounded-lg border border-[var(--color-border-subtle)]">
+            <div className="segmented">
               <button
                 type="button"
                 onClick={() => setViewSize('comfortable')}
-                className={`p-1 rounded-md transition cursor-pointer ${
-                  viewSize === 'comfortable'
-                    ? 'bg-white shadow-2xs text-[var(--color-text-primary)]'
-                    : 'text-[var(--color-text-secondary)]'
-                }`}
+                className={`segmented-item ${viewSize === 'comfortable' ? 'is-active' : ''}`}
+                aria-pressed={viewSize === 'comfortable'}
                 title="Comfortable cards"
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
+                <LayoutGrid className="h-3.5 w-3.5" />
               </button>
               <button
                 type="button"
                 onClick={() => setViewSize('compact')}
-                className={`p-1 rounded-md transition cursor-pointer ${
-                  viewSize === 'compact'
-                    ? 'bg-white shadow-2xs text-[var(--color-text-primary)]'
-                    : 'text-[var(--color-text-secondary)]'
-                }`}
+                className={`segmented-item ${viewSize === 'compact' ? 'is-active' : ''}`}
+                aria-pressed={viewSize === 'compact'}
                 title="Compact grid"
               >
-                <Grid3X3 className="w-3.5 h-3.5" />
+                <Grid3X3 className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
@@ -408,18 +371,28 @@ export const CatalogView: React.FC = () => {
                 : 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5'
             }`}
           >
-            {filteredFabrics.map((fabric) => (
-              <FabricCard
-                key={fabric.id}
-                fabric={fabric}
-                viewSize={viewSize}
-                onPreview={(f) => setPreviewFabric(f)}
-                onApplyDirect={handleApplyDirect}
-                onPromoteToCatalog={handlePromoteToCatalog}
-                onRename={handleStartRename}
-                onArchive={(f) => archiveBrandFabric(f.id)}
-              />
-            ))}
+            {filteredFabrics.length === 0 ? (
+              <div className="col-span-full brand-card px-6 py-12">
+                <p className="eyebrow-label">No swatches</p>
+                <h3 className="mt-2 font-display text-[18px] font-semibold">Nothing matches these filters</h3>
+                <p className="mt-1 max-w-md text-[14px] text-[var(--color-text-secondary)]">
+                  Clear a filter, or add a fabric from camera or bulk upload.
+                </p>
+              </div>
+            ) : (
+              filteredFabrics.map((fabric) => (
+                <FabricCard
+                  key={fabric.id}
+                  fabric={fabric}
+                  viewSize={viewSize}
+                  onPreview={(f) => setPreviewFabric(f)}
+                  onApplyDirect={handleApplyDirect}
+                  onPromoteToCatalog={handlePromoteToCatalog}
+                  onRename={handleStartRename}
+                  onArchive={(f) => archiveBrandFabric(f.id)}
+                />
+              ))
+            )}
           </div>
         </main>
       </div>
@@ -438,30 +411,20 @@ export const CatalogView: React.FC = () => {
 
       {/* Rename Dialog */}
       {renamingFabric && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-          <div className="brand-card w-full max-w-sm p-5 bg-white space-y-4">
-            <h3 className="text-sm font-display font-semibold text-[var(--color-text-primary)]">
-              Rename Swatch
-            </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1A1814]/40 p-4 backdrop-blur-sm">
+          <div className="brand-card w-full max-w-sm space-y-4 p-5">
+            <h3 className="font-display text-[16px] font-semibold">Rename swatch</h3>
             <input
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className="w-full h-9 px-3 text-xs rounded-lg bg-[var(--color-bg-sunken)] border border-[var(--color-border-strong)]"
+              className="field"
             />
             <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setRenamingFabric(null)}
-                className="px-3 py-1.5 text-xs text-[var(--color-text-secondary)]"
-              >
+              <button type="button" onClick={() => setRenamingFabric(null)} className="btn btn-ghost">
                 Cancel
               </button>
-              <button
-                type="button"
-                onClick={handleSaveRename}
-                className="px-4 py-1.5 text-xs font-semibold bg-[var(--color-accent)] text-white rounded-lg"
-              >
+              <button type="button" onClick={handleSaveRename} className="btn btn-primary">
                 Save
               </button>
             </div>
