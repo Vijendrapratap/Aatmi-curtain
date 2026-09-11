@@ -220,9 +220,9 @@ const SEEDED_TEMPLATES: CurtainTemplate[] = DEFAULT_TEMPLATES.map((tpl, i) => ({
 
 const SEEDED_FABRICS: Fabric[] = DEFAULT_FABRICS.map((fab, i) => ({
   ...fab,
-  brand_id: 'brand-aatmi-01',
-  visibility: i % 5 === 0 ? 'session_only' : 'catalog',
-  source: i % 4 === 0 ? 'camera_capture' : 'catalog',
+  brand_id: i === 0 || i === 1 ? 'brand-aatmi-01' : null, // null = shared platform catalog available to all brands
+  visibility: (i % 6 === 0 ? 'session_only' : 'catalog') as 'session_only' | 'catalog',
+  source: (i % 4 === 0 ? 'camera_capture' : 'catalog') as 'camera_capture' | 'catalog',
 }));
 
 function applyRootTheme(hex: string) {

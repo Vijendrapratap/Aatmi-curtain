@@ -9,10 +9,11 @@ import {
   Search,
   Check,
   Sparkles,
-  Plus,
-  ArrowRight,
+  Eye,
+  Camera as CameraIcon,
 } from 'lucide-react';
 import { CameraCaptureModal } from './CameraCaptureModal';
+import { FabricPreviewModal } from './FabricPreviewModal';
 
 interface FabricPickerSheetProps {
   isOpen: boolean;
@@ -21,6 +22,102 @@ interface FabricPickerSheetProps {
   currentAssignedFabricId: string | null;
   onAssignFabric: (fabricId: string) => void;
 }
+
+const PickerFabricItem: React.FC<{
+  fabric: Fabric;
+  isAssigned: boolean;
+  onSelect: () => void;
+  onPreview: () => void;
+}> = ({ fabric, isAssigned, onSelect, onPreview }) => {
+  const [imgError, setImgError] = useState(false);
+  const isRealPhoto = fabric.image_url.startsWith('/fabrics/');
+
+  return (
+    <div
+      onClick={onSelect}
+      className={`rounded-2xl border text-left overflow-hidden transition cursor-pointer flex flex-col justify-between group relative select-none ${
+        isAssigned
+          ? 'border-[var(--color-accent)] ring-2 ring-[var(--color-accent)]/20 shadow-sm bg-[var(--color-accent-tint)]'
+          : 'border-[var(--color-border-subtle)] hover:border-[var(--color-accent)] bg-white hover:shadow-xs'
+      }`}
+    >
+      <div
+        className="w-full aspect-square relative overflow-hidden bg-neutral-100"
+        style={{ backgroundColor: fabric.color_hex || '#EDE8DE' }}
+      >
+        {!imgError ? (
+          <img
+            src={fabric.image_url}
+            alt={fabric.name}
+            onError={() => setImgError(true)}
+            loading="lazy"
+            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+          />
+        ) : (
+          <div
+            className="w-full h-full flex flex-col items-center justify-center p-2 text-center text-white"
+            style={{
+              backgroundColor: fabric.color_hex || '#5B4FE0',
+              backgroundImage:
+                'repeating-linear-gradient(45deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 2px, transparent 2px, transparent 6px)',
+            }}
+          >
+            <Palette className="w-5 h-5 mb-1 opacity-80" />
+            <span className="text-[10px] font-semibold truncate max-w-full px-1">
+              {fabric.name}
+            </span>
+          </div>
+        )}
+
+        {/* Assigned checkmark indicator */}
+        {isAssigned && (
+          <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--color-accent)] text-white flex items-center justify-center shadow-xs z-10">
+            <Check className="w-3 h-3 stroke-[2.5]" />
+          </div>
+        )}
+
+        {/* Real photo badge */}
+        {isRealPhoto && (
+          <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-black/60 text-white font-mono text-[9px] tracking-wider backdrop-blur-xs">
+            REAL
+          </span>
+        )}
+
+        {/* Quick Tactile Loupe Inspect button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onPreview();
+          }}
+          title="Inspect tactile weave"
+          className="absolute bottom-2 right-2 p-1.5 rounded-lg bg-white/95 hover:bg-white text-[var(--color-text-primary)] shadow-sm opacity-0 group-hover:opacity-100 transition duration-150 cursor-pointer flex items-center gap-1 z-10"
+        >
+          <Eye className="w-3.5 h-3.5 text-[var(--color-accent)]" />
+          <span className="text-[10px] font-semibold pr-0.5">Inspect</span>
+        </button>
+      </div>
+
+      <div className="p-2.5">
+        <div className="flex items-center gap-1.5">
+          <span
+            className="w-2.5 h-2.5 rounded-full shrink-0 border border-black/10"
+            style={{ backgroundColor: fabric.color_hex || '#CCC' }}
+          />
+          <h4 className="text-xs font-semibold text-[var(--color-text-primary)] truncate">
+            {fabric.name}
+          </h4>
+        </div>
+        <div className="text-[10px] text-[var(--color-text-secondary)] mt-1 flex items-center justify-between">
+          <span className="truncate">{fabric.category}</span>
+          <span className="font-mono text-[9px] text-[var(--color-text-tertiary)] uppercase shrink-0">
+            {fabric.metadata.sheen}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const FabricPickerSheet: React.FC<FabricPickerSheetProps> = ({
   isOpen,
@@ -35,6 +132,7 @@ export const FabricPickerSheet: React.FC<FabricPickerSheetProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
+  const [previewingFabric, setPreviewingFabric] = useState<Fabric | null>(null);
 
   if (!isOpen || !activeRegion) return null;
 
@@ -43,7 +141,16 @@ export const FabricPickerSheet: React.FC<FabricPickerSheetProps> = ({
   );
 
   const filteredFabrics = scopedFabrics.filter((f) => {
-    if (selectedCategory !== 'All' && f.category !== selectedCategory) return false;
+    if (selectedCategory === 'Real Swatches' && !f.image_url.startsWith('/fabrics/')) {
+      return false;
+    }
+    if (
+      selectedCategory !== 'All' &&
+      selectedCategory !== 'Real Swatches' &&
+      f.category !== selectedCategory
+    ) {
+      return false;
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       return (
@@ -57,6 +164,7 @@ export const FabricPickerSheet: React.FC<FabricPickerSheetProps> = ({
 
   const categories = [
     'All',
+    'Real Swatches',
     'Velvet',
     'Linen',
     'Silk',
@@ -115,7 +223,7 @@ export const FabricPickerSheet: React.FC<FabricPickerSheetProps> = ({
                 : 'text-[var(--color-text-secondary)]'
             }`}
           >
-            <Camera className="w-3.5 h-3.5 text-[var(--color-accent)]" />
+            <CameraIcon className="w-3.5 h-3.5 text-[var(--color-accent)]" />
             <span>Camera Capture</span>
           </button>
         </div>
@@ -141,7 +249,7 @@ export const FabricPickerSheet: React.FC<FabricPickerSheetProps> = ({
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-2.5 py-1 rounded-lg text-[11px] shrink-0 transition cursor-pointer ${
                   selectedCategory === cat
-                    ? 'bg-[var(--color-accent)] text-white font-semibold'
+                    ? 'bg-[var(--color-accent)] text-white font-semibold shadow-xs'
                     : 'bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
                 }`}
               >
@@ -153,48 +261,24 @@ export const FabricPickerSheet: React.FC<FabricPickerSheetProps> = ({
 
         {/* Swatch Grid */}
         <div className="flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 p-1">
-          {filteredFabrics.map((fabric) => {
-            const isAssigned = currentAssignedFabricId === fabric.id;
+          {filteredFabrics.map((fabric) => (
+            <PickerFabricItem
+              key={fabric.id}
+              fabric={fabric}
+              isAssigned={currentAssignedFabricId === fabric.id}
+              onSelect={() => {
+                onAssignFabric(fabric.id);
+                onClose();
+              }}
+              onPreview={() => setPreviewingFabric(fabric)}
+            />
+          ))}
 
-            return (
-              <button
-                key={fabric.id}
-                type="button"
-                onClick={() => {
-                  onAssignFabric(fabric.id);
-                  onClose();
-                }}
-                className={`rounded-2xl border text-left overflow-hidden transition cursor-pointer tactile-press flex flex-col justify-between group ${
-                  isAssigned
-                    ? 'border-[var(--color-accent)] ring-2 ring-[var(--color-accent)]/20 shadow-sm bg-[var(--color-accent-tint)]'
-                    : 'border-[var(--color-border-subtle)] hover:border-[var(--color-border-strong)] bg-white'
-                }`}
-              >
-                <div className="w-full aspect-square bg-neutral-100 relative overflow-hidden">
-                  <img
-                    src={fabric.image_url}
-                    alt={fabric.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                  />
-                  {isAssigned && (
-                    <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--color-accent)] text-white flex items-center justify-center shadow-xs">
-                      <Check className="w-3 h-3" />
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-2.5">
-                  <h4 className="text-xs font-semibold text-[var(--color-text-primary)] truncate">
-                    {fabric.name}
-                  </h4>
-                  <div className="text-[10px] text-[var(--color-text-secondary)] mt-0.5 flex items-center justify-between">
-                    <span>{fabric.category}</span>
-                    <span className="font-mono text-[9px]">{fabric.metadata.sheen}</span>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
+          {filteredFabrics.length === 0 && (
+            <div className="col-span-full py-12 text-center text-xs text-[var(--color-text-tertiary)]">
+              No fabrics match your search criteria.
+            </div>
+          )}
         </div>
 
         {/* Camera Modal */}
@@ -203,6 +287,30 @@ export const FabricPickerSheet: React.FC<FabricPickerSheetProps> = ({
           onClose={() => setIsCameraModalOpen(false)}
           onFabricCaptured={(f) => {
             onAssignFabric(f.id);
+            onClose();
+          }}
+        />
+
+        {/* Tactile Loupe & Deep Preview Modal */}
+        <FabricPreviewModal
+          isOpen={!!previewingFabric}
+          onClose={() => setPreviewingFabric(null)}
+          fabric={previewingFabric}
+          regions={activeRegion ? [activeRegion] : []}
+          activeRegionId={activeRegion?.id || null}
+          onApplyToRegion={(_regId, fabId) => {
+            onAssignFabric(fabId);
+            setPreviewingFabric(null);
+            onClose();
+          }}
+          onApplyToAllRegions={(fabId) => {
+            onAssignFabric(fabId);
+            setPreviewingFabric(null);
+            onClose();
+          }}
+          onGoToStudio={() => {
+            if (previewingFabric) onAssignFabric(previewingFabric.id);
+            setPreviewingFabric(null);
             onClose();
           }}
         />
