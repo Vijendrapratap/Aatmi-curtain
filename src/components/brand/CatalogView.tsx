@@ -136,9 +136,10 @@ export const CatalogView: React.FC = () => {
   };
 
   const handleApplyToAllRegions = (fabricId: string) => {
-    currentTemplate?.regions.forEach((reg) => {
-      assignFabricToRegion(reg.id, fabricId);
-    });
+    useStudioStore.getState().assignFabricToAllRegions(
+      (currentTemplate?.regions || []).map((r) => r.id),
+      fabricId
+    );
     setToastMessage(`Applied to all ${currentTemplate?.regions.length} zones!`);
     setTimeout(() => setToastMessage(null), 3000);
   };

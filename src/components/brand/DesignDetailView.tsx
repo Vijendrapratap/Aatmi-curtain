@@ -1,7 +1,6 @@
 // src/components/brand/DesignDetailView.tsx
 import React, { useState } from 'react';
 import { useBrandStore } from '../../lib/brandStore';
-import { useStudioStore } from '../../lib/store';
 import { Design, RoomPreview } from '../../types/brand';
 import {
   Share2,
