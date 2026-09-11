@@ -132,14 +132,17 @@ export const BrandSettingsView: React.FC<BrandSettingsViewProps> = ({
   const used = initialConfig.monthly_generations_used || 0;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6 animate-in fade-in duration-200">
-      {/* Settings Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-[var(--color-border-subtle)] pb-3">
+    <div className="page-shell max-w-4xl space-y-6">
+      <div>
+        <p className="eyebrow-label">Atelier</p>
+        <h1 className="page-title">Settings</h1>
+      </div>
+      <div className="segmented flex-wrap">
         {[
-          { id: 'models', label: 'AI Models', icon: Cpu },
-          { id: 'profile', label: 'Brand Profile & Theme', icon: Building2 },
-          { id: 'team', label: 'Team Members', icon: Users },
-          { id: 'billing', label: 'Billing & Quotas', icon: CreditCard },
+          { id: 'models', label: 'Models', icon: Cpu },
+          { id: 'profile', label: 'Brand', icon: Building2 },
+          { id: 'team', label: 'Team', icon: Users },
+          { id: 'billing', label: 'Billing', icon: CreditCard },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -148,13 +151,10 @@ export const BrandSettingsView: React.FC<BrandSettingsViewProps> = ({
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                isActive
-                  ? 'bg-[var(--color-bg-sunken)] text-[var(--color-text-primary)] font-bold border border-[var(--color-border-subtle)] shadow-2xs'
-                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
-              }`}
+              className={`segmented-item ${isActive ? 'is-active' : ''}`}
+              aria-pressed={isActive}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="h-3.5 w-3.5" />
               <span>{tab.label}</span>
             </button>
           );
@@ -162,8 +162,8 @@ export const BrandSettingsView: React.FC<BrandSettingsViewProps> = ({
       </div>
 
       {saveNotice && (
-        <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2">
-          <Check className="w-4 h-4 text-emerald-600" />
+        <div className="flex items-center gap-2 rounded-[14px] bg-[rgba(44,154,106,0.1)] px-4 py-3 text-[13px] text-[#1F6B48]">
+          <Check className="h-4 w-4" />
           <span>{saveNotice}</span>
         </div>
       )}
@@ -173,11 +173,9 @@ export const BrandSettingsView: React.FC<BrandSettingsViewProps> = ({
         <div className="max-w-2xl mx-auto space-y-6 pb-24">
           {/* Header (Section 3.4.1) */}
           <div>
-            <h1 className="text-2xl font-display font-semibold text-[var(--color-text-primary)]">
-              AI Models
-            </h1>
-            <p className="text-xs text-[var(--color-text-secondary)] mt-1">
-              Choose which AI powers your fabric renders. We recommend the defaults — change only if you know what you're picking.
+            <h2 className="font-display text-[22px] font-semibold tracking-tight">AI models</h2>
+            <p className="page-lede">
+              Choose which model powers fabric renders. Defaults are tuned for drapery; change them only if you need a different vendor.
             </p>
           </div>
 
@@ -469,37 +467,32 @@ export const BrandSettingsView: React.FC<BrandSettingsViewProps> = ({
             )}
           </div>
 
-          {/* STICKY SAVE BAR (Section 3.4.5) */}
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-[var(--color-border-subtle)] shadow-2xl z-30">
-            <div className="max-w-2xl mx-auto flex items-center justify-between">
-              <span className="text-xs text-[var(--color-text-secondary)]">
-                {isDirty ? 'Unsaved model changes' : 'All model settings saved'}
-              </span>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  disabled={!isDirty}
-                  onClick={() => {
-                    setRegionProvider(initialConfig.region_edit_provider);
-                    setRoomProvider(initialConfig.room_preview_provider);
-                    setKeyMode(initialConfig.key_mode);
-                    setByoKeyInput('');
-                  }}
-                  className="px-4 py-2 text-xs font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  disabled={!isDirty}
-                  onClick={handleSaveChanges}
-                  className="px-6 py-2 rounded-[var(--radius-button)] bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-xs font-semibold cursor-pointer tactile-press disabled:opacity-40 disabled:cursor-not-allowed shadow-xs"
-                >
-                  Save changes
-                </button>
+          {isDirty && (
+            <div className="fixed right-0 bottom-0 left-0 z-30 border-t border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)]/92 px-4 py-3 backdrop-blur-md">
+              <div className="mx-auto flex max-w-2xl items-center justify-between gap-3">
+                <span className="text-[13px] text-[var(--color-text-secondary)]">
+                  Unsaved model changes
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRegionProvider(initialConfig.region_edit_provider);
+                      setRoomProvider(initialConfig.room_preview_provider);
+                      setKeyMode(initialConfig.key_mode);
+                      setByoKeyInput('');
+                    }}
+                    className="btn btn-ghost"
+                  >
+                    Cancel
+                  </button>
+                  <button type="button" onClick={handleSaveChanges} className="btn btn-primary">
+                    Save changes
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       )}
 
@@ -507,40 +500,40 @@ export const BrandSettingsView: React.FC<BrandSettingsViewProps> = ({
       {activeTab === 'profile' && (
         <div className="max-w-2xl mx-auto brand-card p-6 space-y-6">
           <div>
-            <h2 className="text-lg font-display font-semibold">Brand Profile &amp; Theming</h2>
-            <p className="text-xs text-[var(--color-text-secondary)]">
-              Update brand contact information and interactive accent color.
+            <h2 className="font-display text-[20px] font-semibold tracking-tight">Brand profile</h2>
+            <p className="page-lede">
+              Contact details and the accent used on interactive studio controls.
             </p>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-medium mb-1">Brand Name</label>
+              <label className="field-label">Brand name</label>
               <input
                 type="text"
                 value={profileName}
                 onChange={(e) => setProfileName(e.target.value)}
-                className="w-full h-10 px-3 text-xs rounded-[var(--radius-input)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)]"
+                className="field"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium mb-1">Primary Contact</label>
+                <label className="field-label">Primary contact</label>
                 <input
                   type="text"
                   value={profileContact}
                   onChange={(e) => setProfileContact(e.target.value)}
-                  className="w-full h-10 px-3 text-xs rounded-[var(--radius-input)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)]"
+                  className="field"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1">Contact Email</label>
+                <label className="field-label">Contact email</label>
                 <input
                   type="email"
                   value={profileEmail}
                   onChange={(e) => setProfileEmail(e.target.value)}
-                  className="w-full h-10 px-3 text-xs rounded-[var(--radius-input)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-subtle)]"
+                  className="field"
                 />
               </div>
             </div>
@@ -574,12 +567,8 @@ export const BrandSettingsView: React.FC<BrandSettingsViewProps> = ({
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleSaveProfile}
-              className="px-5 py-2.5 rounded-[var(--radius-button)] bg-[var(--color-accent)] text-white text-xs font-semibold cursor-pointer tactile-press shadow-xs"
-            >
-              Save Profile
+            <button type="button" onClick={handleSaveProfile} className="btn btn-primary">
+              Save profile
             </button>
           </div>
         </div>
