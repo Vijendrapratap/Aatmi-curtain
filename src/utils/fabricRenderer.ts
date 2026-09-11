@@ -396,6 +396,19 @@ export async function renderCurtainOnCanvas(
     }
   }
 
+  // Pre-load all organic raster masks if defined on regions
+  const loadedMaskImages = new Map<string, HTMLImageElement>();
+  for (const reg of template.regions) {
+    if (reg.mask_url) {
+      try {
+        const mImg = await loadImage(reg.mask_url);
+        loadedMaskImages.set(reg.id, mImg);
+      } catch (e) {
+        console.warn('Mask image load note for', reg.display_name, e);
+      }
+    }
+  }
+
   // Helper to convert polygon coordinates to canvas points
   const getCanvasPoints = (coords: { x: number; y: number }[]) => {
     return coords.map((c) => ({
@@ -415,7 +428,7 @@ export async function renderCurtainOnCanvas(
   // 3. Render Each Assigned Region with its new fabric & photorealistic drape shading
   for (const region of regionsToRender) {
     const points = getCanvasPoints(region.polygon_coords);
-    if (points.length < 3) continue;
+    if (points.length < 3 && !region.mask_url) continue;
 
     const assignment = assignments.find((a) => a.region_id === region.id);
     const fabric = assignment ? fabricMap.get(assignment.fabric_id) : null;
@@ -424,26 +437,36 @@ export async function renderCurtainOnCanvas(
     const scale = assignment?.scale || 1.0;
     const rotationRad = ((assignment?.rotation || 0) * Math.PI) / 180;
 
-    ctx.save();
-    // Clip strictly to region polygon
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++) {
-      ctx.lineTo(points[i].x, points[i].y);
+    const maskImg = loadedMaskImages.get(region.id);
+    const regionCanvas = maskImg ? document.createElement('canvas') : null;
+    if (regionCanvas) {
+      regionCanvas.width = width;
+      regionCanvas.height = height;
     }
-    ctx.closePath();
-    ctx.clip();
+    const targetCtx = regionCanvas ? regionCanvas.getContext('2d')! : ctx;
+
+    targetCtx.save();
+    if (!maskImg && points.length >= 3) {
+      // Clip strictly to region polygon
+      targetCtx.beginPath();
+      targetCtx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        targetCtx.lineTo(points[i].x, points[i].y);
+      }
+      targetCtx.closePath();
+      targetCtx.clip();
+    }
 
     // 3a. Draw base color
-    ctx.fillStyle = fabric?.color_hex || region.default_color || '#DDD6C7';
-    ctx.fillRect(0, 0, width, height);
+    targetCtx.fillStyle = fabric?.color_hex || region.default_color || '#DDD6C7';
+    targetCtx.fillRect(0, 0, width, height);
 
     // 3b. Draw procedural high-res texture pattern
     const procTile = createProceduralFabricPattern(fabric, region.default_color || '#DDD6C7', scale, rotationRad);
-    const procPattern = ctx.createPattern(procTile, 'repeat');
+    const procPattern = targetCtx.createPattern(procTile, 'repeat');
     if (procPattern) {
-      ctx.fillStyle = procPattern;
-      ctx.fillRect(0, 0, width, height);
+      targetCtx.fillStyle = procPattern;
+      targetCtx.fillRect(0, 0, width, height);
     }
 
     // 3c. If custom swatch image was loaded, composite it
@@ -461,10 +484,10 @@ export async function renderCurtainOnCanvas(
         pCtx.drawImage(fabricImg, -pWidth / 2, -pHeight / 2, pWidth, pHeight);
         pCtx.restore();
 
-        const customPattern = ctx.createPattern(patternCanvas, 'repeat');
+        const customPattern = targetCtx.createPattern(patternCanvas, 'repeat');
         if (customPattern) {
-          ctx.fillStyle = customPattern;
-          ctx.fillRect(0, 0, width, height);
+          targetCtx.fillStyle = customPattern;
+          targetCtx.fillRect(0, 0, width, height);
         }
       }
     }
@@ -472,15 +495,25 @@ export async function renderCurtainOnCanvas(
     // 3d. Photorealistic Luminance Transfer (Authentic Pleat Folds & Sunlight Crests from Real Photograph)
     if (luminanceMaps) {
       // Transfer authentic shadowed pleats
-      ctx.drawImage(luminanceMaps.shadowCanvas, 0, 0);
+      targetCtx.drawImage(luminanceMaps.shadowCanvas, 0, 0);
       // Transfer authentic crest highlights in screen mode
-      ctx.save();
-      ctx.globalCompositeOperation = 'screen';
-      ctx.drawImage(luminanceMaps.highlightCanvas, 0, 0);
-      ctx.restore();
+      targetCtx.save();
+      targetCtx.globalCompositeOperation = 'screen';
+      targetCtx.drawImage(luminanceMaps.highlightCanvas, 0, 0);
+      targetCtx.restore();
     }
 
-    ctx.restore();
+    targetCtx.restore();
+
+    if (regionCanvas && maskImg) {
+      const rCtx = regionCanvas.getContext('2d')!;
+      rCtx.save();
+      rCtx.globalCompositeOperation = 'destination-in';
+      rCtx.drawImage(maskImg, 0, 0, width, height);
+      rCtx.restore();
+
+      ctx.drawImage(regionCanvas, 0, 0);
+    }
   }
 
   // 4. Continuous Photorealistic Column Pleats across Drapery Panels
@@ -622,9 +655,9 @@ export async function renderCurtainOnCanvas(
       ctx.closePath();
 
       if (isSelected) {
-        ctx.fillStyle = 'rgba(79, 70, 229, 0.22)';
+        ctx.fillStyle = 'rgba(212, 175, 55, 0.25)';
         ctx.fill();
-        ctx.strokeStyle = '#4F46E5';
+        ctx.strokeStyle = '#D4AF37';
         ctx.lineWidth = 3;
         ctx.setLineDash([]);
         ctx.stroke();
@@ -632,7 +665,7 @@ export async function renderCurtainOnCanvas(
         // Draw pin badge
         const centerX = points.reduce((s, p) => s + p.x, 0) / points.length;
         const centerY = points.reduce((s, p) => s + p.y, 0) / points.length;
-        ctx.fillStyle = '#4F46E5';
+        ctx.fillStyle = '#D4AF37';
         ctx.beginPath();
         ctx.arc(centerX, centerY, 14, 0, Math.PI * 2);
         ctx.fill();

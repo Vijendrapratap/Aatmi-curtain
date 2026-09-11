@@ -20,9 +20,12 @@ import { DatabaseSchemaModal } from './components/DatabaseSchemaModal';
 import { SequentialProgressOverlay } from './components/SequentialProgressOverlay';
 import { RoomVizStudio } from './components/RoomVizStudio';
 import { CatalogLibraryView } from './components/CatalogLibraryView';
+import { BrandStudioStepper, BrandStudioStep } from './components/BrandStudioStepper';
+import { TemplateGalleryPage } from './components/TemplateGalleryPage';
+import { RenderLookbookPage } from './components/RenderLookbookPage';
 import { UserProfile, RoomLightingId, RoomSettingId } from './types/auth';
 import { DEMO_USERS } from './data/roomSettings';
-import { Sparkles, AlertTriangle, CheckCircle, Info, Eye, Layers } from 'lucide-react';
+import { Sparkles, AlertTriangle, CheckCircle, Info, Eye, Layers, ArrowLeft, ArrowRight } from 'lucide-react';
 
 export default function App() {
   const {
@@ -33,6 +36,7 @@ export default function App() {
     addJob,
   } = useStudioStore();
 
+  const [brandStep, setBrandStep] = useState<BrandStudioStep>('template');
   const [templates, setTemplates] = useState<CurtainTemplate[]>(DEFAULT_TEMPLATES);
   const [selectedTemplate, setSelectedTemplate] = useState<CurtainTemplate>(DEFAULT_TEMPLATES[0]);
   const [fabrics, setFabrics] = useState<Fabric[]>(DEFAULT_FABRICS);
@@ -127,9 +131,10 @@ export default function App() {
   const handleSaveNewTemplate = (newTemplate: CurtainTemplate) => {
     setTemplates((prev) => [newTemplate, ...prev]);
     setSelectedTemplate(newTemplate);
+    setBrandStep('materials');
     setGenerationNotice({
       type: 'success',
-      text: `Created "${newTemplate.name}" with ${newTemplate.regions.length} AI detected fabric regions.`,
+      text: `Created "${newTemplate.name}" with ${newTemplate.regions.length} AI detected fabric regions. Ready for fabric & color mapping!`,
     });
   };
 
@@ -183,7 +188,7 @@ export default function App() {
   const activeAssignment = assignments.find((a) => a.region_id === activeRegionId);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0A0B0E] text-[#F9F6F0] font-sans antialiased">
+    <div className="min-h-screen flex flex-col bg-[#F8F6F0] text-[#1A1714] font-sans antialiased">
       {/* Top Navigation Header */}
       <Header
         templates={templates}
@@ -206,24 +211,24 @@ export default function App() {
         <div
           className={`px-4 py-2 text-xs flex items-center justify-between border-b transition-all ${
             generationNotice.type === 'success'
-              ? 'bg-emerald-950/70 text-emerald-200 border-emerald-500/40'
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
               : generationNotice.type === 'warning'
-              ? 'bg-amber-950/70 text-amber-200 border-amber-500/40'
-              : 'bg-[#15171F] text-[#C5C8D4] border-[#2A2D3A]'
+              ? 'bg-amber-50 text-amber-800 border-amber-200'
+              : 'bg-[#F5F0EB] text-[#6B5F54] border-[#E2D9CE]'
           }`}
         >
           <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
             <div className="flex items-center gap-2">
               {generationNotice.type === 'success' ? (
-                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
               ) : (
-                <Info className="w-4 h-4 text-[#D4AF37] shrink-0" />
+                <Info className="w-4 h-4 text-[#C49A1E] shrink-0" />
               )}
               <span>{generationNotice.text}</span>
             </div>
             <button
               onClick={() => setGenerationNotice(null)}
-              className="text-[11px] underline hover:no-underline text-[#8C909A] hover:text-[#F9F6F0] cursor-pointer ml-4"
+              className="text-[11px] underline hover:no-underline text-[#9E9088] hover:text-[#1A1714] cursor-pointer ml-4"
             >
               Dismiss
             </button>
@@ -231,13 +236,74 @@ export default function App() {
         </div>
       )}
 
-      {/* Studio Tab Router: Room Viz / Catalog / Atelier Canvas */}
-      {activeTab === 'room_viz' ? (
-        <RoomVizStudio />
-      ) : activeTab === 'catalog' || activeTab === 'catalogs' ? (
+      {/* Brand Studio 4-Step Stepper */}
+      <BrandStudioStepper
+        currentStep={brandStep}
+        onSelectStep={(step) => {
+          setBrandStep(step);
+          if (step === 'ambiance') {
+            setActiveTab('room_viz');
+          } else {
+            setActiveTab('atelier');
+          }
+          if (step === 'materials') {
+            setMobileTab('regions');
+          } else {
+            setMobileTab('preview');
+          }
+        }}
+        onOpenNewTemplateModal={() => setIsNewTemplateModalOpen(true)}
+        onOpenFabricLibrary={() => setIsFabricLibraryOpen(true)}
+        onTriggerAiGeneration={handleTriggerAiGeneration}
+        isGeneratingAi={isGeneratingAi}
+        hasGeneratedResult={Boolean(aiGeneratedImageUrl)}
+        onExportMockup={handleExportMockup}
+        assignedRegionsCount={assignments.length}
+        totalRegionsCount={selectedTemplate.regions.length}
+      />
+
+      {/* Main Studio Viewport Router */}
+      {activeTab === 'catalog' || activeTab === 'catalogs' ? (
         <CatalogLibraryView />
+      ) : activeTab === 'room_viz' || brandStep === 'ambiance' ? (
+        <RoomVizStudio
+          onProceedToGenerate={() => {
+            setActiveTab('atelier');
+            setBrandStep('generate');
+          }}
+          onBackToAtelier={() => {
+            setActiveTab('atelier');
+            setBrandStep('materials');
+          }}
+        />
+      ) : brandStep === 'template' ? (
+        <TemplateGalleryPage
+          templates={templates}
+          selectedTemplate={selectedTemplate}
+          onSelectTemplate={(tpl) => setSelectedTemplate(tpl)}
+          onProceedToCustomizer={() => {
+            setActiveTab('atelier');
+            setBrandStep('materials');
+          }}
+          onOpenNewTemplateModal={() => setIsNewTemplateModalOpen(true)}
+        />
+      ) : brandStep === 'generate' ? (
+        <RenderLookbookPage
+          template={selectedTemplate}
+          assignments={assignments}
+          fabrics={fabrics}
+          aiGeneratedImageUrl={aiGeneratedImageUrl}
+          isGeneratingAi={isGeneratingAi}
+          onTriggerAiGeneration={handleTriggerAiGeneration}
+          onExportMockup={handleExportMockup}
+          onOpenSpecModal={() => setIsSpecModalOpen(true)}
+          onBackToCustomizer={() => {
+            setActiveTab('atelier');
+            setBrandStep('materials');
+          }}
+        />
       ) : (
-        /* Design Studio (Split Screen Atelier) */
+        /* brandStep === 'materials' (Design Studio - Split Screen Atelier Canvas) */
         <div className="flex-1 flex flex-col overflow-hidden relative">
           {/* Sequential Inpainting Progress Overlay ("The Secret Sauce" In-Flight) */}
           {isGeneratingAi && sequentialStepEvent && (
@@ -245,15 +311,15 @@ export default function App() {
           )}
 
           {/* Studio View Switcher for screens under 1024px (Mobile & Tablet) */}
-          <div className="lg:hidden bg-[#101217] border-b border-[#22242F] px-3 sm:px-4 py-2 flex items-center justify-between z-20 shrink-0 shadow-sm gap-2">
-            <div className="flex items-center gap-1 p-1 bg-[#171922] rounded-lg border border-[#272A36]">
+          <div className="lg:hidden bg-[#F0EBE4] border-b border-[#E2D9CE] px-3 sm:px-4 py-2 flex items-center justify-between z-20 shrink-0 shadow-sm gap-2">
+            <div className="flex items-center gap-1 p-1 bg-[#E8E2DA] rounded-lg border border-[#C9BFB4]">
               <button
                 id="mobile-tab-preview"
                 onClick={() => setMobileTab('preview')}
                 className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-medium transition cursor-pointer ${
                   mobileTab === 'preview'
-                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#B59128] text-[#0A0B0E] font-bold shadow-xs'
-                    : 'text-[#8C909A] hover:text-[#F9F6F0]'
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#B59128] text-white font-bold shadow-xs'
+                    : 'text-[#6B5F54] hover:text-[#1A1714]'
                 }`}
               >
                 <Eye className="w-3.5 h-3.5" />
@@ -264,8 +330,8 @@ export default function App() {
                 onClick={() => setMobileTab('regions')}
                 className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-medium transition cursor-pointer ${
                   mobileTab === 'regions'
-                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#B59128] text-[#0A0B0E] font-bold shadow-xs'
-                    : 'text-[#8C909A] hover:text-[#F9F6F0]'
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#B59128] text-white font-bold shadow-xs'
+                    : 'text-[#6B5F54] hover:text-[#1A1714]'
                 }`}
               >
                 <Layers className="w-3.5 h-3.5" />
@@ -280,7 +346,7 @@ export default function App() {
                   const t = templates.find((tpl) => tpl.id === e.target.value);
                   if (t) setSelectedTemplate(t);
                 }}
-                className="bg-[#171922] text-[#E0E2EB] border border-[#272A36] text-[11px] sm:text-xs py-1.5 px-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 cursor-pointer max-w-[130px] sm:max-w-[170px] truncate"
+                className="bg-white text-[#1A1714] border border-[#C9BFB4] text-[11px] sm:text-xs py-1.5 px-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#C49A1E]/50 cursor-pointer max-w-[130px] sm:max-w-[170px] truncate"
               >
                 {templates.map((tpl) => (
                   <option key={tpl.id} value={tpl.id}>
@@ -292,7 +358,7 @@ export default function App() {
           </div>
 
           {/* Main Studio Body: Region Assignment Panel on Left, Viewport on Right */}
-          <main className="flex-1 flex flex-col lg:flex-row overflow-hidden relative min-h-0 bg-[#0D0E12]">
+          <main className="flex-1 flex flex-col lg:flex-row overflow-hidden relative min-h-0 bg-[#EDE7DF]">
             {/* Left: Region Assignment Panel */}
             <div
               className={`w-full lg:w-96 lg:h-full lg:flex lg:flex-col shrink-0 ${
@@ -319,6 +385,7 @@ export default function App() {
                   setTactileFabric(fab);
                   setIsTactileLoupeOpen(true);
                 }}
+                onAddNewFabric={handleAddNewFabric}
               />
             </div>
 
@@ -361,6 +428,30 @@ export default function App() {
                   setIsTactileLoupeOpen(true);
                 }}
               />
+
+              {/* Sub-canvas Atelier Pagination Bar */}
+              <div className="bg-[#F0EBE4] border-t border-[#E2D9CE] px-4 py-2.5 flex items-center justify-between shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setBrandStep('template')}
+                  className="tactile-press text-xs font-semibold text-[#6B5F54] hover:text-[#1A1714] flex items-center gap-1.5 cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>← Change Silhouette</span>
+                </button>
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] font-mono text-[#9E9088] hidden sm:inline">
+                    {assignments.length} of {selectedTemplate.regions.length} zones mapped
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setBrandStep('ambiance')}
+                    className="tactile-press px-4 py-1.5 rounded-xl bg-white hover:bg-[#FFFDF8] border border-[#C49A1E] text-xs font-bold text-[#C49A1E] flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  >
+                    <span>Next: Room Ambiance →</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </main>
         </div>

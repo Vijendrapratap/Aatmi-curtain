@@ -37,7 +37,7 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
       title: 'Choose or Upload Any Curtain Silhouette',
       subtitle: 'From Timeless Pinch Pleats to Color-Block & Bordered Stencils',
       icon: Layers,
-      iconColor: 'text-indigo-400',
+      iconColor: 'text-[#D4AF37]',
       description:
         'Select from curated architectural drapery templates or upload your own real showroom photograph. Each design is automatically segmented into crisp, assignable fabric zones: main panels, horizontal borders, vertical trims, pleated headers, and bottom hems.',
       points: [

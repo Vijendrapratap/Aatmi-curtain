@@ -97,10 +97,10 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-stone-950/80 backdrop-blur-xs">
-      <div className="bg-white sm:rounded-2xl shadow-2xl border-0 sm:border border-stone-200 w-full sm:max-w-4xl h-full sm:h-auto sm:max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-white/85 backdrop-blur-md">
+      <div className="bg-white sm:rounded-2xl shadow-2xl border-0 sm:border border-[#C49A1E]/20 w-full sm:max-w-4xl h-full sm:h-auto sm:max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in duration-200" style={{boxShadow:'0 0 0 1px rgba(212,175,55,0.12), 0 32px 80px rgba(0,0,0,0.75)'}}>
         {/* Header */}
-        <div className="px-4 sm:px-6 py-3.5 border-b border-stone-800 flex items-center justify-between bg-stone-900 text-stone-100">
+        <div className="px-4 sm:px-6 py-3.5 border-b border-[#D4AF37]/15 flex items-center justify-between bg-[#F8F5F0] text-stone-100">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-stone-950 font-serif font-bold text-xs sm:text-sm shrink-0">
               A
@@ -143,7 +143,7 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
         </div>
 
         {/* Docket Body */}
-        <div className="p-4 sm:p-6 flex-1 overflow-y-auto space-y-4 sm:space-y-6 bg-[#FAFAF8]" id="printable-spec-sheet">
+        <div className="p-4 sm:p-6 flex-1 overflow-y-auto space-y-4 sm:space-y-6 bg-white" id="printable-spec-sheet">
           {/* Client & Designer Docket Header */}
           <div className="bg-stone-900 text-stone-100 p-3.5 sm:p-4 rounded-xl border border-stone-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
             <div className="space-y-1">
@@ -297,7 +297,7 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
                       <div className="flex items-center gap-1.5 sm:gap-2">
                         <span
                           className="w-2.5 h-2.5 rounded-full shrink-0"
-                          style={{ backgroundColor: region.accent_color || '#4F46E5' }}
+                          style={{ backgroundColor: region.accent_color || '#D4AF37' }}
                         />
                         <h4 className="text-xs font-bold text-stone-900 truncate">
                           {region.display_name}
