@@ -1,54 +1,77 @@
 // src/components/brand/CatalogView.tsx
 import React, { useState } from 'react';
 import { useBrandStore } from '../../lib/brandStore';
+import { useStudioStore } from '../../lib/store';
 import { Fabric } from '../../types/curtain';
 import {
   Search,
   Plus,
   Camera,
   Upload,
-  MoreVertical,
   Filter,
   Check,
   Sparkles,
   Layers,
-  Archive,
-  Edit2,
-  FolderPlus,
+  LayoutGrid,
+  Grid3X3,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { CameraCaptureModal } from './CameraCaptureModal';
 import { BulkUploadModal } from './BulkUploadModal';
+import { FabricCard } from './FabricCard';
+import { FabricPreviewModal } from './FabricPreviewModal';
 
 export const CatalogView: React.FC = () => {
   const {
     brandFabrics,
     currentBrandId,
+    brandTemplates,
     updateBrandFabric,
     archiveBrandFabric,
+    setActiveView,
   } = useBrandStore();
+
+  const {
+    selectedTemplateId,
+    assignments,
+    assignFabricToRegion,
+    activeRegionId,
+  } = useStudioStore();
+
+  // Active template in studio
+  const currentTemplate =
+    brandTemplates.find((t) => t.id === selectedTemplateId) || brandTemplates[0];
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedSource, setSelectedSource] = useState<string>('all');
   const [selectedVisibility, setSelectedVisibility] = useState<string>('all');
-  const [activeMenuFabricId, setActiveMenuFabricId] = useState<string | null>(null);
+  const [quickFilter, setQuickFilter] = useState<'all' | 'authentic_real'>('all');
+  const [viewSize, setViewSize] = useState<'comfortable' | 'compact'>('comfortable');
 
   // Modals state
   const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
 
+  // Preview & Inspect Modal
+  const [previewFabric, setPreviewFabric] = useState<Fabric | null>(null);
+
   // Rename prompt state
   const [renamingFabric, setRenamingFabric] = useState<Fabric | null>(null);
   const [newName, setNewName] = useState('');
 
-  // Scoped fabrics to current brand
+  // Toast feedback
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Scoped fabrics: show brand-specific or shared platform fabrics
   const scopedFabrics = brandFabrics.filter(
-    (f) => f.brand_id === currentBrandId || !f.brand_id
+    (f) => !f.brand_id || f.brand_id === currentBrandId
   );
 
   // Filter logic
   const filteredFabrics = scopedFabrics.filter((fabric) => {
+    if (quickFilter === 'authentic_real' && !fabric.id.startsWith('fab-user-')) return false;
     if (selectedCategory !== 'All' && fabric.category !== selectedCategory) return false;
     if (selectedSource !== 'all' && fabric.source !== selectedSource) return false;
     if (selectedVisibility !== 'all' && fabric.visibility !== selectedVisibility) return false;
@@ -56,9 +79,10 @@ export const CatalogView: React.FC = () => {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchName = fabric.name.toLowerCase().includes(q);
-      const matchTags = fabric.tags.some((t) => t.toLowerCase().includes(q));
-      const matchCategory = fabric.category.toLowerCase().includes(q);
-      return matchName || matchTags || matchCategory;
+      const matchTags = fabric.tags?.some((t) => t.toLowerCase().includes(q));
+      const matchCategory = fabric.category?.toLowerCase().includes(q);
+      const matchWeave = fabric.metadata?.weave?.toLowerCase().includes(q);
+      return matchName || matchTags || matchCategory || matchWeave;
     }
 
     return true;
@@ -69,21 +93,21 @@ export const CatalogView: React.FC = () => {
     'Velvet',
     'Linen',
     'Silk',
+    'Geometric',
     'Jacquard & Damask',
     'Textured & Bouclé',
     'Exotic Relief',
+    'Embroidered & Textured',
     'Custom',
   ];
 
   const handlePromoteToCatalog = (fabric: Fabric) => {
     updateBrandFabric(fabric.id, { visibility: 'catalog' });
-    setActiveMenuFabricId(null);
   };
 
   const handleStartRename = (fabric: Fabric) => {
     setRenamingFabric(fabric);
     setNewName(fabric.name);
-    setActiveMenuFabricId(null);
   };
 
   const handleSaveRename = () => {
@@ -93,8 +117,54 @@ export const CatalogView: React.FC = () => {
     }
   };
 
+  // Direct 1-click apply to active zone
+  const handleApplyDirect = (fabric: Fabric) => {
+    const targetRegionId = activeRegionId || currentTemplate?.regions[0]?.id;
+    if (targetRegionId) {
+      assignFabricToRegion(targetRegionId, fabric.id);
+      const targetZoneName =
+        currentTemplate?.regions.find((r) => r.id === targetRegionId)?.display_name || 'Curtain Zone';
+
+      setToastMessage(`Applied "${fabric.name}" to ${targetZoneName}!`);
+      setTimeout(() => setToastMessage(null), 3000);
+    }
+  };
+
+  const handleApplyToRegion = (regionId: string, fabricId: string) => {
+    assignFabricToRegion(regionId, fabricId);
+    const fabric = scopedFabrics.find((f) => f.id === fabricId);
+    const zoneName = currentTemplate?.regions.find((r) => r.id === regionId)?.display_name || 'Zone';
+    setToastMessage(`Applied "${fabric?.name}" to ${zoneName}`);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handleApplyToAllRegions = (fabricId: string) => {
+    currentTemplate?.regions.forEach((reg) => {
+      assignFabricToRegion(reg.id, fabricId);
+    });
+    setToastMessage(`Applied to all ${currentTemplate?.regions.length} zones!`);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6 animate-in fade-in duration-200">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-20 right-6 z-50 p-3.5 rounded-2xl bg-white border border-[var(--color-accent)] text-xs text-[var(--color-text-primary)] shadow-xl flex items-center gap-2.5 animate-in slide-in-from-top-4">
+          <div className="w-5 h-5 rounded-full bg-[var(--color-accent)] text-white flex items-center justify-center shrink-0">
+            <Check className="w-3.5 h-3.5" />
+          </div>
+          <span className="font-semibold">{toastMessage}</span>
+          <button
+            type="button"
+            onClick={() => setActiveView('editor')}
+            className="ml-2 underline text-[var(--color-accent)] font-bold cursor-pointer hover:no-underline"
+          >
+            View in Studio →
+          </button>
+        </div>
+      )}
+
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -105,12 +175,21 @@ export const CatalogView: React.FC = () => {
             Fabric Catalog
           </h1>
           <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-            Manage your brand's digital material library, camera-captured physical swatches, and batch books.
+            Browse high-resolution textiles, inspect macro weave textures, and 1-click apply swatches to your active curtain design.
           </p>
         </div>
 
-        {/* "+ Add Fabric" Dropdown Button (Section 6.2) */}
-        <div className="relative self-start sm:self-auto">
+        {/* "+ Add Fabric" Dropdown Button */}
+        <div className="relative self-start sm:self-auto flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveView('editor')}
+            className="px-3.5 py-2.5 rounded-[var(--radius-button)] bg-white hover:bg-[var(--color-bg-sunken)] border border-[var(--color-border-strong)] text-xs font-semibold text-[var(--color-text-primary)] flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[var(--color-accent)]" />
+            <span>Open Studio Editor</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
@@ -162,13 +241,35 @@ export const CatalogView: React.FC = () => {
 
       {/* Main Layout: Left Filter Rail + Responsive Right Grid */}
       <div className="flex flex-col lg:flex-row gap-8 items-start">
-        {/* Left Filter Rail (Section 6.2) */}
+        {/* Left Filter Rail */}
         <aside className="w-full lg:w-64 shrink-0 brand-card p-5 space-y-6">
           <div className="flex items-center gap-2 pb-3 border-b border-[var(--color-border-subtle)]">
             <Filter className="w-4 h-4 text-[var(--color-text-secondary)]" />
             <span className="text-xs font-semibold text-[var(--color-text-primary)]">
               Filters &amp; Categories
             </span>
+          </div>
+
+          {/* Quick Filter: Authentic Real Photos */}
+          <div className="space-y-1.5">
+            <span className="eyebrow-label text-[var(--color-accent)] block mb-1">
+              Curated Collections
+            </span>
+            <button
+              type="button"
+              onClick={() => setQuickFilter(quickFilter === 'all' ? 'authentic_real' : 'all')}
+              className={`w-full px-3 py-2 rounded-xl text-left text-xs transition cursor-pointer flex items-center justify-between border ${
+                quickFilter === 'authentic_real'
+                  ? 'bg-[var(--color-accent-tint)] border-[var(--color-accent)] text-[var(--color-accent)] font-semibold shadow-2xs'
+                  : 'bg-white border-[var(--color-border-subtle)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-sunken)]'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-[var(--color-accent)]" />
+                <span>13 Real Atelier Samples</span>
+              </span>
+              {quickFilter === 'authentic_real' && <Check className="w-3.5 h-3.5" />}
+            </button>
           </div>
 
           {/* Search bar */}
@@ -268,109 +369,72 @@ export const CatalogView: React.FC = () => {
         <main className="flex-1 w-full space-y-4">
           <div className="flex items-center justify-between text-xs text-[var(--color-text-secondary)] px-1">
             <span>
-              Showing {filteredFabrics.length} of {scopedFabrics.length} swatches
+              Showing <strong className="text-[var(--color-text-primary)]">{filteredFabrics.length}</strong> of {scopedFabrics.length} swatches • Click any swatch to inspect texture &amp; apply
             </span>
+
+            {/* View Size Switcher */}
+            <div className="flex items-center gap-1 bg-[var(--color-bg-sunken)] p-0.5 rounded-lg border border-[var(--color-border-subtle)]">
+              <button
+                type="button"
+                onClick={() => setViewSize('comfortable')}
+                className={`p-1 rounded-md transition cursor-pointer ${
+                  viewSize === 'comfortable'
+                    ? 'bg-white shadow-2xs text-[var(--color-text-primary)]'
+                    : 'text-[var(--color-text-secondary)]'
+                }`}
+                title="Comfortable cards"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewSize('compact')}
+                className={`p-1 rounded-md transition cursor-pointer ${
+                  viewSize === 'compact'
+                    ? 'bg-white shadow-2xs text-[var(--color-text-primary)]'
+                    : 'text-[var(--color-text-secondary)]'
+                }`}
+                title="Compact grid"
+              >
+                <Grid3X3 className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {filteredFabrics.map((fabric) => {
-              const isCatalog = fabric.visibility !== 'session_only';
-
-              return (
-                <div
-                  key={fabric.id}
-                  className="brand-card overflow-hidden hover:translate-y-[-2px] transition group relative flex flex-col justify-between"
-                >
-                  {/* Swatch Image */}
-                  <div className="w-full aspect-square bg-neutral-100 relative overflow-hidden">
-                    <img
-                      src={fabric.image_url}
-                      alt={fabric.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                    />
-
-                    {/* Visibility Pill (Section 6.2) */}
-                    <div className="absolute top-2 left-2">
-                      <span
-                        className={`text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full ${
-                          isCatalog
-                            ? 'bg-[var(--color-accent-tint)] text-[var(--color-accent)] border border-[var(--color-accent)]/20'
-                            : 'bg-neutral-800/80 text-neutral-200 backdrop-blur-xs'
-                        }`}
-                      >
-                        {isCatalog ? 'Catalog' : 'Session-only'}
-                      </span>
-                    </div>
-
-                    {/* Kebab ⋮ Menu Button */}
-                    <div className="absolute top-2 right-2">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveMenuFabricId(
-                            activeMenuFabricId === fabric.id ? null : fabric.id
-                          );
-                        }}
-                        className="p-1 rounded-full bg-white/80 hover:bg-white text-[var(--color-text-primary)] shadow-xs transition cursor-pointer"
-                      >
-                        <MoreVertical className="w-3.5 h-3.5" />
-                      </button>
-
-                      {/* Dropdown Menu */}
-                      {activeMenuFabricId === fabric.id && (
-                        <div className="absolute right-0 top-full mt-1 w-40 rounded-xl bg-white border border-[var(--color-border-strong)] shadow-xl p-1.5 z-30 animate-in fade-in zoom-in-95 duration-100 text-xs">
-                          {/* Add to catalog option: only shown for session-only (Section 6.2) */}
-                          {!isCatalog && (
-                            <button
-                              type="button"
-                              onClick={() => handlePromoteToCatalog(fabric)}
-                              className="w-full px-2 py-1.5 text-left rounded-lg hover:bg-[var(--color-accent-tint)] text-[var(--color-accent)] font-semibold flex items-center gap-2 cursor-pointer"
-                            >
-                              <FolderPlus className="w-3.5 h-3.5" />
-                              <span>Add to catalog</span>
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => handleStartRename(fabric)}
-                            className="w-full px-2 py-1.5 text-left rounded-lg hover:bg-[var(--color-bg-sunken)] text-[var(--color-text-primary)] flex items-center gap-2 cursor-pointer"
-                          >
-                            <Edit2 className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" />
-                            <span>Rename</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              archiveBrandFabric(fabric.id);
-                              setActiveMenuFabricId(null);
-                            }}
-                            className="w-full px-2 py-1.5 text-left rounded-lg hover:bg-red-50 text-red-600 flex items-center gap-2 cursor-pointer"
-                          >
-                            <Archive className="w-3.5 h-3.5" />
-                            <span>Archive</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Card Details */}
-                  <div className="p-3">
-                    <h4 className="text-xs font-display font-semibold text-[var(--color-text-primary)] truncate">
-                      {fabric.name}
-                    </h4>
-                    <div className="text-[10px] text-[var(--color-text-secondary)] mt-0.5 flex items-center justify-between">
-                      <span>{fabric.category}</span>
-                      <span className="font-mono text-[9px]">{fabric.metadata.sheen}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          <div
+            className={`grid gap-4 ${
+              viewSize === 'comfortable'
+                ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4'
+                : 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5'
+            }`}
+          >
+            {filteredFabrics.map((fabric) => (
+              <FabricCard
+                key={fabric.id}
+                fabric={fabric}
+                viewSize={viewSize}
+                onPreview={(f) => setPreviewFabric(f)}
+                onApplyDirect={handleApplyDirect}
+                onPromoteToCatalog={handlePromoteToCatalog}
+                onRename={handleStartRename}
+                onArchive={(f) => archiveBrandFabric(f.id)}
+              />
+            ))}
           </div>
         </main>
       </div>
+
+      {/* Fabric Detail & Application Modal */}
+      <FabricPreviewModal
+        isOpen={Boolean(previewFabric)}
+        onClose={() => setPreviewFabric(null)}
+        fabric={previewFabric}
+        regions={currentTemplate?.regions || []}
+        activeRegionId={activeRegionId}
+        onApplyToRegion={handleApplyToRegion}
+        onApplyToAllRegions={handleApplyToAllRegions}
+        onGoToStudio={() => setActiveView('editor')}
+      />
 
       {/* Rename Dialog */}
       {renamingFabric && (
@@ -405,7 +469,7 @@ export const CatalogView: React.FC = () => {
         </div>
       )}
 
-      {/* Modals */}
+      {/* Camera & Bulk Modals */}
       <CameraCaptureModal
         isOpen={isCameraModalOpen}
         onClose={() => setIsCameraModalOpen(false)}
