@@ -1,16 +1,14 @@
 // src/components/brand/FabricPreviewModal.tsx
 import React, { useState } from 'react';
-import { Fabric, Region } from '../../types/curtain';
+import { ZoneChooser } from './ZoneChooser';
+import { Fabric, FabricAssignment, Region } from '../../types/curtain';
 import {
   X,
   ZoomIn,
-  Sparkles,
   Check,
   Palette,
   Layers,
-  Info,
   ArrowRight,
-  Maximize2,
 } from 'lucide-react';
 
 interface FabricPreviewModalProps {
@@ -19,8 +17,9 @@ interface FabricPreviewModalProps {
   fabric: Fabric | null;
   regions: Region[];
   activeRegionId: string | null;
-  onApplyToRegion: (regionId: string, fabricId: string) => void;
-  onApplyToAllRegions: (fabricId: string) => void;
+  assignments: FabricAssignment[];
+  fabrics: Fabric[];
+  onApply: (regionId: string | 'all', fabricId: string) => void;
   onGoToStudio: () => void;
 }
 
@@ -30,21 +29,28 @@ export const FabricPreviewModal: React.FC<FabricPreviewModalProps> = ({
   fabric,
   regions,
   activeRegionId,
-  onApplyToRegion,
-  onApplyToAllRegions,
+  assignments,
+  fabrics,
+  onApply,
   onGoToStudio,
 }) => {
-  const [selectedRegionId, setSelectedRegionId] = useState<string>(
-    activeRegionId || regions[0]?.id || ''
-  );
   const [isLoupeActive, setIsLoupeActive] = useState(false);
   const [lensPos, setLensPos] = useState({ x: 50, y: 50 });
   const [appliedNotice, setAppliedNotice] = useState<string | null>(null);
   const [imgFailed, setImgFailed] = useState(false);
+  const [isChooserOpen, setIsChooserOpen] = useState(false);
 
   if (!isOpen || !fabric) return null;
 
-  const targetRegion = regions.find((r) => r.id === selectedRegionId) || regions[0];
+  const activeRegion = regions.find((r) => r.id === activeRegionId) || regions[0] || null;
+
+  const applyTo = (target: string | 'all') => {
+    onApply(target, fabric.id);
+    const name = target === 'all' ? `all ${regions.length} zones` : regions.find((r) => r.id === target)?.display_name || 'zone';
+    setAppliedNotice(`Applied to ${name}`);
+    setIsChooserOpen(false);
+    setTimeout(() => setAppliedNotice(null), 2500);
+  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isLoupeActive) return;
@@ -52,30 +58,6 @@ export const FabricPreviewModal: React.FC<FabricPreviewModalProps> = ({
     const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
     const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
     setLensPos({ x, y });
-  };
-
-  const handleApplySingle = () => {
-    if (selectedRegionId) {
-      onApplyToRegion(selectedRegionId, fabric.id);
-      setAppliedNotice(`Applied to "${targetRegion?.display_name || 'Zone'}"`);
-      setTimeout(() => setAppliedNotice(null), 2500);
-    }
-  };
-
-  const handleApplyAndGo = () => {
-    if (selectedRegionId) {
-      onApplyToRegion(selectedRegionId, fabric.id);
-    } else if (regions.length > 0) {
-      onApplyToRegion(regions[0].id, fabric.id);
-    }
-    onClose();
-    onGoToStudio();
-  };
-
-  const handleApplyAll = () => {
-    onApplyToAllRegions(fabric.id);
-    setAppliedNotice(`Applied to all ${regions.length} curtain zones!`);
-    setTimeout(() => setAppliedNotice(null), 2500);
   };
 
   return (
@@ -247,70 +229,44 @@ export const FabricPreviewModal: React.FC<FabricPreviewModalProps> = ({
               )}
             </div>
 
-            {/* Apply To Zone Section (The Key Requirement!) */}
-            <div className="p-4 rounded-2xl bg-white border border-[var(--color-border-strong)] space-y-3 shadow-xs">
+            <div className="space-y-2 rounded-2xl border border-[var(--color-border-strong)] bg-white p-4 shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="eyebrow-label text-[var(--color-text-primary)] font-semibold flex items-center gap-1.5">
-                  <Layers className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-                  <span>Apply to Active Curtain</span>
+                <span className="eyebrow-label flex items-center gap-1.5 text-[var(--color-text-primary)]">
+                  <Layers className="h-3.5 w-3.5 text-[var(--color-accent)]" />
+                  Use this fabric
                 </span>
-                <span className="text-[10px] font-mono text-[var(--color-text-secondary)]">
-                  {regions.length} Available Zones
-                </span>
+                <span className="font-mono text-[10px] text-[var(--color-text-secondary)]">{regions.length} zones</span>
               </div>
-
-              <div>
-                <label className="block text-[11px] font-medium text-[var(--color-text-secondary)] mb-1">
-                  Select Target Curtain Zone:
-                </label>
-                <select
-                  value={selectedRegionId}
-                  onChange={(e) => setSelectedRegionId(e.target.value)}
-                  className="w-full h-10 px-3 text-xs rounded-xl bg-[var(--color-bg-sunken)] border border-[var(--color-border-strong)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                >
-                  {regions.map((reg) => (
-                    <option key={reg.id} value={reg.id}>
-                      Zone #{reg.order}: {reg.display_name} ({reg.location})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2 pt-1">
-                {/* 1. Apply to selected zone & immediately route to Studio Editor */}
-                <button
-                  type="button"
-                  onClick={handleApplyAndGo}
-                  className="w-full h-11 rounded-[var(--radius-button)] bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer tactile-press shadow-xs"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  <span>Apply &amp; Open in Studio Editor →</span>
+              {activeRegion && (
+                <button type="button" onClick={() => applyTo(activeRegion.id)} className="btn btn-primary btn-block">
+                  Apply to {activeRegion.display_name}
                 </button>
-
-                <div className="grid grid-cols-2 gap-2">
-                  {/* 2. Apply to single zone only */}
-                  <button
-                    type="button"
-                    onClick={handleApplySingle}
-                    className="h-9 px-3 rounded-xl bg-white hover:bg-[var(--color-bg-sunken)] border border-[var(--color-border-strong)] text-xs font-semibold text-[var(--color-text-primary)] flex items-center justify-center gap-1.5 cursor-pointer tactile-press shadow-2xs"
-                  >
-                    <Check className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Apply to This Zone</span>
-                  </button>
-
-                  {/* 3. Apply to all zones */}
-                  <button
-                    type="button"
-                    onClick={handleApplyAll}
-                    className="h-9 px-3 rounded-xl bg-white hover:bg-[var(--color-bg-sunken)] border border-[var(--color-border-strong)] text-xs font-semibold text-[var(--color-text-primary)] flex items-center justify-center gap-1.5 cursor-pointer tactile-press shadow-2xs"
-                  >
-                    <span>Apply to All Zones</span>
-                  </button>
-                </div>
+              )}
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => setIsChooserOpen(true)} className="btn btn-secondary btn-sm">
+                  Choose a zone…
+                </button>
+                <button type="button" onClick={() => applyTo('all')} className="btn btn-secondary btn-sm">
+                  All zones
+                </button>
               </div>
+              <button type="button" onClick={onGoToStudio} className="btn btn-ghost btn-sm w-full">
+                Open studio <ArrowRight className="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
         </div>
+
+        <ZoneChooser
+          isOpen={isChooserOpen}
+          onClose={() => setIsChooserOpen(false)}
+          title={fabric.name}
+          regions={regions}
+          activeRegionId={activeRegionId}
+          assignments={assignments}
+          fabrics={fabrics}
+          onChoose={applyTo}
+        />
       </div>
     </div>
   );

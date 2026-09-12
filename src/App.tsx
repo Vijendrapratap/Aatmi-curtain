@@ -6,9 +6,8 @@ import { SignIn } from './pages/SignIn';
 import { OnboardingWizard } from './components/brand/OnboardingWizard';
 import { BrandHeader } from './components/brand/BrandHeader';
 import { BrandDashboard } from './components/brand/BrandDashboard';
-import { TemplatesGallery } from './components/brand/TemplatesGallery';
 import { TemplateEditor } from './components/brand/TemplateEditor';
-import { CatalogView } from './components/brand/CatalogView';
+import { LibraryPage } from './components/brand/library/LibraryPage';
 import { DesignDetailView } from './components/brand/DesignDetailView';
 import { BrandSettingsView } from './components/brand/BrandSettingsView';
 import { PlatformAdminView } from './components/brand/PlatformAdminView';
@@ -101,8 +100,11 @@ export default function App() {
           />
         )}
 
-        {activeView === 'library_styles' && (
-          <TemplatesGallery onOpenNewTemplateModal={() => setIsNewTemplateModalOpen(true)} />
+        {(activeView === 'library_styles' || activeView === 'library_fabrics') && (
+          <LibraryPage
+            tab={activeView === 'library_styles' ? 'styles' : 'fabrics'}
+            onOpenNewStyle={() => setIsNewTemplateModalOpen(true)}
+          />
         )}
 
         {activeView === 'editor' && (
@@ -110,8 +112,6 @@ export default function App() {
             onOpenSpecModal={() => setIsSpecSheetOpen(true)}
           />
         )}
-
-        {activeView === 'library_fabrics' && <CatalogView />}
 
         {activeView === 'design_detail' && (
           <DesignDetailView
