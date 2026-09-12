@@ -1,13 +1,10 @@
 // src/components/brand/BrandHeader.tsx
 import React, { useEffect, useRef, useState } from 'react';
-import { useBrandStore } from '../../lib/brandStore';
+import { useBrandStore, BrandStoreState } from '../../lib/brandStore';
 import {
   Sparkles,
   Layers,
-  Palette,
   FolderKanban,
-  Settings,
-  Shield,
   ChevronDown,
   LogOut,
   Check,
@@ -46,16 +43,10 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ onSignOut }) => {
   const used = modelConfig.monthly_generations_used || 0;
   const percentUsed = Math.min(100, Math.round((used / cap) * 100));
 
-  const navItems: Array<{
-    id: string;
-    label: string;
-    icon: typeof Layers;
-    match: (view: string) => boolean;
-  }> = [
+  const navItems: Array<{ id: BrandStoreState['activeView']; label: string; icon: typeof Layers; match: (view: string) => boolean }> = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard, match: (v) => v === 'dashboard' },
     { id: 'editor', label: 'Studio', icon: Sparkles, match: (v) => v === 'editor' },
-    { id: 'library_styles', label: 'Templates', icon: Layers, match: (v) => v === 'library_styles' },
-    { id: 'library_fabrics', label: 'Catalog', icon: Palette, match: (v) => v === 'library_fabrics' },
+    { id: 'library_styles', label: 'Library', icon: Layers, match: (v) => v.startsWith('library') },
     { id: 'design_detail', label: 'Designs', icon: FolderKanban, match: (v) => v === 'design_detail' },
   ];
 
@@ -87,8 +78,8 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ onSignOut }) => {
     };
   }, []);
 
-  const go = (view: string) => {
-    setActiveView(view as any);
+  const go = (view: BrandStoreState['activeView']) => {
+    setActiveView(view);
     setIsMobileNavOpen(false);
     setIsBrandMenuOpen(false);
     setIsUserMenuOpen(false);
@@ -206,33 +197,13 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ onSignOut }) => {
               </button>
             );
           })}
-          {canManage && (
-            <button
-              type="button"
-              onClick={() => go('settings_models')}
-              className={`nav-chip ${activeView.startsWith('settings') ? 'is-active' : ''}`}
-              aria-current={activeView.startsWith('settings') ? 'page' : undefined}
-            >
-              <Settings className="h-3.5 w-3.5" />
-              <span>Settings</span>
-            </button>
-          )}
-          {currentUser?.role === 'platform_admin' && (
-            <button
-              type="button"
-              onClick={() => go('platform_admin')}
-              className={`nav-chip ${activeView === 'platform_admin' ? 'is-active' : ''}`}
-            >
-              <Shield className="h-3.5 w-3.5" />
-              <span>Ops</span>
-            </button>
-          )}
         </nav>
 
         <div className="flex items-center gap-2">
           <div
             className="hidden items-center gap-2 rounded-[10px] bg-[var(--color-bg-sunken)] px-2.5 py-1.5 md:flex"
-            title={`${used} of ${cap} monthly renders`}
+            title={`${used} of ${cap} photoreal renders used this month`}
+            aria-label={`${used} of ${cap} photoreal renders used this month`}
           >
             <span className="font-mono text-[10px] font-medium tabular-nums text-[var(--color-text-secondary)]">
               {used}/{cap}
@@ -285,20 +256,19 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ onSignOut }) => {
                   <span className="badge badge-brass mt-2">{roleLabel}</span>
                 </div>
                 <div className="py-1">
-                  <button
-                    type="button"
-                    className="w-full rounded-[10px] px-3 py-2 text-left text-[13px] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-sunken)]"
-                    onClick={() => go('settings_profile')}
-                  >
+                  {canManage && (
+                    <button type="button" className="w-full rounded-[10px] px-3 py-2 text-left text-[13px] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-sunken)]" onClick={() => go('settings_models')}>
+                      Settings
+                    </button>
+                  )}
+                  <button type="button" className="w-full rounded-[10px] px-3 py-2 text-left text-[13px] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-sunken)]" onClick={() => go('settings_profile')}>
                     Brand profile
                   </button>
-                  <button
-                    type="button"
-                    className="w-full rounded-[10px] px-3 py-2 text-left text-[13px] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-sunken)]"
-                    onClick={() => go('settings_models')}
-                  >
-                    Models &amp; keys
-                  </button>
+                  {currentUser?.role === 'platform_admin' && (
+                    <button type="button" className="w-full rounded-[10px] px-3 py-2 text-left text-[13px] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-sunken)]" onClick={() => go('platform_admin')}>
+                      Platform admin
+                    </button>
+                  )}
                 </div>
                 <div className="border-t border-[var(--color-border-subtle)] pt-1">
                   <button
@@ -346,16 +316,6 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ onSignOut }) => {
                 </button>
               );
             })}
-            {canManage && (
-              <button
-                type="button"
-                onClick={() => go('settings_models')}
-                className={`nav-chip justify-start ${activeView.startsWith('settings') ? 'is-active' : ''}`}
-              >
-                <Settings className="h-4 w-4" />
-                Settings
-              </button>
-            )}
           </nav>
         </div>
       )}
