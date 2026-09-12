@@ -52,6 +52,10 @@ export default function App() {
       brand_id: currentBrandId,
       source: 'user_upload',
     });
+    useStudioStore.getState().selectTemplate(template.id, [
+      { ...template, brand_id: currentBrandId, source: 'user_upload' },
+      ...useBrandStore.getState().brandTemplates,
+    ]);
     setIsNewTemplateModalOpen(false);
     setActiveView('editor');
   };
@@ -109,7 +113,7 @@ export default function App() {
 
         {activeView === 'editor' && (
           <TemplateEditor
-            onOpenSpecModal={() => setIsSpecSheetOpen(true)}
+            onOpenNewStyle={() => setIsNewTemplateModalOpen(true)}
           />
         )}
 
