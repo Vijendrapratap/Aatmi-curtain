@@ -88,13 +88,13 @@ export const SignIn: React.FC<SignInProps> = ({ onStartOnboarding, onSuccess }) 
         <div className="w-full max-w-[420px]">
           <div className="mb-8">
             <h2 className="font-display text-[1.65rem] font-semibold tracking-tight">Sign in</h2>
-            <p className="page-lede">Use a test persona or enter workspace credentials.</p>
+            <p className="page-lede">Pick a demo account, or sign in with workspace credentials.</p>
           </div>
 
           <div className="mb-7 rounded-[16px] bg-[var(--color-bg-sunken)] p-3">
             <div className="mb-2 flex items-center justify-between px-1">
               <span className="text-[11px] font-semibold tracking-wide text-[var(--color-text-tertiary)] uppercase">
-                Personas
+                Demo accounts
               </span>
             </div>
             <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
