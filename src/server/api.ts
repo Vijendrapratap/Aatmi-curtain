@@ -22,28 +22,6 @@ function getGenAIClient(): GoogleGenAI | null {
   });
 }
 
-/**
- * Helper to safely extract clean base64 data and mimeType from data URIs.
- * Returns null if the string is not a valid raster base64 image (rejects SVGs, malformed URIs, etc.).
- */
-function parseBase64Image(dataUri: string | undefined): { mimeType: string; base64: string; data: string } | null {
-  if (!dataUri || typeof dataUri !== 'string') return null;
-  // Match standard base64 data URLs: data:image/(png|jpeg|jpg|webp);base64,XXXX
-  const match = dataUri.match(/^data:(image\/(png|jpeg|jpg|webp));base64,([A-Za-z0-9+/=]+[\r\n]*)$/i);
-  if (match) {
-    const rawMime = match[1].toLowerCase();
-    const mime = rawMime === 'image/jpg' ? 'image/jpeg' : rawMime;
-    const b64 = match[3].replace(/\s+/g, '');
-    return { mimeType: mime, base64: b64, data: b64 };
-  }
-  // Check if it's already a raw base64 string without prefix
-  const cleaned = dataUri.replace(/\s+/g, '');
-  if (/^[A-Za-z0-9+/=]+$/.test(cleaned) && cleaned.length > 200) {
-    return { mimeType: 'image/jpeg', base64: cleaned, data: cleaned };
-  }
-  return null;
-}
-
 import {
   getRegionEditProvider,
   getRoomPreviewProvider,
@@ -59,6 +37,8 @@ import {
   OPENROUTER_RECOMMENDED_MODELS,
 } from './openrouter';
 import { Brand, BrandModelConfig } from '../types/brand';
+import { parseBase64Image } from './images';
+import { SERVER_MODEL_CONFIGS, getOrCreateBrandConfig } from './brandConfigs';
 
 // In-Memory Multi-Tenant Store for Brands & Model Configurations
 const SERVER_BRANDS: Map<string, Brand> = new Map([
@@ -114,62 +94,6 @@ const SERVER_BRANDS: Map<string, Brand> = new Map([
     },
   ],
 ]);
-
-const SERVER_MODEL_CONFIGS: Map<string, BrandModelConfig> = new Map([
-  [
-    'brand-aatmi-01',
-    {
-      id: 'config-aatmi-01',
-      brand_id: 'brand-aatmi-01',
-      region_edit_provider: 'flux_kontext',
-      room_preview_provider: 'nano_banana_pro',
-      key_mode: 'platform_managed',
-      byo_api_key_encrypted: null,
-      byo_provider: null,
-      monthly_generation_cap: 250,
-      monthly_generations_used: 24,
-      updated_at: new Date().toISOString(),
-      updated_by_user_id: 'usr-elena-01',
-    },
-  ],
-  [
-    'brand-lumina-02',
-    {
-      id: 'config-lumina-02',
-      brand_id: 'brand-lumina-02',
-      region_edit_provider: 'flux_kontext',
-      room_preview_provider: 'seedream_edit',
-      key_mode: 'platform_managed',
-      byo_api_key_encrypted: null,
-      byo_provider: null,
-      monthly_generation_cap: 100,
-      monthly_generations_used: 12,
-      updated_at: new Date().toISOString(),
-      updated_by_user_id: 'usr-marcus-01',
-    },
-  ],
-]);
-
-function getOrCreateBrandConfig(brandId: string): BrandModelConfig {
-  let cfg = SERVER_MODEL_CONFIGS.get(brandId);
-  if (!cfg) {
-    cfg = {
-      id: `config-${brandId}-${Date.now()}`,
-      brand_id: brandId,
-      region_edit_provider: 'flux_kontext',
-      room_preview_provider: 'nano_banana_pro',
-      key_mode: 'platform_managed',
-      byo_api_key_encrypted: null,
-      byo_provider: null,
-      monthly_generation_cap: 200,
-      monthly_generations_used: 0,
-      updated_at: new Date().toISOString(),
-      updated_by_user_id: 'system',
-    };
-    SERVER_MODEL_CONFIGS.set(brandId, cfg);
-  }
-  return cfg;
-}
 
 /**
  * Health & Capabilities Endpoint
