@@ -11,8 +11,6 @@ import { LibraryPage } from './components/brand/library/LibraryPage';
 import { DesignDetailView } from './components/brand/DesignDetailView';
 import { BrandSettingsView } from './components/brand/BrandSettingsView';
 import { PlatformAdminView } from './components/brand/PlatformAdminView';
-import { BulkUploadModal } from './components/brand/BulkUploadModal';
-import { CameraCaptureModal } from './components/brand/CameraCaptureModal';
 import { NewTemplateModal } from './components/NewTemplateModal';
 import { SpecSheetModal } from './components/SpecSheetModal';
 import { CurtainTemplate } from './types/curtain';
@@ -39,8 +37,6 @@ export default function App() {
 
   // Global modals
   const [isNewTemplateModalOpen, setIsNewTemplateModalOpen] = useState(false);
-  const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
-  const [isCameraCaptureOpen, setIsCameraCaptureOpen] = useState(false);
   const [isSpecSheetOpen, setIsSpecSheetOpen] = useState(false);
 
   const currentBrand = brands.find((b) => b.id === currentBrandId) || brands[0];
@@ -98,10 +94,7 @@ export default function App() {
       {/* Main View Router */}
       <main className="flex-1 flex flex-col min-h-0">
         {activeView === 'dashboard' && (
-          <BrandDashboard
-            onOpenNewTemplate={() => setIsNewTemplateModalOpen(true)}
-            onOpenBulkUpload={() => setIsBulkUploadOpen(true)}
-          />
+          <BrandDashboard onOpenNewStyle={() => setIsNewTemplateModalOpen(true)} />
         )}
 
         {(activeView === 'library_styles' || activeView === 'library_fabrics') && (
@@ -143,16 +136,6 @@ export default function App() {
         isOpen={isNewTemplateModalOpen}
         onClose={() => setIsNewTemplateModalOpen(false)}
         onSaveTemplate={handleSaveNewTemplate}
-      />
-
-      <BulkUploadModal
-        isOpen={isBulkUploadOpen}
-        onClose={() => setIsBulkUploadOpen(false)}
-      />
-
-      <CameraCaptureModal
-        isOpen={isCameraCaptureOpen}
-        onClose={() => setIsCameraCaptureOpen(false)}
       />
 
       {activeDesign && (
