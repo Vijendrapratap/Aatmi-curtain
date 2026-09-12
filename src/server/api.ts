@@ -5,6 +5,7 @@ export const apiApp = express();
 
 apiApp.use(express.json({ limit: '50mb' }));
 apiApp.use(express.urlencoded({ extended: true, limit: '50mb' }));
+apiApp.use('/api/render', createRenderRouter());
 
 // Lazy initialization of GoogleGenAI
 function getGenAIClient(): GoogleGenAI | null {
@@ -31,7 +32,6 @@ import {
 import {
   callOpenRouterVision,
   callOpenRouterInpaint,
-  callOpenRouterRoomViz,
   testOpenRouterConnection,
   getEffectiveOpenRouterKey,
   OPENROUTER_RECOMMENDED_MODELS,
@@ -39,6 +39,7 @@ import {
 import { Brand, BrandModelConfig } from '../types/brand';
 import { parseBase64Image } from './images';
 import { SERVER_MODEL_CONFIGS, getOrCreateBrandConfig } from './brandConfigs';
+import { createRenderRouter } from './renderAgent/routes';
 
 // In-Memory Multi-Tenant Store for Brands & Model Configurations
 const SERVER_BRANDS: Map<string, Brand> = new Map([
@@ -212,102 +213,6 @@ apiApp.post('/api/test-provider', async (req, res) => {
     res.json(result);
   } catch (err: any) {
     res.status(400).json({ success: false, latencyMs: 0, message: err.message || 'Connection test failed' });
-  }
-});
-
-/**
- * Room Visualization Endpoint (Section 8)
- */
-apiApp.post('/api/room-visualize', async (req, res) => {
-  try {
-    const {
-      roomPhoto,
-      designImage,
-      brandId = 'brand-aatmi-01',
-      prompt,
-      roomSource = 'uploaded',
-    } = req.body;
-
-    if (!roomPhoto || !designImage) {
-      return res.status(400).json({ error: 'roomPhoto and designImage are required' });
-    }
-
-    const config = getOrCreateBrandConfig(brandId);
-    const providerAdapter = getRoomPreviewProvider(config.room_preview_provider);
-
-    // Lightweight VLM window area proposal
-    let windowHint = {
-      bbox: { x: 20, y: 15, width: 60, height: 75 },
-      description: 'central architectural window with floor-to-ceiling drapery frame',
-    };
-
-    const ai = getGenAIClient();
-    if (ai) {
-      try {
-        const parsedRoom = parseBase64Image(roomPhoto);
-        if (parsedRoom) {
-          const vlmResp = await ai.models.generateContent({
-            model: 'gemini-3.8-flash',
-            contents: {
-              parts: [
-                { inlineData: { data: parsedRoom.base64, mimeType: parsedRoom.mimeType } },
-                {
-                  text: 'Locate the window or curtain area in this room photo. If a window is visible, return a JSON object: {"hasWindow": true, "bbox": {"x": number, "y": number, "width": number, "height": number}}. If no window exists, return {"hasWindow": false}. Output valid JSON only.',
-                },
-              ],
-            },
-          });
-          const text = (vlmResp.text || '{}').replace(/```json/g, '').replace(/```/g, '').trim();
-          const parsed = JSON.parse(text);
-          if (parsed.hasWindow === false) {
-            // Edge Case Section 10: Room Visualization run on a photo with no visible window
-            return res.status(422).json({
-              error: "We couldn't find a window in this photo, try a clearer shot of the wall with the window.",
-              code: 'NO_WINDOW_DETECTED',
-            });
-          }
-          if (parsed.bbox) {
-            windowHint.bbox = parsed.bbox;
-          }
-        }
-      } catch (detectErr) {
-        // Fallback to central default architectural window bounds
-      }
-    }
-
-    // Call Room Preview Provider (Nano Banana Pro / Seedream / GPT Image 2)
-    const apiKey = config.key_mode === 'brand_byo_key' ? config.byo_api_key_encrypted : null;
-    let outputUrl = '';
-
-    try {
-      outputUrl = await providerAdapter.roomPreview(
-        {
-          roomPhoto,
-          designImage,
-          targetRegionHint: windowHint,
-          prompt,
-        },
-        apiKey
-      );
-    } catch (renderErr: any) {
-      console.warn('Provider roomPreview error, falling back to clean composite:', renderErr.message);
-      outputUrl = designImage || roomPhoto;
-    }
-
-    // Track generation usage
-    config.monthly_generations_used = (config.monthly_generations_used || 0) + 1;
-
-    res.json({
-      success: true,
-      outputUrl,
-      providerUsed: providerAdapter.name,
-      roomSource,
-      windowHint,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (err: any) {
-    console.error('Error in /api/room-visualize:', err);
-    res.status(500).json({ error: err.message || 'Failed to visualize room' });
   }
 });
 
@@ -492,89 +397,6 @@ apiApp.post('/api/generate-curtain-fabric', async (req, res) => {
       return res.status(400).json({
         error: 'Neither OPENROUTER_API_KEY nor GEMINI_API_KEY is configured on the server. Please add your key in Settings > Secrets.',
       });
-    }
-
-    if (req.body.mode === 'single_region') {
-      const { templateImage, guideImage, tint, region, fabric } = req.body;
-      const curtain = parseBase64Image(templateImage),
-        guide = parseBase64Image(guideImage),
-        swatch = parseBase64Image(fabric?.imageBase64);
-      if (!curtain || !guide || !swatch) return res.status(400).json({ error: 'invalid images' });
-      const prompt =
-`Image 1 = current curtain photograph. Image 2 = target fabric. Image 3 = Image 1 with zone "${region?.displayName || region?.name}" marked in solid ${tint}.
-Repaint ONLY the ${tint} zone with the exact pattern and weave of Image 2 (${fabric?.name}, ${fabric?.weave || 'woven'}).
-Inside the zone preserve every fold, pleat, shadow and highlight of Image 1; the fabric must drape into the existing folds. Pattern repeat ≈ 1/25 of curtain height.
-Keep ALL pixels outside the ${tint} zone identical to Image 1. Boundary = clean sewn seam, no halo.
-Do not flatten folds, move zone boundaries, redraw the background, or add text/watermarks.`;
-
-      // 1. Primary Route: OpenRouter Inpainting (FLUX.1 Fill Pro)
-      if (openRouterKey) {
-        try {
-          const imageUrl = await callOpenRouterInpaint({
-            baseImage: templateImage,
-            fabricImage: fabric?.imageBase64,
-            maskImage: guideImage,
-            prompt,
-            zoneName: region?.displayName || region?.name,
-            fabricName: fabric?.name,
-            fabricWeave: fabric?.weave,
-            model: OPENROUTER_RECOMMENDED_MODELS.inpaintingPro,
-            apiKey: openRouterKey,
-          });
-          if (imageUrl) {
-            return res.json({ success: true, imageUrl, providerUsed: 'openrouter_flux' });
-          }
-        } catch (orSingleErr) {
-          console.warn('OpenRouter single region inpaint error, trying Gemini SDK fallback:', orSingleErr);
-        }
-      }
-
-      if (!ai) {
-        return res.status(400).json({ error: 'No AI model available for image generation.' });
-      }
-
-      try {
-        const response = await ai.models.generateContent({
-          model: process.env.GEMINI_IMAGE_MODEL || 'gemini-3.1-flash-image', // FIX 3: tier up, env-switchable
-          config: { imageConfig: { aspectRatio: '4:5', imageSize: '2K' } }, // FIX 4: framing/resolution
-          contents: {
-            parts: [
-              { inlineData: curtain },
-              { inlineData: swatch },
-              { inlineData: guide },
-              { text: prompt },
-            ],
-          },
-        });
-
-        let imageUrl: string | null = null;
-        if (response.candidates && response.candidates[0]?.content?.parts) {
-          for (const part of response.candidates[0].content.parts) {
-            if (part.inlineData && part.inlineData.data) {
-              imageUrl = `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`;
-              break;
-            }
-          }
-        }
-
-        if (!imageUrl) {
-          return res.status(500).json({ error: 'No image was generated by the model.' });
-        }
-
-        return res.json({ success: true, imageUrl });
-      } catch (singleErr: any) {
-        console.error('Single region generation error:', singleErr);
-        const isPaidKeyError =
-          singleErr.message?.includes('paid') ||
-          singleErr.message?.includes('quota') ||
-          singleErr.message?.includes('RESOURCE_EXHAUSTED') ||
-          singleErr.status === 429;
-
-        return res.status(422).json({
-          error: singleErr.message || 'Image generation model encountered an issue.',
-          needsPaidKey: isPaidKeyError,
-        });
-      }
     }
 
     // Deprecated multi-region legacy fallback
