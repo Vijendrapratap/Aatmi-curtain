@@ -18,6 +18,7 @@ interface FabricPickerSheetProps {
   fabrics: Fabric[];
   currentAssignedFabricId: string | null;
   onAssignFabric: (fabricId: string) => void;
+  onAssignFabricTo: (target: string | 'all', fabricId: string) => void;
   onChangeZone: () => void;
 }
 
@@ -50,6 +51,7 @@ const PickerFabricItem: React.FC<{ fabric: Fabric; isAssigned: boolean; onSelect
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onPreview(); }}
+          onKeyDown={(e) => e.stopPropagation()}
           title="Look closer"
           className="absolute right-2 bottom-2 z-10 flex items-center gap-1 rounded-lg bg-white/95 p-1.5 text-[var(--color-text-primary)] opacity-0 shadow-sm transition group-hover:opacity-100 group-focus-within:opacity-100"
         >
@@ -67,7 +69,7 @@ const PickerFabricItem: React.FC<{ fabric: Fabric; isAssigned: boolean; onSelect
   );
 };
 
-export const FabricPickerSheet: React.FC<FabricPickerSheetProps> = ({ variant, isOpen, onClose, activeRegion, regions, assignments, fabrics, currentAssignedFabricId, onAssignFabric, onChangeZone }) => {
+export const FabricPickerSheet: React.FC<FabricPickerSheetProps> = ({ variant, isOpen, onClose, activeRegion, regions, assignments, fabrics, currentAssignedFabricId, onAssignFabric, onAssignFabricTo, onChangeZone }) => {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -114,8 +116,8 @@ export const FabricPickerSheet: React.FC<FabricPickerSheetProps> = ({ variant, i
           <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-[var(--color-text-disabled)]" />
           <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search fabrics" className="field pl-9" />
         </div>
-        <button type="button" onClick={() => setIsCameraOpen(true)} className="btn btn-secondary shrink-0" title="Photograph a physical swatch and use it here">
-          <Camera className="h-4 w-4" /><span className="hidden xl:inline">Photograph a swatch</span>
+        <button type="button" onClick={() => setIsCameraOpen(true)} className="btn btn-secondary shrink-0" title="Photograph a physical fabric sample and use it here">
+          <Camera className="h-4 w-4" /><span className="hidden xl:inline">Photograph a fabric</span>
         </button>
       </div>
 
@@ -147,7 +149,11 @@ export const FabricPickerSheet: React.FC<FabricPickerSheetProps> = ({ variant, i
         activeRegionId={activeRegion?.id || null}
         assignments={assignments}
         fabrics={fabrics}
-        onApply={(_target, fabId) => { pick(fabId); setPreviewing(null); }}
+        onApply={(target, fabId) => {
+          onAssignFabricTo(target, fabId);
+          setPreviewing(null);
+          if (variant === 'modal') onClose();
+        }}
         onGoToStudio={() => setPreviewing(null)}
       />
     </>
