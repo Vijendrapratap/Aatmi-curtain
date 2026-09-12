@@ -19,7 +19,7 @@ interface TemplateEditorProps {
 
 export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }) => {
   const { brandTemplates, brandFabrics, currentBrandId, getModelConfig, saveDesign, setActiveDesignId, setActiveView } = useBrandStore();
-  const { selectedTemplateId, selectTemplate, assignments, activeRegionId, setActiveRegionId, hoveredRegionId, setHoveredRegionId, assignFabricToRegion } = useStudioStore();
+  const { selectedTemplateId, selectTemplate, assignments, activeRegionId, setActiveRegionId, hoveredRegionId, setHoveredRegionId, assignFabricToRegion, assignFabricToAllRegions } = useStudioStore();
 
   const templates = useMemo(() => brandTemplates.filter((t) => t.brand_id === currentBrandId || !t.brand_id), [brandTemplates, currentBrandId]);
   const currentTemplate: CurtainTemplate | undefined = templates.find((t) => t.id === selectedTemplateId) || templates[0];
@@ -99,6 +99,13 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
     setGeneratedImageUrl(null);
   }, [activeRegionId, assignFabricToRegion]);
 
+  const safeRegions = currentTemplate?.regions ?? [];
+  const handleAssignFabricTo = useCallback((target: string | 'all', fabricId: string) => {
+    if (target === 'all') assignFabricToAllRegions(safeRegions.map((r) => r.id), fabricId);
+    else assignFabricToRegion(target, fabricId);
+    setGeneratedImageUrl(null);
+  }, [safeRegions, assignFabricToRegion, assignFabricToAllRegions]);
+
   const handlePhotoreal = async () => {
     if (!currentTemplate) return;
     setIsGenerating(true);
@@ -119,6 +126,8 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
       if (result?.imageUrl) {
         setGeneratedImageUrl(result.imageUrl);
         setStatus({ kind: 'ok', text: 'Photoreal render ready. Save the design to keep it.' });
+      } else {
+        setStatus({ kind: 'info', text: 'The render finished without an image. Showing the live preview instead.' });
       }
     } catch (err: any) {
       setStatus({ kind: 'info', text: `Photoreal render did not finish (${err.message || 'unknown error'}). Showing the live preview instead.` });
@@ -312,6 +321,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
             fabrics={scopedFabrics}
             currentAssignedFabricId={activeAssignment?.fabric_id || null}
             onAssignFabric={handleAssignFabric}
+            onAssignFabricTo={handleAssignFabricTo}
             onChangeZone={() => setIsZoneChooserOpen(true)}
           />
         </aside>
@@ -344,6 +354,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
           fabrics={scopedFabrics}
           currentAssignedFabricId={activeAssignment?.fabric_id || null}
           onAssignFabric={handleAssignFabric}
+          onAssignFabricTo={handleAssignFabricTo}
           onChangeZone={() => { setIsPickerSheetOpen(false); setIsZoneChooserOpen(true); }}
         />
       </div>
