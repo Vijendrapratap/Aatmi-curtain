@@ -286,18 +286,14 @@ export const FabricPickerSheet: React.FC<FabricPickerSheetProps> = ({
           fabric={previewingFabric}
           regions={activeRegion ? [activeRegion] : []}
           activeRegionId={activeRegion?.id || null}
-          onApplyToRegion={(_regId, fabId) => {
-            onAssignFabric(fabId);
-            setPreviewingFabric(null);
-            if (variant === 'modal') onClose();
-          }}
-          onApplyToAllRegions={(fabId) => {
+          assignments={[]}
+          fabrics={scopedFabrics}
+          onApply={(_target, fabId) => {
             onAssignFabric(fabId);
             setPreviewingFabric(null);
             if (variant === 'modal') onClose();
           }}
           onGoToStudio={() => {
-            if (previewingFabric) onAssignFabric(previewingFabric.id);
             setPreviewingFabric(null);
             if (variant === 'modal') onClose();
           }}

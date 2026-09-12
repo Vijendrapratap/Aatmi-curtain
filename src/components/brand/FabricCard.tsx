@@ -1,6 +1,7 @@
 // src/components/brand/FabricCard.tsx
 import React, { useState } from 'react';
 import { Fabric } from '../../types/curtain';
+import { fabricOriginBadge } from '../../lib/labels';
 import {
   Eye,
   MoreVertical,
@@ -13,8 +14,8 @@ import {
 interface FabricCardProps {
   fabric: Fabric;
   onPreview: (fabric: Fabric) => void;
-  onApplyDirect: (fabric: Fabric) => void;
-  onPromoteToCatalog?: (fabric: Fabric) => void;
+  onApply: (fabric: Fabric) => void;
+  onKeepInLibrary?: (fabric: Fabric) => void;
   onRename?: (fabric: Fabric) => void;
   onArchive?: (fabric: Fabric) => void;
   viewSize?: 'compact' | 'comfortable';
@@ -23,15 +24,16 @@ interface FabricCardProps {
 export const FabricCard: React.FC<FabricCardProps> = ({
   fabric,
   onPreview,
-  onApplyDirect,
-  onPromoteToCatalog,
+  onApply,
+  onKeepInLibrary,
   onRename,
   onArchive,
   viewSize = 'comfortable',
 }) => {
   const [imgError, setImgError] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isCatalog = fabric.visibility !== 'session_only';
+  const badge = fabricOriginBadge(fabric);
+  const isOwn = badge === 'Your fabric';
 
   return (
     <div
@@ -86,18 +88,16 @@ export const FabricCard: React.FC<FabricCardProps> = ({
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              onApplyDirect(fabric);
+              onApply(fabric);
             }}
             className="btn btn-primary btn-sm w-full"
           >
-            Apply
+            Apply to zone…
           </button>
         </div>
 
         <div className="absolute top-2 left-2 pointer-events-none">
-          <span className={isCatalog ? 'badge badge-muted' : 'badge badge-accent'}>
-            {isCatalog ? 'Catalog' : 'Session'}
-          </span>
+          <span className={isOwn ? 'badge badge-accent' : 'badge badge-muted'}>{badge}</span>
         </div>
 
         <div className="absolute top-2 right-2 z-10">
@@ -118,17 +118,17 @@ export const FabricCard: React.FC<FabricCardProps> = ({
               onClick={(e) => e.stopPropagation()}
               className="menu-panel absolute top-full right-0 z-30 mt-1 w-40 text-[12px]"
             >
-              {!isCatalog && onPromoteToCatalog && (
+              {fabric.visibility === 'session_only' && onKeepInLibrary && (
                 <button
                   type="button"
                   onClick={() => {
                     setIsMenuOpen(false);
-                    onPromoteToCatalog(fabric);
+                    onKeepInLibrary(fabric);
                   }}
                   className="flex w-full items-center gap-2 rounded-[8px] px-2 py-1.5 text-left text-[var(--color-accent)] hover:bg-[var(--color-accent-tint)]"
                 >
                   <FolderPlus className="h-3.5 w-3.5" />
-                  Add to catalog
+                  Keep in library
                 </button>
               )}
               {onRename && (
