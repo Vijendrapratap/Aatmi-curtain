@@ -67,10 +67,15 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
     else scrollTo(`design-${id}`);
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError('Could not copy the link. Copy it from the address bar instead.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const download = (src: string, suffix: string) => {
@@ -133,6 +138,7 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
       setTimeout(() => scrollTo('design-room'), 50);
     } catch (err: any) {
       setError(err.message || 'Room staging failed.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setIsStaging(false);
     }
@@ -197,7 +203,7 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
               </ul>
             </div>
             {design.render_kind !== 'photoreal' && (
-              <button type="button" disabled={isRendering} onClick={handlePhotoreal} className="btn btn-primary btn-block">
+              <button type="button" disabled={isRendering || !template} title={template ? undefined : 'The curtain style for this design is no longer available'} onClick={handlePhotoreal} className="btn btn-primary btn-block">
                 <Sparkles className={`h-3.5 w-3.5 ${isRendering ? 'animate-spin' : ''}`} />{isRendering ? renderStep || 'Rendering…' : 'Create photoreal render'}
               </button>
             )}
@@ -220,7 +226,7 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
         ) : currentPreview ? (
           <div className="space-y-3">
             <div
-              className="relative mx-auto aspect-[16/10] w-full max-w-4xl cursor-ew-resize overflow-hidden rounded-2xl bg-neutral-100 shadow-lg select-none"
+              className="relative mx-auto aspect-[16/10] w-full max-w-4xl cursor-ew-resize touch-none overflow-hidden rounded-2xl bg-neutral-100 shadow-lg select-none"
               onMouseDown={() => setIsDragging(true)}
               onMouseUp={() => setIsDragging(false)}
               onMouseLeave={() => setIsDragging(false)}
