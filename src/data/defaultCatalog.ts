@@ -1134,7 +1134,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
     metadata: {
       created_at: '2026-03-05T00:00:00Z',
       source: 'catalog',
-      tags: ['linen', 'persian', 'tapestry', 'embroidered', 'vertical-stencil', 'high-ceiling'],
+      tags: ['linen', 'persian', 'tapestry', 'embroidered', 'vertical-edge', 'high-ceiling'],
       pinch_style: 'Pinch Pleat',
     },
     regions: [
