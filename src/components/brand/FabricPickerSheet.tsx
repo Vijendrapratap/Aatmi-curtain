@@ -1,319 +1,164 @@
 // src/components/brand/FabricPickerSheet.tsx
+// The studio's fabric panel. Dock variant sits beside the canvas on desktop;
+// modal variant is the bottom sheet on small screens.
 import React, { useState } from 'react';
-import { useBrandStore } from '../../lib/brandStore';
-import { Fabric, Region } from '../../types/curtain';
-import {
-  X,
-  Camera,
-  Palette,
-  Search,
-  Check,
-  Sparkles,
-  Eye,
-  Camera as CameraIcon,
-} from 'lucide-react';
+import { X, Camera, Search, Check, Eye, Palette, ArrowLeftRight } from 'lucide-react';
+import { Fabric, FabricAssignment, Region } from '../../types/curtain';
+import { fabricOriginBadge } from '../../lib/labels';
 import { CameraCaptureModal } from './CameraCaptureModal';
 import { FabricPreviewModal } from './FabricPreviewModal';
 
 interface FabricPickerSheetProps {
+  variant: 'dock' | 'modal';
   isOpen: boolean;
   onClose: () => void;
   activeRegion: Region | null;
+  regions: Region[];
+  assignments: FabricAssignment[];
+  fabrics: Fabric[];
   currentAssignedFabricId: string | null;
   onAssignFabric: (fabricId: string) => void;
-  variant?: 'modal' | 'dock';
+  onChangeZone: () => void;
 }
 
-const PickerFabricItem: React.FC<{
-  fabric: Fabric;
-  isAssigned: boolean;
-  onSelect: () => void;
-  onPreview: () => void;
-  compact?: boolean;
-}> = ({ fabric, isAssigned, onSelect, onPreview, compact = false }) => {
-  const [imgError, setImgError] = useState(false);
-  const isRealPhoto = fabric.image_url.startsWith('/fabrics/');
+const CATEGORIES = ['All', 'Your fabrics', 'Velvet', 'Linen', 'Silk', 'Geometric', 'Jacquard & Damask', 'Textured & Bouclé', 'Exotic Relief'];
 
+const PickerFabricItem: React.FC<{ fabric: Fabric; isAssigned: boolean; onSelect: () => void; onPreview: () => void; compact: boolean }> = ({ fabric, isAssigned, onSelect, onPreview, compact }) => {
+  const [imgError, setImgError] = useState(false);
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
-      title={fabric.name}
-      className={`group relative flex shrink-0 cursor-pointer flex-col overflow-hidden rounded-[12px] text-left transition-shadow ${
-        isAssigned
-          ? 'ring-2 ring-[var(--color-accent)] ring-offset-1'
-          : 'shadow-[var(--shadow-ring)] hover:shadow-[var(--shadow-card)]'
-      }`}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); } }}
+      title={`Use ${fabric.name}`}
+      className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-[12px] text-left transition-shadow ${isAssigned ? 'ring-2 ring-[var(--color-accent)] ring-offset-1' : 'shadow-[var(--shadow-ring)] hover:shadow-[var(--shadow-card)]'}`}
     >
-      <div
-        className="relative w-full shrink-0 overflow-hidden bg-[var(--color-bg-sunken)]"
-        style={{
-          backgroundColor: fabric.color_hex || '#EDE8DE',
-          aspectRatio: '1 / 1',
-          minHeight: compact ? 92 : 112,
-        }}
-      >
+      <div className="relative w-full overflow-hidden bg-[var(--color-bg-sunken)]" style={{ backgroundColor: fabric.color_hex || '#EDE8DE', aspectRatio: '1 / 1', minHeight: compact ? 88 : 112 }}>
         {!imgError ? (
-          <img
-            src={fabric.image_url}
-            alt={fabric.name}
-            onError={() => setImgError(true)}
-            loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-          />
+          <img src={fabric.image_url} alt={fabric.name} onError={() => setImgError(true)} loading="lazy" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
         ) : (
-          <div
-            className="w-full h-full flex flex-col items-center justify-center p-2 text-center text-white"
-            style={{
-              backgroundColor: fabric.color_hex || '#5B4FE0',
-              backgroundImage:
-                'repeating-linear-gradient(45deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 2px, transparent 2px, transparent 6px)',
-            }}
-          >
-            <Palette className="w-5 h-5 mb-1 opacity-80" />
-            <span className="text-[10px] font-semibold truncate max-w-full px-1">
-              {fabric.name}
-            </span>
+          <div className="flex h-full w-full flex-col items-center justify-center p-2 text-center text-white" style={{ backgroundColor: fabric.color_hex || '#5B4FE0' }}>
+            <Palette className="mb-1 h-5 w-5 opacity-80" />
+            <span className="max-w-full truncate px-1 text-[10px] font-semibold">{fabric.name}</span>
           </div>
         )}
-
-        {/* Assigned checkmark indicator */}
         {isAssigned && (
-          <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--color-accent)] text-white flex items-center justify-center shadow-xs z-10">
-            <Check className="w-3 h-3 stroke-[2.5]" />
-          </div>
+          <span className="absolute top-2 right-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-accent)] text-white shadow-xs"><Check className="h-3 w-3 stroke-[2.5]" /></span>
         )}
-
-        {/* Real photo badge */}
-        {isRealPhoto && (
-          <span className="badge badge-muted absolute top-2 left-2">Real</span>
-        )}
-
-        {/* Quick Tactile Loupe Inspect button */}
+        {fabricOriginBadge(fabric) === 'Your fabric' && <span className="badge badge-accent absolute top-2 left-2">Yours</span>}
         <button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onPreview();
-          }}
-          title="Inspect tactile weave"
-          className="absolute bottom-2 right-2 p-1.5 rounded-lg bg-white/95 hover:bg-white text-[var(--color-text-primary)] shadow-sm opacity-0 group-hover:opacity-100 transition duration-150 cursor-pointer flex items-center gap-1 z-10"
+          onClick={(e) => { e.stopPropagation(); onPreview(); }}
+          title="Look closer"
+          className="absolute right-2 bottom-2 z-10 flex items-center gap-1 rounded-lg bg-white/95 p-1.5 text-[var(--color-text-primary)] opacity-0 shadow-sm transition group-hover:opacity-100 group-focus-within:opacity-100"
         >
-          <Eye className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-          <span className="text-[10px] font-semibold pr-0.5">Inspect</span>
+          <Eye className="h-3.5 w-3.5 text-[var(--color-accent)]" />
+          <span className="pr-0.5 text-[10px] font-semibold">Look closer</span>
         </button>
       </div>
-
       {!compact && (
         <div className="p-2">
           <h4 className="truncate text-[12px] font-semibold">{fabric.name}</h4>
-          <div className="mt-0.5 truncate text-[10px] text-[var(--color-text-tertiary)]">
-            {fabric.category}
-          </div>
+          <div className="mt-0.5 truncate text-[10px] text-[var(--color-text-tertiary)]">{fabric.category}</div>
         </div>
       )}
     </div>
   );
 };
 
-export const FabricPickerSheet: React.FC<FabricPickerSheetProps> = ({
-  isOpen,
-  onClose,
-  activeRegion,
-  currentAssignedFabricId,
-  onAssignFabric,
-  variant = 'modal',
-}) => {
-  const { brandFabrics, currentBrandId } = useBrandStore();
+export const FabricPickerSheet: React.FC<FabricPickerSheetProps> = ({ variant, isOpen, onClose, activeRegion, regions, assignments, fabrics, currentAssignedFabricId, onAssignFabric, onChangeZone }) => {
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('All');
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [previewing, setPreviewing] = useState<Fabric | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'catalog' | 'camera'>('catalog');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
-  const [previewingFabric, setPreviewingFabric] = useState<Fabric | null>(null);
+  if (variant === 'modal' && !isOpen) return null;
 
-  const scopedFabrics = brandFabrics.filter(
-    (f) => f.brand_id === currentBrandId || !f.brand_id
-  );
-
-  if (variant === 'modal' && (!isOpen || !activeRegion)) return null;
-
-  const filteredFabrics = scopedFabrics.filter((f) => {
-    if (selectedCategory === 'Real Swatches' && !f.image_url.startsWith('/fabrics/')) {
-      return false;
-    }
-    if (
-      selectedCategory !== 'All' &&
-      selectedCategory !== 'Real Swatches' &&
-      f.category !== selectedCategory
-    ) {
-      return false;
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      return (
-        f.name.toLowerCase().includes(q) ||
-        f.category.toLowerCase().includes(q) ||
-        f.tags.some((t) => t.toLowerCase().includes(q))
-      );
+  const filtered = fabrics.filter((f) => {
+    if (category === 'Your fabrics' && fabricOriginBadge(f) !== 'Your fabric') return false;
+    if (category !== 'All' && category !== 'Your fabrics' && f.category !== category) return false;
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      return f.name.toLowerCase().includes(q) || f.category.toLowerCase().includes(q) || f.tags.some((t) => t.toLowerCase().includes(q));
     }
     return true;
   });
 
-  const categories = [
-    'All',
-    'Real Swatches',
-    'Velvet',
-    'Linen',
-    'Silk',
-    'Jacquard & Damask',
-    'Textured & Bouclé',
-    'Exotic Relief',
-  ];
+  const pick = (fabricId: string) => {
+    onAssignFabric(fabricId);
+    if (variant === 'modal') onClose();
+  };
 
   const body = (
     <>
-        <div className="flex items-center justify-between border-b border-[var(--color-border-subtle)] pb-3">
-          <div className="min-w-0">
-            <p className="eyebrow-label">Fabrics</p>
-            <h3 className="truncate font-display text-[15px] font-semibold">
-              {activeRegion ? activeRegion.display_name : 'Select a zone'}
-            </h3>
-          </div>
+      <div className="flex items-start justify-between gap-2 border-b border-[var(--color-border-subtle)] pb-3">
+        <div className="min-w-0">
+          <p className="eyebrow-label">Fabrics for</p>
+          <h3 className="truncate font-display text-[15px] font-semibold">{activeRegion ? activeRegion.display_name : 'Pick a zone first'}</h3>
+        </div>
+        <div className="flex shrink-0 items-center gap-1">
+          {regions.length > 1 && (
+            <button type="button" onClick={onChangeZone} className="btn btn-ghost btn-sm" title="Choose a different zone">
+              <ArrowLeftRight className="h-3.5 w-3.5" /> Change zone
+            </button>
+          )}
           {variant === 'modal' && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn btn-ghost"
-              aria-label="Close fabric picker"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <button type="button" onClick={onClose} className="btn btn-ghost btn-sm" aria-label="Close fabric panel"><X className="h-5 w-5" /></button>
           )}
         </div>
+      </div>
 
-        <div className="segmented w-full">
-          <button
-            type="button"
-            onClick={() => setActiveTab('catalog')}
-            className={`segmented-item flex-1 ${activeTab === 'catalog' ? 'is-active' : ''}`}
-          >
-            Catalog
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('camera');
-              setIsCameraModalOpen(true);
-            }}
-            className={`segmented-item flex-1 ${activeTab === 'camera' ? 'is-active' : ''}`}
-          >
-            Camera
-          </button>
-        </div>
-
-        <div className="relative">
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-[var(--color-text-disabled)]" />
-          <input
-            type="search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search weave or name"
-            className="field pl-9"
-          />
+          <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search fabrics" className="field pl-9" />
         </div>
+        <button type="button" onClick={() => setIsCameraOpen(true)} className="btn btn-secondary shrink-0" title="Photograph a physical swatch and use it here">
+          <Camera className="h-4 w-4" /><span className="hidden xl:inline">Photograph a swatch</span>
+        </button>
+      </div>
 
-        <div className="flex items-center gap-1 overflow-x-auto pb-1">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setSelectedCategory(cat)}
-              className={`shrink-0 rounded-[8px] px-2.5 py-1 text-[11px] font-medium ${
-                selectedCategory === cat
-                  ? 'bg-[var(--color-accent)] text-white'
-                  : 'bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)]'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+      <div className="flex items-center gap-1 overflow-x-auto pb-1">
+        {CATEGORIES.map((c) => (
+          <button key={c} type="button" onClick={() => setCategory(c)} className={`shrink-0 rounded-[8px] px-2.5 py-1 text-[11px] font-medium ${category === c ? 'bg-[var(--color-accent)] text-white' : 'bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)]'}`}>{c}</button>
+        ))}
+      </div>
 
-        <div
-          className={`grid min-h-0 flex-1 auto-rows-max content-start gap-2 overflow-y-auto p-0.5 ${
-            variant === 'dock' ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4'
-          }`}
-        >
-          {!activeRegion ? (
-            <div className="col-span-full px-2 py-10 text-center text-[13px] text-[var(--color-text-tertiary)]">
-              Select a zone to assign a swatch.
-            </div>
-          ) : (
-            filteredFabrics.map((fabric) => (
-              <PickerFabricItem
-                key={fabric.id}
-                fabric={fabric}
-                compact={variant === 'dock'}
-                isAssigned={currentAssignedFabricId === fabric.id}
-                onSelect={() => {
-                  onAssignFabric(fabric.id);
-                  if (variant === 'modal') onClose();
-                }}
-                onPreview={() => setPreviewingFabric(fabric)}
-              />
-            ))
-          )}
+      <div className={`grid min-h-0 flex-1 auto-rows-max content-start gap-2 overflow-y-auto p-0.5 ${variant === 'dock' ? 'grid-cols-2' : 'grid-cols-3 sm:grid-cols-4'}`}>
+        {!activeRegion ? (
+          <div className="col-span-full px-2 py-10 text-center text-[13px] text-[var(--color-text-tertiary)]">Click a zone on the curtain or in the zones list.</div>
+        ) : filtered.length === 0 ? (
+          <div className="col-span-full py-10 text-center text-[13px] text-[var(--color-text-tertiary)]">No fabrics match.</div>
+        ) : (
+          filtered.map((f) => (
+            <PickerFabricItem key={f.id} fabric={f} compact={variant === 'dock'} isAssigned={currentAssignedFabricId === f.id} onSelect={() => pick(f.id)} onPreview={() => setPreviewing(f)} />
+          ))
+        )}
+      </div>
 
-          {activeRegion && filteredFabrics.length === 0 && (
-            <div className="col-span-full py-10 text-center text-[13px] text-[var(--color-text-tertiary)]">
-              No fabrics match.
-            </div>
-          )}
-        </div>
+      <CameraCaptureModal isOpen={isCameraOpen} onClose={() => setIsCameraOpen(false)} onFabricCaptured={(f) => pick(f.id)} />
 
-        <CameraCaptureModal
-          isOpen={isCameraModalOpen}
-          onClose={() => setIsCameraModalOpen(false)}
-          onFabricCaptured={(f) => {
-            onAssignFabric(f.id);
-            if (variant === 'modal') onClose();
-          }}
-        />
-
-        <FabricPreviewModal
-          isOpen={!!previewingFabric}
-          onClose={() => setPreviewingFabric(null)}
-          fabric={previewingFabric}
-          regions={activeRegion ? [activeRegion] : []}
-          activeRegionId={activeRegion?.id || null}
-          assignments={[]}
-          fabrics={scopedFabrics}
-          onApply={(_target, fabId) => {
-            onAssignFabric(fabId);
-            setPreviewingFabric(null);
-            if (variant === 'modal') onClose();
-          }}
-          onGoToStudio={() => {
-            setPreviewingFabric(null);
-            if (variant === 'modal') onClose();
-          }}
-        />
+      <FabricPreviewModal
+        isOpen={!!previewing}
+        onClose={() => setPreviewing(null)}
+        fabric={previewing}
+        regions={regions}
+        activeRegionId={activeRegion?.id || null}
+        assignments={assignments}
+        fabrics={fabrics}
+        onApply={(_target, fabId) => { pick(fabId); setPreviewing(null); }}
+        onGoToStudio={() => setPreviewing(null)}
+      />
     </>
   );
 
   if (variant === 'dock') {
-    return (
-      <div className="flex h-full min-h-0 w-full flex-col gap-3 overflow-hidden rounded-[18px] bg-[var(--color-bg-surface)] p-3 shadow-[var(--shadow-card)]">
-        {body}
-      </div>
-    );
+    return <div className="flex h-full min-h-0 w-full flex-col gap-3 overflow-hidden rounded-[18px] bg-[var(--color-bg-surface)] p-3 shadow-[var(--shadow-card)]">{body}</div>;
   }
-
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#1A1814]/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
-      <div className="relative flex h-[min(640px,90dvh)] w-full max-w-2xl flex-col gap-3 rounded-t-[24px] bg-[var(--color-bg-surface)] p-5 shadow-[var(--shadow-modal)] sm:rounded-[24px]">
-        {body}
-      </div>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#1A1814]/40 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="relative flex h-[min(640px,90dvh)] w-full max-w-2xl flex-col gap-3 rounded-t-[24px] bg-[var(--color-bg-surface)] p-4 shadow-[var(--shadow-modal)] sm:rounded-[24px]">{body}</div>
     </div>
   );
 };
