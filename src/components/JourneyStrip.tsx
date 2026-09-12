@@ -19,6 +19,7 @@ export const JourneyStrip: React.FC<JourneyStripProps> = ({ steps, onStepClick }
               type="button"
               onClick={() => onStepClick(step.id)}
               aria-current={step.state === 'current' ? 'step' : undefined}
+              aria-label={`${step.label}: ${step.state === 'done' ? 'done' : step.state === 'current' ? 'current step' : 'not started'}`}
               className="journey-step-button"
             >
               <span className="journey-step-index">
