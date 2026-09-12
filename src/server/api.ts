@@ -68,7 +68,7 @@ const SERVER_BRANDS: Map<string, Brand> = new Map([
       id: 'brand-aatmi-01',
       name: 'Maison Aatmi',
       slug: 'aatmi',
-      logo_url: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=200&auto=format&fit=crop&q=80',
+      logo_url: null,
       theme_accent_color: '#5B4FE0',
       primary_contact_name: 'Elena Vance',
       primary_contact_email: 'elena@aatmi.design',
