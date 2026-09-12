@@ -101,10 +101,8 @@ export default function App() {
           />
         )}
 
-        {activeView === 'templates' && (
-          <TemplatesGallery
-            onOpenNewTemplateModal={() => setIsNewTemplateModalOpen(true)}
-          />
+        {activeView === 'library_styles' && (
+          <TemplatesGallery onOpenNewTemplateModal={() => setIsNewTemplateModalOpen(true)} />
         )}
 
         {activeView === 'editor' && (
@@ -113,7 +111,7 @@ export default function App() {
           />
         )}
 
-        {activeView === 'catalog' && <CatalogView />}
+        {activeView === 'library_fabrics' && <CatalogView />}
 
         {activeView === 'design_detail' && (
           <DesignDetailView

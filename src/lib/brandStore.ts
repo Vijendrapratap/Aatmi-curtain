@@ -34,6 +34,7 @@ export interface BrandStoreState {
   saveDesign: (design: Omit<Design, 'id' | 'created_at'>) => Design;
   addRoomPreview: (designId: string, preview: Omit<RoomPreview, 'id' | 'created_at'>) => RoomPreview;
   getDesign: (designId: string) => Design | undefined;
+  updateDesign: (designId: string, updates: Partial<Design>) => void;
 
   // Scoped Assets
   brandTemplates: CurtainTemplate[];
@@ -50,9 +51,9 @@ export interface BrandStoreState {
   // Active navigation view in brand platform
   activeView:
     | 'dashboard'
-    | 'templates'
     | 'editor'
-    | 'catalog'
+    | 'library_styles'
+    | 'library_fabrics'
     | 'design_detail'
     | 'settings_profile'
     | 'settings_models'
@@ -70,7 +71,7 @@ const INITIAL_BRANDS: Brand[] = [
     id: 'brand-aatmi-01',
     name: 'Maison Aatmi',
     slug: 'aatmi',
-    logo_url: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=200&auto=format&fit=crop&q=80',
+    logo_url: null,
     theme_accent_color: '#5B4FE0',
     primary_contact_name: 'Elena Vance',
     primary_contact_email: 'elena@aatmi.design',
@@ -117,7 +118,6 @@ const INITIAL_USERS: BrandUser[] = [
     name: 'Elena Vance',
     email: 'elena@aatmi.design',
     role: 'brand_admin',
-    avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
     created_at: '2026-01-15T09:00:00Z',
   },
   {
@@ -126,7 +126,6 @@ const INITIAL_USERS: BrandUser[] = [
     name: 'Julian Croft',
     email: 'julian@aatmi.design',
     role: 'brand_staff',
-    avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80',
     created_at: '2026-01-20T10:00:00Z',
   },
   {
@@ -135,7 +134,6 @@ const INITIAL_USERS: BrandUser[] = [
     name: 'Marcus Thorne',
     email: 'marcus@luminadrapes.com',
     role: 'brand_admin',
-    avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80',
     created_at: '2026-02-01T14:20:00Z',
   },
   {
@@ -144,7 +142,6 @@ const INITIAL_USERS: BrandUser[] = [
     name: 'Pratap Singh (Platform Ops)',
     email: 'pratap@platform.curtain.ai',
     role: 'platform_admin',
-    avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop&q=80',
     created_at: '2026-01-01T00:00:00Z',
   },
 ];
@@ -180,34 +177,21 @@ const INITIAL_MODEL_CONFIGS: Record<string, BrandModelConfig> = {
 
 const INITIAL_DESIGNS: Design[] = [
   {
-    id: 'design-palazzo-01',
+    id: 'design-velvet-salon-01',
     brand_id: 'brand-aatmi-01',
-    template_id: 'template-chevron-accent',
-    template_name: 'Palazzo Dual Chevron Drapery',
-    name: 'Palazzo Emerald & Gold Living Suite',
+    template_id: 'tpl-velvet-houndstooth',
+    template_name: 'Haute Couture Velvet & Houndstooth Drape',
+    name: 'Velvet & Houndstooth Salon',
     assignments: [
-      { region_id: 'reg-upper-field', fabric_id: 'fab-emerald-velvet', scale: 1, rotation: 0 },
-      { region_id: 'reg-chevron-accent', fabric_id: 'fab-croc-espresso', scale: 1, rotation: 0 },
-      { region_id: 'reg-bottom-hem', fabric_id: 'fab-emerald-velvet', scale: 1, rotation: 0 },
+      { region_id: 'reg-vh-top-velvet', fabric_id: 'fab-charcoal-slate', scale: 1, rotation: 0 },
+      { region_id: 'reg-vh-mid-brass', fabric_id: 'fab-metallic-gold-satin', scale: 1, rotation: 0 },
+      { region_id: 'reg-vh-skirt-houndstooth', fabric_id: 'fab-classic-houndstooth', scale: 1, rotation: 0 },
     ],
-    final_image_url:
-      'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1024&auto=format&fit=crop&q=80',
+    final_image_url: '/designs/velvet-salon-preview.png',
+    render_kind: 'preview',
     created_at: '2026-03-08T14:30:00Z',
     created_by_user_id: 'usr-elena-01',
-    room_previews: [
-      {
-        id: 'room-prev-01',
-        design_id: 'design-palazzo-01',
-        brand_id: 'brand-aatmi-01',
-        room_source: 'template_original',
-        room_photo_url:
-          'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1024&auto=format&fit=crop&q=80',
-        output_url:
-          'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1024&auto=format&fit=crop&q=80',
-        provider_used: 'Nano Banana Pro (Gemini 3 Pro Image)',
-        created_at: '2026-03-08T15:00:00Z',
-      },
-    ],
+    room_previews: [],
   },
 ];
 
@@ -430,6 +414,12 @@ export const useBrandStore = create<BrandStoreState>((set, get) => {
 
     getDesign: (designId) => {
       return get().designs.find((d) => d.id === designId);
+    },
+
+    updateDesign: (designId, updates) => {
+      set((state) => ({
+        designs: state.designs.map((d) => (d.id === designId ? { ...d, ...updates } : d)),
+      }));
     },
 
     brandTemplates: SEEDED_TEMPLATES,

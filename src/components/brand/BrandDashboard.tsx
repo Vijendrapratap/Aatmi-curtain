@@ -79,7 +79,7 @@ export const BrandDashboard: React.FC<BrandDashboardProps> = ({
         </div>
         <button
           type="button"
-          onClick={() => setActiveView('templates')}
+          onClick={() => setActiveView('library_styles')}
           className="bg-[var(--color-bg-surface)] px-5 py-4 text-left transition-colors hover:bg-[var(--color-bg-sunken)]"
         >
           <div className="text-[11px] font-medium tracking-wide text-[var(--color-text-tertiary)] uppercase">
@@ -90,7 +90,7 @@ export const BrandDashboard: React.FC<BrandDashboardProps> = ({
         </button>
         <button
           type="button"
-          onClick={() => setActiveView('catalog')}
+          onClick={() => setActiveView('library_fabrics')}
           className="bg-[var(--color-bg-surface)] px-5 py-4 text-left transition-colors hover:bg-[var(--color-bg-sunken)]"
         >
           <div className="text-[11px] font-medium tracking-wide text-[var(--color-text-tertiary)] uppercase">
@@ -137,7 +137,7 @@ export const BrandDashboard: React.FC<BrandDashboardProps> = ({
             <p className="max-w-md text-[14px] text-[var(--color-text-secondary)]">
               Pick a template, assign fabrics to each zone, then save a design for client presentation.
             </p>
-            <button type="button" onClick={() => setActiveView('templates')} className="btn btn-primary">
+            <button type="button" onClick={() => setActiveView('library_styles')} className="btn btn-primary">
               Choose a template
             </button>
           </div>
