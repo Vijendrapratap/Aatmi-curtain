@@ -240,45 +240,6 @@ export const BrandSettingsView: React.FC<BrandSettingsViewProps> = ({
                 );
               })}
             </div>
-
-            {/* Static Example Image Pair (Section 3.4.2) */}
-            <div className="pt-2">
-              <span className="eyebrow-label text-[var(--color-text-secondary)] block mb-2">
-                Quality Comparison Example (Single-Region Swap)
-              </span>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <div className="w-full aspect-[4/3] rounded-xl bg-neutral-100 overflow-hidden relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&auto=format&fit=crop&q=80"
-                      alt="Before"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/60 text-[9px] font-mono text-white">
-                      ORIGINAL
-                    </div>
-                  </div>
-                  <span className="text-[10px] text-[var(--color-text-secondary)]">
-                    Base curtain with pleats
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  <div className="w-full aspect-[4/3] rounded-xl bg-neutral-100 overflow-hidden relative border border-[var(--color-accent)]">
-                    <img
-                      src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&auto=format&fit=crop&q=80"
-                      alt="After"
-                      className="w-full h-full object-cover filter contrast-125"
-                    />
-                    <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-[var(--color-accent)] text-[9px] font-mono text-white font-semibold">
-                      INPAINTED
-                    </div>
-                  </div>
-                  <span className="text-[10px] text-[var(--color-text-secondary)]">
-                    Folds &amp; lighting preserved
-                  </span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* CARD 2: Room Preview (Section 3.4.3) */}

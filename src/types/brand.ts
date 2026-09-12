@@ -72,6 +72,7 @@ export interface Design {
     brightness?: number;
   }>;
   final_image_url: string;
+  render_kind: 'preview' | 'photoreal';
   created_at: string;
   created_by_user_id: string;
   room_previews: RoomPreview[];

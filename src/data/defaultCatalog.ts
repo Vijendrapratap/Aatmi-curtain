@@ -696,7 +696,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
   // 1. Inspired by Screenshot 1: The Chevron & Ribbon Trim Drape
   {
     id: 'tpl-chevron-accent-band',
-    name: 'Chevron & Cream Drape with Ribbon Stencil',
+    name: 'Chevron & Cream Drape with Ribbon Trim',
     style_code: 'AATMI-CHV-01',
     tagline: 'Dual Drapery Pairing Full Chevron Panel with Inset Ribbon Band',
     description: 'Authentic designer drapery as photographed: A dramatic left drape in black & gold chevron weave, paired with a right cream drape highlighted by a mid-height chevron accent band framed by metallic gold ribbon trims.',
@@ -714,7 +714,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-chv-left-panel',
         name: 'left_full_chevron',
-        display_name: 'Stencil 1 — Left Chevron Drapery',
+        display_name: 'Left chevron panel',
         description: 'Full height left drapery panel featuring bold woven chevron pattern.',
         location: 'Left panel (5% to 47% width)',
         order: 1,
@@ -730,7 +730,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-chv-right-main',
         name: 'right_cream_body',
-        display_name: 'Stencil 2 — Right Cream Upper Body',
+        display_name: 'Right upper panel',
         description: 'Upper cream bouclé drape body extending down to the upper ribbon trim.',
         location: 'Right drape upper body (47% to 96% width, 0% to 22% height)',
         order: 2,
@@ -746,7 +746,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-chv-ribbon-trims',
         name: 'gold_ribbon_trims',
-        display_name: 'Stencil 3 — Upper Metallic Ribbon Trim',
+        display_name: 'Upper ribbon trim',
         description: 'Upper metallic gold satin ribbon framing the chevron accent band.',
         location: 'Upper border (47% to 96% width, 22% to 25.2% height)',
         order: 3,
@@ -762,7 +762,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-chv-accent-band',
         name: 'horizontal_chevron_band',
-        display_name: 'Stencil 4 — Inset Chevron Accent Band',
+        display_name: 'Chevron accent band',
         description: 'Mid-height horizontal band repeating the left panel chevron jacquard.',
         location: 'Right drape center band (47% to 96% width, 25.2% to 34.8% height)',
         order: 4,
@@ -778,7 +778,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-chv-ribbon-lower',
         name: 'gold_ribbon_lower',
-        display_name: 'Stencil 5 — Lower Metallic Ribbon Trim',
+        display_name: 'Lower ribbon trim',
         description: 'Lower metallic gold satin ribbon framing below the chevron band.',
         location: 'Lower border (47% to 96% width, 34.8% to 38% height)',
         order: 5,
@@ -794,7 +794,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-chv-right-skirt',
         name: 'right_cream_skirt',
-        display_name: 'Stencil 6 — Right Lower Skirt',
+        display_name: 'Right lower skirt',
         description: 'Lower cream bouclé drape falling continuously to the floor.',
         location: 'Right drape lower body (47% to 96% width, 38% to 100% height)',
         order: 6,
@@ -831,7 +831,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-cbt-left-top',
         name: 'left_champagne_header',
-        display_name: 'Stencil 1 — Left Champagne Body (Upper 65%)',
+        display_name: 'Left upper body',
         description: 'Upper 65% of left curtain in soft champagne tan drape.',
         location: 'Left curtain upper section (8% to 40% width, 8.5% to 65% height)',
         order: 1,
@@ -847,7 +847,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-cbt-left-stripe',
         name: 'left_terracotta_stripe',
-        display_name: 'Stencil 2 — Left Terracotta Stripe (Mid 10%)',
+        display_name: 'Left stripe',
         description: 'Vibrant terracotta accent stripe separating upper tan from lower navy.',
         location: 'Left curtain mid stripe (65% to 75% height)',
         order: 2,
@@ -863,7 +863,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-cbt-left-bottom',
         name: 'left_navy_base',
-        display_name: 'Stencil 3 — Left Midnight Navy Base (Lower 25%)',
+        display_name: 'Left base',
         description: 'Heavy midnight navy velvet pooling on hardwood floor.',
         location: 'Left curtain lower section (75% to 96% height)',
         order: 3,
@@ -879,7 +879,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-cbt-right-top',
         name: 'right_navy_header',
-        display_name: 'Stencil 4 — Right Midnight Navy Header (Upper 25%)',
+        display_name: 'Right header',
         description: 'Inverted top block in deep midnight navy velvet.',
         location: 'Right curtain header (60% to 92% width, 8.5% to 30% height)',
         order: 4,
@@ -895,7 +895,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-cbt-right-stripe',
         name: 'right_terracotta_stripe',
-        display_name: 'Stencil 5 — Right Terracotta Stripe (Mid 10%)',
+        display_name: 'Right stripe',
         description: 'Terracotta horizontal stripe matching left drape.',
         location: 'Right curtain mid stripe (30% to 40% height)',
         order: 5,
@@ -911,7 +911,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-cbt-right-bottom',
         name: 'right_champagne_puddle',
-        display_name: 'Stencil 6 — Right Champagne Skirt (Lower 60%)',
+        display_name: 'Right skirt',
         description: 'Expansive champagne linen drape puddling luxuriously on the floor.',
         location: 'Right curtain lower section (40% to 98% height)',
         order: 6,
@@ -948,7 +948,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-vh-top-velvet',
         name: 'velvet_upper_header',
-        display_name: 'Stencil 1 — Top Velvet Header (Upper 50%)',
+        display_name: 'Upper header',
         description: 'Lustrous charcoal/black velvet with deep columnar drapery pleats.',
         location: 'Upper half drape (8% to 80% width, 0% to 50% height)',
         order: 1,
@@ -964,7 +964,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-vh-mid-brass',
         name: 'metallic_brass_band',
-        display_name: 'Stencil 2 — Brass Satin Transition Band (8% Height)',
+        display_name: 'Transition band',
         description: 'Gleaming horizontal metallic brass/gold satin ribbon divider.',
         location: 'Horizontal transition band (50% to 57.5% height)',
         order: 2,
@@ -980,7 +980,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-vh-skirt-houndstooth',
         name: 'houndstooth_skirt',
-        display_name: 'Stencil 3 — Houndstooth Drapery Skirt (Lower 42.5%)',
+        display_name: 'Lower skirt',
         description: 'Tailored black & white woven houndstooth skirt pooling on dark walnut floor.',
         location: 'Lower drapery skirt (57.5% to 96% height)',
         order: 3,
@@ -1017,7 +1017,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-gkf-center-velvet',
         name: 'center_ivory_field',
-        display_name: 'Stencil 1 — Center Ivory Velvet Field',
+        display_name: 'Centre field',
         description: 'Soft off-white ivory cream velvet center drapery field.',
         location: 'Center body inside border frame (5% to 75% width, 0% to 75% height)',
         order: 1,
@@ -1033,7 +1033,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-gkf-greek-key-trim',
         name: 'greek_key_ribbon',
-        display_name: 'Stencil 2 — Greek Key Embroidered Ribbon (L-Shape)',
+        display_name: 'Greek key ribbon',
         description: 'Embroidered geometric Greek key ribbon running along bottom and right edge.',
         location: 'Inner border framing center field (74% to 82% width & 74% to 82% height)',
         order: 2,
@@ -1050,7 +1050,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-gkf-outer-gold-frame',
         name: 'outer_gold_border',
-        display_name: 'Stencil 3 — Outer Mustard Gold Velvet Frame & Hem',
+        display_name: 'Outer frame and hem',
         description: 'Wide tailored mustard gold / ochre velvet border framing outer edge and bottom hem.',
         location: 'Outer perimeter border (82% to 95% width & 82% to 96% height)',
         order: 3,
@@ -1088,7 +1088,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-cb-header',
         name: 'camel_tan_header',
-        display_name: 'Stencil 1 — Camel Tan Pleated Header (Upper 25%)',
+        display_name: 'Pleated header',
         description: 'Upper 25% header panel with uniform pinch pleats and brass ring hardware.',
         location: 'Top header section (4.5% to 29% height)',
         order: 1,
@@ -1104,7 +1104,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-cb-body',
         name: 'midnight_black_body',
-        display_name: 'Stencil 2 — Midnight Black Velvet Gathered Drape (Lower 75%)',
+        display_name: 'Gathered body',
         description: 'Lower 75% heavy drapery body gathered gracefully to the left with gold tassel tieback.',
         location: 'Lower drapery body (29% to 95% height)',
         order: 2,
@@ -1123,9 +1123,9 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
   // 6. Inspired by Screenshot 6: High-Ceiling Linen with Persian Tapestry Edge
   {
     id: 'tpl-persian-tapestry',
-    name: 'High-Ceiling Linen with Persian Tapestry Stencil',
+    name: 'High-Ceiling Linen with Persian Tapestry Edge',
     style_code: 'AATMI-PTE-06',
-    tagline: 'Grand Natural Flax Linen Drape with Vertical Persian Tapestry Stencil',
+    tagline: 'Grand Natural Flax Linen Drape with Vertical Persian Tapestry Edge',
     description: 'High-ceiling architectural salon: Natural Belgian oatmeal linen drapery accented by an exquisite multi-color Persian floral arabesque embroidered tapestry along the leading edge.',
     original_image_url: '/templates/tpl-linen-embroidery-border.png',
     plate_id: 'plate-persian-tapestry',
@@ -1141,7 +1141,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-pt-left-linen',
         name: 'left_oatmeal_linen',
-        display_name: 'Stencil 1 — Left Natural Oatmeal Linen Body',
+        display_name: 'Left panel',
         description: 'Full-height organic Belgian linen with soft, relaxed vertical drape folds on left curtain.',
         location: 'Left drape panel (5% to 33% width, 0% to 100% height)',
         order: 1,
@@ -1157,7 +1157,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-pt-left-tapestry',
         name: 'left_persian_tapestry_edge',
-        display_name: 'Stencil 2 — Left Leading Edge Persian Tapestry',
+        display_name: 'Left leading edge',
         description: 'Exquisite botanical embroidered tapestry ribbon running full-height down the leading edge of left drape.',
         location: 'Left vertical border strip (33% to 45% width, 0% to 100% height)',
         order: 2,
@@ -1173,7 +1173,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-pt-right-tapestry',
         name: 'right_persian_tapestry_edge',
-        display_name: 'Stencil 3 — Right Leading Edge Persian Tapestry',
+        display_name: 'Right leading edge',
         description: 'Matching botanical embroidered tapestry ribbon running down the leading edge of right drape.',
         location: 'Right vertical border strip (55% to 67% width, 0% to 100% height)',
         order: 3,
@@ -1189,7 +1189,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-pt-right-linen',
         name: 'right_oatmeal_linen',
-        display_name: 'Stencil 4 — Right Natural Oatmeal Linen Body',
+        display_name: 'Right panel',
         description: 'Full-height organic Belgian linen body on right curtain.',
         location: 'Right drape panel (67% to 95% width, 0% to 100% height)',
         order: 4,
@@ -1225,7 +1225,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-grn-main',
         name: 'main_panel',
-        display_name: 'Region 1 — Main Panel',
+        display_name: 'Main panel',
         description: 'Large vertical folds of fabric — primary changeable area with soft gravity draping.',
         location: 'Upper 72% body with pinch pleats',
         order: 1,
@@ -1243,7 +1243,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-grn-band',
         name: 'decorative_band',
-        display_name: 'Region 2 — Decorative Band',
+        display_name: 'Decorative band',
         description: 'Horizontal textured strip with top/bottom seam stitching — high visual impact focal point.',
         location: 'Middle horizontal band (72% to 84%)',
         order: 2,
@@ -1261,7 +1261,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-grn-hem',
         name: 'bottom_hem',
-        display_name: 'Region 3 — Bottom Hem Border',
+        display_name: 'Bottom hem',
         description: 'Solid weighted horizontal base band at the floor hem with blind stitching.',
         location: 'Base floor hem (84% to 98%)',
         order: 3,
@@ -1296,7 +1296,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-vrt-main',
         name: 'main_panel',
-        display_name: 'Region 1 — Main Panel Body',
+        display_name: 'Main panel',
         description: 'Full height curtain fabric with deep pinch pleats and columnar shadows.',
         location: 'Main drape panel (12% to 70% width)',
         order: 1,
@@ -1314,7 +1314,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-vrt-border',
         name: 'vertical_border',
-        display_name: 'Region 2 — Leading Edge Vertical Border',
+        display_name: 'Leading edge border',
         description: 'Narrow vertical column with repeating geometric or embroidered luxury trim.',
         location: 'Right leading edge border (70% to 88% width)',
         order: 2,
@@ -1349,7 +1349,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-dbl-main',
         name: 'main_panel',
-        display_name: 'Region 1 — Center Drapery Body',
+        display_name: 'Centre body',
         description: 'Large center fabric area showing soft fluid folds and natural ambient lighting.',
         location: 'Center body between vertical borders (26% to 74% width)',
         order: 1,
@@ -1367,7 +1367,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-dbl-left-border',
         name: 'left_vertical_border',
-        display_name: 'Region 2 — Left Vertical Flank',
+        display_name: 'Left flank',
         description: 'Left vertical frame border strip with clean edge seam.',
         location: 'Left border strip (12% to 26% width)',
         order: 2,
@@ -1385,7 +1385,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-dbl-right-border',
         name: 'right_vertical_border',
-        display_name: 'Region 3 — Right Vertical Flank',
+        display_name: 'Right flank',
         description: 'Right vertical frame border strip symmetrical to the left flank.',
         location: 'Right border strip (74% to 88% width)',
         order: 3,
@@ -1403,7 +1403,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-dbl-hem',
         name: 'bottom_hem',
-        display_name: 'Region 4 — Floor Hem Trim',
+        display_name: 'Floor hem',
         description: 'Horizontal decorative band connecting the two vertical borders at the floor.',
         location: 'Bottom hem band (84% to 98% height)',
         order: 4,
@@ -1438,7 +1438,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-fl-valance',
         name: 'top_valance',
-        display_name: 'Region 1 — Top Swag Valance',
+        display_name: 'Swag valance',
         description: 'Arched scalloped header with draped swags and top pleat headers.',
         location: 'Top header (4% to 26% height)',
         order: 1,
@@ -1457,7 +1457,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-fl-main',
         name: 'main_drops',
-        display_name: 'Region 2 — Cascading Drop Drapes',
+        display_name: 'Drop drapes',
         description: 'Grand floor-sweeping fabric drops with dramatic vertical volume.',
         location: 'Main vertical drapes (26% to 98% height)',
         order: 2,
@@ -1475,7 +1475,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
       {
         id: 'reg-fl-tiebacks',
         name: 'edge_trim_tiebacks',
-        display_name: 'Region 3 — Contrast Flange Trim',
+        display_name: 'Flange trim',
         description: 'Outer perimeter framing flange and decorative piping cord.',
         location: 'Outer borders (8% to 12% & 88% to 92%)',
         order: 3,

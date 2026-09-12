@@ -31,7 +31,7 @@ interface StencilPresetDef {
 const BUILT_IN_STENCILS: StencilPresetDef[] = [
   {
     id: 'stencil-chevron',
-    name: 'Aatmi Chevron Drape Stencil',
+    name: 'Aatmi Chevron Drape Built-in Style',
     category: 'Chevron & Inset',
     plateId: 'chevron',
     tagline: '3-Zone Architectural Chevron Inset Band',
@@ -39,7 +39,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
     regions: [
       {
         name: 'upper_body',
-        display_name: 'Region 1 — Upper Drape Body',
+        display_name: 'Upper body',
         description: 'Upper curtain field extending from rod header to chevron band',
         location: 'Upper 40%',
         polygon_coords: [
@@ -50,7 +50,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
       },
       {
         name: 'chevron_band',
-        display_name: 'Region 2 — Dynamic Chevron Band',
+        display_name: 'Chevron band',
         description: 'Geometric inverted-V chevron inset band across drapes',
         location: 'Mid 20% Chevron Band',
         polygon_coords: [
@@ -62,7 +62,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
       },
       {
         name: 'lower_skirt',
-        display_name: 'Region 3 — Grounding Lower Skirt',
+        display_name: 'Lower skirt',
         description: 'Lower architectural hem skirt pooling toward floor',
         location: 'Bottom 40%',
         polygon_coords: [
@@ -76,15 +76,15 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
   },
   {
     id: 'stencil-colorblock',
-    name: 'Color-Block Trio Stencil',
+    name: 'Color-Block Trio Built-in Style',
     category: 'Horizontal Bands',
     plateId: 'colorblock',
-    tagline: '3-Tier Color-Block Drapery Stencil',
+    tagline: '3-Tier Color-Block Drapery Built-in Style',
     description: 'Header band (25%), expansive mid-body section (45%), and tailored base hem (30%).',
     regions: [
       {
         name: 'upper_header',
-        display_name: 'Region 1 — Header Band',
+        display_name: 'Header band',
         description: 'Pinch pleat header zone',
         location: 'Upper 25%',
         polygon_coords: [
@@ -95,7 +95,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
       },
       {
         name: 'mid_body',
-        display_name: 'Region 2 — Main Center Field',
+        display_name: 'Centre field',
         description: 'Central eye-level drapery field',
         location: 'Mid 45%',
         polygon_coords: [
@@ -106,7 +106,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
       },
       {
         name: 'lower_hem',
-        display_name: 'Region 3 — Floor Hem Skirt',
+        display_name: 'Floor hem',
         description: 'Weighted floor pool hem band',
         location: 'Bottom 28%',
         polygon_coords: [
@@ -119,15 +119,15 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
   },
   {
     id: 'stencil-leading-edge',
-    name: 'Velvet Body & Leading Edge Stencil',
+    name: 'Velvet Body & Leading Edge Built-in Style',
     category: 'Borders & Edges',
     plateId: 'velvet-houndstooth',
-    tagline: 'Tailored Vertical Leading Border Stencil',
+    tagline: 'Tailored Vertical Leading Border Built-in Style',
     description: 'Continuous main velvet drape body framed by high-contrast houndstooth or patterned leading edge.',
     regions: [
       {
         name: 'main_body',
-        display_name: 'Region 1 — Main Drapery Panel',
+        display_name: 'Main panel',
         description: 'Expansive field with heavy vertical fold drapes',
         location: 'Main 75% Width',
         polygon_coords: [
@@ -138,7 +138,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
       },
       {
         name: 'leading_edge',
-        display_name: 'Region 2 — Tailored Leading Border',
+        display_name: 'Leading border',
         description: 'High-contrast vertical border flanking the window opening',
         location: 'Inner 25% Leading Edge',
         polygon_coords: [
@@ -151,7 +151,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
   },
   {
     id: 'stencil-greek-key',
-    name: 'Greek Key Mitred Frame Stencil',
+    name: 'Greek Key Mitred Frame Built-in Style',
     category: 'Architectural Frames',
     plateId: 'greek-key',
     tagline: 'Mitred Outer Border + Center Field',
@@ -159,7 +159,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
     regions: [
       {
         name: 'center_field',
-        display_name: 'Region 1 — Center Field Drapery',
+        display_name: 'Centre field',
         description: 'Subtle linen or velvet central curtain field',
         location: 'Center Field',
         polygon_coords: [
@@ -170,7 +170,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
       },
       {
         name: 'mitred_border',
-        display_name: 'Region 2 — Mitred Outer Border',
+        display_name: 'Outer border',
         description: 'Perimeter framing band with tailored mitred corner seams',
         location: 'Full Perimeter Border',
         polygon_coords: [
@@ -184,15 +184,15 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
   },
   {
     id: 'stencil-split-panel',
-    name: 'Bi-Color Symmetrical Drapes Stencil',
+    name: 'Bi-Color Symmetrical Drapes Built-in Style',
     category: 'Dual Panels',
     plateId: 'camel-midnight',
-    tagline: 'Symmetrical Left & Right Panel Stencil',
+    tagline: 'Symmetrical Left & Right Panel Built-in Style',
     description: 'Dual-flank curtain pair with coordinating left and right drapery panels.',
     regions: [
       {
         name: 'left_panel',
-        display_name: 'Region 1 — Left Drapery Panel',
+        display_name: 'Left panel',
         description: 'Left window drape with columnar pleating',
         location: 'Left 45%',
         polygon_coords: [
@@ -203,7 +203,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
       },
       {
         name: 'right_panel',
-        display_name: 'Region 2 — Right Drapery Panel',
+        display_name: 'Right panel',
         description: 'Right window drape with columnar pleating',
         location: 'Right 45%',
         polygon_coords: [
@@ -216,7 +216,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
   },
   {
     id: 'stencil-persian-tapestry',
-    name: 'Persian Tapestry & Damask Stencil',
+    name: 'Persian Tapestry & Damask Built-in Style',
     category: 'Heritage Drapes',
     plateId: 'persian-tapestry',
     tagline: 'Jacquard Medallion Field with Weighted Hem',
@@ -224,7 +224,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
     regions: [
       {
         name: 'tapestry_body',
-        display_name: 'Region 1 — Jacquard Tapestry Body',
+        display_name: 'Tapestry body',
         description: 'Main body for intricate damask, brocade, or floral tapestry',
         location: 'Upper 80%',
         polygon_coords: [
@@ -235,7 +235,7 @@ const BUILT_IN_STENCILS: StencilPresetDef[] = [
       },
       {
         name: 'base_skirt',
-        display_name: 'Region 2 — Weighted Base Hem',
+        display_name: 'Base hem',
         description: 'Tailored solid grounding hem border',
         location: 'Bottom 20%',
         polygon_coords: [
@@ -362,7 +362,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
         const formatted: Region[] = data.regions.map((r: any, idx: number) => ({
           id: `reg-custom-${Date.now()}-${idx}`,
           name: r.name || `region_${idx + 1}`,
-          display_name: r.display_name || `Region ${idx + 1}`,
+          display_name: r.display_name || `Zone ${idx + 1}`,
           description: r.description || 'Replaceable fabric zone',
           location: r.location || 'Section of drapery',
           order: idx + 1,
@@ -392,7 +392,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
         {
           id: `reg-custom-main-${Date.now()}`,
           name: 'main_panel',
-          display_name: 'Region 1 — Main Panel',
+          display_name: 'Main panel',
           description: 'Upper drapery body with vertical folds',
           location: 'Upper 70%',
           order: 1,
@@ -405,7 +405,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
         {
           id: `reg-custom-hem-${Date.now()}`,
           name: 'bottom_hem',
-          display_name: 'Region 2 — Bottom Border',
+          display_name: 'Bottom border',
           description: 'Lower architectural hem band',
           location: 'Lower 25%',
           order: 2,
@@ -427,7 +427,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
     const newReg: Region = {
       id: `reg-custom-${Date.now()}`,
       name: `custom_accent_zone_${nextOrder}`,
-      display_name: `Region ${nextOrder} — Accent Zone`,
+      display_name: `Zone ${nextOrder}`,
       description: 'Custom added replaceable fabric zone',
       location: 'Custom section',
       order: nextOrder,
@@ -459,7 +459,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
       name: templateName || 'Custom Curtain Style',
       style_code: styleCode,
       tagline: `${detectedRegions.length}-Zone Custom Fabric Segmentation`,
-      description: 'Custom curtain template created from user photograph with multi-region segmentation.',
+      description: 'Custom curtain style created from user photograph with multi-zone segmentation.',
       original_image_url: uploadedImage,
       real_photo_url: uploadedImage,
       structure_maps: {},
@@ -487,10 +487,10 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
             </div>
             <div>
               <h3 className="font-serif text-base sm:text-lg font-bold text-[#1A1714] truncate">
-                Curtain Design &amp; Stencil Studio
+                Add a curtain style
               </h3>
               <p className="text-[11px] sm:text-xs text-[#6B5F54] truncate">
-                Select an architectural curtain stencil or upload showroom photo.
+                Select a built-in style or upload a showroom photo.
               </p>
             </div>
           </div>
@@ -513,7 +513,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
             }`}
           >
             <LayoutTemplate className="w-3.5 h-3.5" />
-            <span>Stencil Presets ({BUILT_IN_STENCILS.length})</span>
+            <span>Built-in Styles ({BUILT_IN_STENCILS.length})</span>
           </button>
 
           <button
@@ -537,7 +537,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
               {/* Left 5 Cols: Stencil Selection List */}
               <div className="md:col-span-5 space-y-2.5 max-h-[480px] overflow-y-auto pr-1">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-[#9E9088] block mb-1">
-                  Architectural Stencil Archetypes
+                  Built-in Styles
                 </span>
 
                 {BUILT_IN_STENCILS.map((stn) => {
@@ -580,7 +580,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-[11px] font-semibold text-[#6B5F54] mb-1">
-                        Stencil Title
+                        Style Name
                       </label>
                       <input
                         type="text"
@@ -630,7 +630,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                     </svg>
 
                     <div className="absolute top-3 left-3 bg-[#F8F5F0]/90 text-[#4A3F35] text-[10px] px-2 py-0.5 rounded border border-[#C9BFB4] font-mono">
-                      Stencil Geometry &amp; Pleat Cuts
+                      Style Geometry &amp; Pleat Cuts
                     </div>
 
                     <div className="absolute bottom-3 right-3 bg-[#D4AF37]/85 text-[#0A0B0E] text-[10px] font-semibold px-2 py-0.5 rounded">
@@ -670,14 +670,14 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                 {/* Save Stencil Button */}
                 <div className="pt-3 border-t border-[#E2D9CE] flex items-center justify-between">
                   <span className="text-xs text-[#9E9088]">
-                    Saves as an editable curtain template in your Studio.
+                    Saves as an editable curtain style in your Studio.
                   </span>
                   <button
                     onClick={handleSaveStencilAsTemplate}
                     className="px-5 py-2 text-xs font-semibold bg-gradient-to-r from-[#F5DE8B] via-[#D4AF37] to-[#8C7322] hover:brightness-110 text-[#0A0B0E] rounded-lg transition shadow-md cursor-pointer flex items-center gap-1.5 tactile-press"
                   >
                     <Check className="w-3.5 h-3.5" />
-                    <span>Create Template from Stencil</span>
+                    <span>Create Curtain Style</span>
                   </button>
                 </div>
               </div>
@@ -720,7 +720,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                     <Sparkles className="w-4 h-4 text-[#C49A1E] shrink-0 mt-0.5" />
                     <div>
                       <span className="font-semibold block mb-0.5 text-[#B8900F]">Real Photographic Pipeline:</span>
-                      Your real photograph will be preserved as the master plate, allowing you to re-drape any region with new fabrics while keeping authentic folds, lighting, and room ambiance.
+                      Your real photograph will be preserved as the master plate, allowing you to re-drape any zone with new fabrics while keeping authentic folds, lighting, and room ambiance.
                     </div>
                   </div>
                 </div>
@@ -752,7 +752,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-semibold text-[#6B5F54] mb-1">
-                        Template Name
+                        Style Name
                       </label>
                       <input
                         type="text"
@@ -851,7 +851,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                       <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-bold text-[#1A1714] uppercase tracking-wide">
-                            Fabric Regions
+                            Fabric Zones
                           </span>
                           <button
                             onClick={handleAddNewRegion}
@@ -923,7 +923,7 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                       className="px-5 py-2 text-xs font-semibold bg-gradient-to-r from-[#F5DE8B] via-[#D4AF37] to-[#8C7322] hover:brightness-110 text-[#0A0B0E] rounded-lg transition shadow-md cursor-pointer flex items-center gap-1.5 tactile-press"
                     >
                       <Check className="w-3.5 h-3.5" />
-                      <span>Save Real Curtain Template</span>
+                      <span>Save Curtain Style</span>
                     </button>
                   </div>
                 </div>

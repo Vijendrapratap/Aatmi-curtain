@@ -54,8 +54,8 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ onSignOut }) => {
   }> = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard, match: (v) => v === 'dashboard' },
     { id: 'editor', label: 'Studio', icon: Sparkles, match: (v) => v === 'editor' },
-    { id: 'templates', label: 'Templates', icon: Layers, match: (v) => v === 'templates' },
-    { id: 'catalog', label: 'Catalog', icon: Palette, match: (v) => v === 'catalog' },
+    { id: 'library_styles', label: 'Templates', icon: Layers, match: (v) => v === 'library_styles' },
+    { id: 'library_fabrics', label: 'Catalog', icon: Palette, match: (v) => v === 'library_fabrics' },
     { id: 'design_detail', label: 'Designs', icon: FolderKanban, match: (v) => v === 'design_detail' },
   ];
 

@@ -209,6 +209,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenSpecModal:
       name: designName || `${currentTemplate.name} Design`,
       assignments,
       final_image_url: finalUrl,
+      render_kind: generatedImageUrl ? 'photoreal' : 'preview',
       created_by_user_id: 'usr-current',
       room_previews: [],
     });
@@ -225,7 +226,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenSpecModal:
           <p className="eyebrow-label">Studio</p>
           <h1 className="page-title mt-1">No template yet</h1>
           <p className="page-lede">Add a silhouette before assigning fabrics.</p>
-          <button type="button" className="btn btn-primary mt-4" onClick={() => setActiveView('templates')}>
+          <button type="button" className="btn btn-primary mt-4" onClick={() => setActiveView('library_styles')}>
             Browse templates
           </button>
         </div>
