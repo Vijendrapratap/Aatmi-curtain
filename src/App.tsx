@@ -118,10 +118,7 @@ export default function App() {
         )}
 
         {activeView === 'design_detail' && (
-          <DesignDetailView
-            onBackToEditor={() => setActiveView('editor')}
-            onOpenSpecSheet={() => setIsSpecSheetOpen(true)}
-          />
+          <DesignDetailView onOpenSpecSheet={() => setIsSpecSheetOpen(true)} />
         )}
 
         {activeView.startsWith('settings') && (
