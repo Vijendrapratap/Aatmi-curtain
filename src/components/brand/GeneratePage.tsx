@@ -103,7 +103,8 @@ export const GeneratePage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTemplateId]);
 
-  const [designTooSmall, setDesignTooSmall] = useState(false);
+  const [designWidth, setDesignWidth] = useState(0);
+  const designTooSmall = designWidth > 0 && designWidth < MIN_WIDTH;
 
   const loadTemplate = async (t: CurtainTemplate) => {
     cancelJob();
@@ -114,7 +115,7 @@ export const GeneratePage: React.FC = () => {
     setCurrent(null);
     setNotice(null);
     const width = await probeWidth(image);
-    setDesignTooSmall(width > 0 && width < MIN_WIDTH);
+    setDesignWidth(width);
     if (width > 0 && width < MIN_WIDTH) setNotice({ kind: 'error', text: `"${t.name}" is only ${width} px wide, too small to generate from. Upload a larger photo of it instead.` });
     else if (width > 0 && width < GOOD_WIDTH) setNotice({ kind: 'info', text: `"${t.name}" is ${width} px wide. The result is still generated at full size, but a ${GOOD_WIDTH} px photo gives a sharper background.` });
   };
@@ -122,7 +123,9 @@ export const GeneratePage: React.FC = () => {
   const analyze = async (image: string, name: string) => {
     setIsAnalyzing(true);
     try {
-      const res = await fetch('/api/analyze-curtain', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ imageBase64: image, mimeType: 'image/png' }) });
+      // Saved styles are app paths and phone photos can be odd formats; the analyzer needs a PNG/JPEG data URL.
+      const raster = await toDataUrl(image);
+      const res = await fetch('/api/analyze-curtain', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ imageBase64: raster, mimeType: raster.startsWith('data:image/jpeg') ? 'image/jpeg' : 'image/png' }) });
       const data = await res.json();
       const regions: any[] = Array.isArray(data.regions) ? data.regions : [];
       if (!res.ok || regions.length === 0) throw new Error(data.error || 'Could not find fabric areas in this image.');
@@ -133,8 +136,7 @@ export const GeneratePage: React.FC = () => {
         location: r.location || '',
         polygon: Array.isArray(r.polygon_coords) && r.polygon_coords.length >= 3 ? r.polygon_coords : [{ x: 10, y: 5 + i * 30 }, { x: 90, y: 5 + i * 30 }, { x: 90, y: 30 + i * 30 }, { x: 10, y: 30 + i * 30 }],
       }));
-      setDesign({ image, name, areas });
-      setDesignTooSmall(false);
+      setDesign((d) => ({ image, name, areas, templateId: d?.image === image ? d.templateId : undefined }));
       setSlots({});
       setJob(null);
       setCurrent(null);
@@ -158,6 +160,7 @@ export const GeneratePage: React.FC = () => {
     }
     if (width < GOOD_WIDTH) setNotice({ kind: 'info', text: `This image is ${width} px wide. The result is still generated at full size, but ${GOOD_WIDTH} px or wider gives a sharper background.` });
     cancelJob();
+    setDesignWidth(width);
     await analyze(image, file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '));
   };
 
