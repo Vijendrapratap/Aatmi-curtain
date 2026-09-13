@@ -33,6 +33,7 @@ export interface CurtainTemplate {
   original_image_url: string;
   real_photo_url?: string;
   plate_id?: string;
+  curtain_mask_url?: string; // optional feathered mask (white = curtain); derived from zone polygons when absent
   stencil_preset?: 'chevron_accent' | 'color_block_trio' | 'velvet_houndstooth' | 'greek_key_frame' | 'camel_midnight_header' | 'persian_tapestry' | 'custom';
   structure_maps: {
     canny_url?: string;

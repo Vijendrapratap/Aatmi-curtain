@@ -47,6 +47,15 @@ export interface BrandUser {
   created_at: string;
 }
 
+export interface RenderCandidate {
+  id: string;
+  round: number;
+  image: string;
+  scores: Array<{ key: string; score: number; reason: string }>;
+  total: number;
+  passed: boolean;
+}
+
 export interface RoomPreview {
   id: string;
   design_id: string;
@@ -56,6 +65,7 @@ export interface RoomPreview {
   output_url: string;
   provider_used: string;
   created_at: string;
+  candidates?: RenderCandidate[];
 }
 
 export interface Design {
@@ -73,6 +83,8 @@ export interface Design {
   }>;
   final_image_url: string;
   render_kind: 'preview' | 'photoreal';
+  render_candidates?: RenderCandidate[];
+  render_prompt?: string;
   created_at: string;
   created_by_user_id: string;
   room_previews: RoomPreview[];
