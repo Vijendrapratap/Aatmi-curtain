@@ -45,7 +45,7 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ onSignOut }) => {
 
   const navItems: Array<{ id: BrandStoreState['activeView']; label: string; icon: typeof Layers; match: (view: string) => boolean }> = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard, match: (v) => v === 'dashboard' },
-    { id: 'editor', label: 'Studio', icon: Sparkles, match: (v) => v === 'editor' },
+    { id: 'editor', label: 'Generate', icon: Sparkles, match: (v) => v === 'editor' },
     { id: 'library_styles', label: 'Library', icon: Layers, match: (v) => v.startsWith('library') },
     { id: 'design_detail', label: 'Designs', icon: FolderKanban, match: (v) => v === 'design_detail' },
   ];

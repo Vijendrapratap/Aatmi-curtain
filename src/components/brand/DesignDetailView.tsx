@@ -48,7 +48,7 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
         <p className="eyebrow-label">Designs</p>
         <h1 className="page-title">No saved designs yet</h1>
         <p className="page-lede mx-auto">Pick a curtain style, choose fabrics for its zones, and save. Your designs will appear here.</p>
-        <button type="button" onClick={() => setActiveView('editor')} className="btn btn-primary">Open studio</button>
+        <button type="button" onClick={() => setActiveView('editor')} className="btn btn-primary">Open Generate</button>
       </div>
     );
   }
@@ -171,7 +171,7 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
       <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
         <div className="min-w-0">
           <div className="mb-2 flex flex-wrap items-center gap-2">
-            <button type="button" onClick={goToStudio} className="btn btn-ghost btn-sm -ml-2"><ArrowLeft className="h-3.5 w-3.5" /> Edit in studio</button>
+            <button type="button" onClick={goToStudio} className="btn btn-ghost btn-sm -ml-2"><ArrowLeft className="h-3.5 w-3.5" /> Edit in Generate</button>
             {brandDesigns.length > 1 && (
               <select aria-label="Switch design" value={design.id} onChange={(e) => { setActiveDesignId(e.target.value); setSelectedPreviewIndex(0); }} className="field h-8 w-auto text-[12px]">
                 {brandDesigns.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}

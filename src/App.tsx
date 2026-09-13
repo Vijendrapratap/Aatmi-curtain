@@ -6,7 +6,7 @@ import { SignIn } from './pages/SignIn';
 import { OnboardingWizard } from './components/brand/OnboardingWizard';
 import { BrandHeader } from './components/brand/BrandHeader';
 import { BrandDashboard } from './components/brand/BrandDashboard';
-import { TemplateEditor } from './components/brand/TemplateEditor';
+import { GeneratePage } from './components/brand/GeneratePage';
 import { LibraryPage } from './components/brand/library/LibraryPage';
 import { DesignDetailView } from './components/brand/DesignDetailView';
 import { BrandSettingsView } from './components/brand/BrandSettingsView';
@@ -104,11 +104,7 @@ export default function App() {
           />
         )}
 
-        {activeView === 'editor' && (
-          <TemplateEditor
-            onOpenNewStyle={() => setIsNewTemplateModalOpen(true)}
-          />
-        )}
+        {activeView === 'editor' && <GeneratePage />}
 
         {activeView === 'design_detail' && (
           <DesignDetailView onOpenSpecSheet={() => setIsSpecSheetOpen(true)} />

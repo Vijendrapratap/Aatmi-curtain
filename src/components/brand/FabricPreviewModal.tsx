@@ -251,7 +251,7 @@ export const FabricPreviewModal: React.FC<FabricPreviewModalProps> = ({
                 </button>
               </div>
               <button type="button" onClick={onGoToStudio} className="btn btn-ghost btn-sm w-full">
-                Open studio <ArrowRight className="h-3.5 w-3.5" />
+                Open Generate <ArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>

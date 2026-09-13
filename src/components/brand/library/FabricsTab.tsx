@@ -70,13 +70,13 @@ export const FabricsTab: React.FC = () => {
         <div role="status" className="fixed top-20 right-6 z-50 flex items-center gap-2.5 rounded-[14px] bg-[var(--color-bg-surface)] px-4 py-3 text-[13px] shadow-[var(--shadow-modal)]">
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-accent)] text-white"><Check className="h-3.5 w-3.5" /></span>
           <span className="font-medium">{toast}</span>
-          <button type="button" onClick={() => setActiveView('editor')} className="ml-1 font-semibold text-[var(--color-accent)]">Open studio</button>
+          <button type="button" onClick={() => setActiveView('editor')} className="ml-1 font-semibold text-[var(--color-accent)]">Open Generate</button>
         </div>
       )}
 
       <div className="flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
         <p className="text-[13px] text-[var(--color-text-secondary)]">
-          Applying a fabric changes the style open in the studio: <strong className="font-semibold text-[var(--color-text-primary)]">{currentTemplate?.name}</strong>.
+          Applying a fabric changes the design open in Generate: <strong className="font-semibold text-[var(--color-text-primary)]">{currentTemplate?.name}</strong>.
         </p>
         <div className="relative flex items-center gap-2">
           <button type="button" onClick={() => setIsAddMenuOpen((o) => !o)} className="btn btn-primary">
