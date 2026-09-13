@@ -42,8 +42,8 @@ export function deriveJourney(input: JourneyInput): JourneyStep[] {
         ? `Choose a fabric for ${remaining} ${remaining === 1 ? 'zone' : 'zones'}.`
         : 'Every zone has a fabric. Change any zone at any time.',
     render: renderDone
-      ? 'Photoreal render saved.'
-      : 'Save the design, then create a photoreal render.',
+      ? 'Render saved.'
+      : 'Save the design, then create a render.',
     room: roomDone ? 'Curtain staged in a room.' : 'Stage the curtain in a real room photo.',
     share: 'Copy a link, download the image, or print the spec sheet.',
   };

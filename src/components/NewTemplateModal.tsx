@@ -339,6 +339,8 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
       probe.onload = () => {
         if (probe.naturalWidth < 1000) {
           setErrorMessage(`This photo is ${probe.naturalWidth} px wide. Renders need at least 1000 px; 1500 px or more gives the best result.`);
+          // Clear the input so picking the same file again still fires a change event.
+          e.target.value = '';
           return;
         }
         if (probe.naturalWidth < 1500) {
@@ -701,6 +703,13 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
             <div>
               {step === 'upload' && (
                 <div className="space-y-4 max-w-lg mx-auto py-4">
+                  {errorMessage && (
+                    <div className="bg-[#D4AF37]/8 border border-[#C49A1E]/25 text-[#B8900F] text-xs p-3 rounded-lg flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-[#C49A1E] shrink-0" />
+                      <span>{errorMessage}</span>
+                    </div>
+                  )}
+
                   <label
                     htmlFor="curtain-photo-upload"
                     className="border-2 border-dashed border-[#C9BFB4] hover:border-[#D4AF37]/60 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer bg-white/2 hover:bg-[#D4AF37]/4 transition group"

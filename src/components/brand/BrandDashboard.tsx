@@ -72,7 +72,7 @@ export const BrandDashboard: React.FC<BrandDashboardProps> = ({ onOpenNewStyle }
       </div>
 
       <div className="grid grid-cols-3 gap-px overflow-hidden rounded-[16px] bg-[var(--color-border-subtle)] shadow-[var(--shadow-card)]">
-        <div className="bg-[var(--color-bg-surface)] px-5 py-4" title="Photoreal renders and room stagings used this month">
+        <div className="bg-[var(--color-bg-surface)] px-5 py-4" title="Renders and room stagings used this month">
           <div className="text-[11px] font-medium tracking-wide text-[var(--color-text-tertiary)] uppercase">Renders this month</div>
           <div className="mt-1 flex items-baseline gap-1.5"><span className="font-display text-[22px] font-semibold tabular-nums">{used}</span><span className="text-[12px] text-[var(--color-text-tertiary)]">/ {cap}</span></div>
           <div className="mt-2 h-1 overflow-hidden rounded-full bg-[var(--color-bg-sunken)]"><div className="h-full rounded-full bg-[var(--color-accent)]" style={{ width: `${Math.min(100, Math.round((used / cap) * 100))}%` }} /></div>

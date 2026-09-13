@@ -256,7 +256,7 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
                 )}
               </div>
               <p className="text-[10px] text-stone-400 mt-2 text-center">
-                Aatmi AI Photorealistic Visualizer
+                Aatmi AI Realistic Visualizer
               </p>
             </div>
 

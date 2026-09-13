@@ -6,7 +6,7 @@ import { useBrandStore } from '../../lib/brandStore';
 import { useStudioStore } from '../../lib/store';
 import { CurtainTemplate } from '../../types/curtain';
 import { deriveJourney, JourneyStepId } from '../../lib/journey';
-import { buildFabricSwapInput, startRender, pollRender, STAGE_COPY, RenderJobView } from '../../lib/renderClient';
+import { buildFabricSwapInput, startRender, pollRender, chooseCandidate, STAGE_COPY, RenderJobView } from '../../lib/renderClient';
 import { renderCurtainOnCanvas, getTemplateRealPhotoUrl } from '../../utils/fabricRenderer';
 import { JourneyStrip } from '../JourneyStrip';
 import { FabricPickerSheet } from './FabricPickerSheet';
@@ -32,6 +32,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [chosenCandidateId, setChosenCandidateId] = useState<string | null>(null);
+  const [isChoosing, setIsChoosing] = useState(false);
   const [canvasDataUrl, setCanvasDataUrl] = useState('');
   const [hasCanvasFrame, setHasCanvasFrame] = useState(false);
   const [status, setStatus] = useState<{ kind: 'ok' | 'info'; text: string } | null>(null);
@@ -42,12 +43,15 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const offscreenRef = useRef<HTMLCanvasElement | null>(null);
   const renderSeq = useRef(0);
+  const renderAbortRef = useRef<AbortController | null>(null);
   const zonesRailRef = useRef<HTMLDivElement | null>(null);
 
   const templateId = currentTemplate?.id;
 
   useEffect(() => {
     if (!currentTemplate) return;
+    // A render still in flight belongs to the template we just left.
+    renderAbortRef.current?.abort();
     setGeneratedImageUrl(null);
     setHasCanvasFrame(false);
     setStatus(null);
@@ -98,6 +102,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
 
   const handleAssignFabric = useCallback((fabricId: string) => {
     if (!activeRegionId) return;
+    renderAbortRef.current?.abort();
     assignFabricToRegion(activeRegionId, fabricId);
     setGeneratedImageUrl(null);
     setRenderJob(null);
@@ -106,6 +111,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
 
   const safeRegions = currentTemplate?.regions ?? [];
   const handleAssignFabricTo = useCallback((target: string | 'all', fabricId: string) => {
+    renderAbortRef.current?.abort();
     if (target === 'all') assignFabricToAllRegions(safeRegions.map((r) => r.id), fabricId);
     else assignFabricToRegion(target, fabricId);
     setGeneratedImageUrl(null);
@@ -116,6 +122,9 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
   const handleRender = async () => {
     if (!currentTemplate) return;
     if (assignments.length === 0) { setStatus({ kind: 'info', text: 'Choose a fabric for at least one zone before rendering.' }); return; }
+    renderAbortRef.current?.abort();
+    const controller = new AbortController();
+    renderAbortRef.current = controller;
     setIsGenerating(true);
     setStatus(null);
     setGeneratedImageUrl(null);
@@ -123,7 +132,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
     try {
       const body = await buildFabricSwapInput(currentTemplate, assignments, scopedFabrics, currentBrandId);
       const jobId = await startRender(body);
-      const job = await pollRender(jobId, setRenderJob);
+      const job = await pollRender(jobId, setRenderJob, { signal: controller.signal });
       if (job.status === 'failed') {
         setStatus({ kind: 'info', text: job.error || 'The render did not finish.' });
       } else if (job.result) {
@@ -134,17 +143,27 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
           : { kind: 'ok', text: 'Render ready. Save the design to keep it.' });
       }
     } catch (err: any) {
-      setStatus({ kind: 'info', text: err.message || 'The render did not finish.' });
+      // A cancelled render was abandoned on purpose; saying so would only confuse.
+      if (err?.code !== 'CANCELLED') setStatus({ kind: 'info', text: err.message || 'The render did not finish.' });
     } finally {
-      setIsGenerating(false);
+      if (renderAbortRef.current === controller) setIsGenerating(false);
     }
   };
 
-  const chooseCandidate = (id: string) => {
-    const c = renderJob?.result?.candidates.find((x) => x.id === id);
-    if (!c) return;
-    setChosenCandidateId(id);
-    setGeneratedImageUrl(c.image);
+  const handleChooseCandidate = async (id: string) => {
+    if (!renderJob || isChoosing || id === chosenCandidateId) return;
+    setIsChoosing(true);
+    try {
+      // The server re-runs the pixel lock for this option; the raw candidate is not lock-safe.
+      const job = await chooseCandidate(renderJob.id, id);
+      setRenderJob(job);
+      setChosenCandidateId(job.result?.chosenId ?? id);
+      if (job.result) setGeneratedImageUrl(job.result.finalImage);
+    } catch (err: any) {
+      setStatus({ kind: 'info', text: err.message || 'Could not switch to that option.' });
+    } finally {
+      setIsChoosing(false);
+    }
   };
 
   const handleConfirmSave = () => {
@@ -160,7 +179,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
       render_kind: generatedImageUrl ? 'photoreal' : 'preview',
       created_by_user_id: 'usr-current',
       room_previews: [],
-      render_candidates: renderJob?.result?.candidates,
+      render_candidates: renderJob?.candidates,
       render_prompt: renderJob?.result?.prompt,
     });
     setIsSaveOpen(false);
@@ -265,6 +284,20 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
         </p>
       )}
 
+      {status && !isGenerating && renderJob?.status === 'needs_review' && (
+        <div className="px-1">
+          <ul className="space-y-1 text-[12px] text-[var(--color-text-secondary)]">
+            {renderJob.candidates.find((c) => c.id === chosenCandidateId)?.scores.filter((s) => s.score < 6).map((s) => (
+              <li key={s.key}>{s.key.replace(/_/g, ' ')}: {s.reason}</li>
+            ))}
+          </ul>
+          <div className="mt-2 flex items-center gap-2">
+            <button type="button" onClick={() => setStatus(null)} className="btn btn-secondary btn-sm">Accept</button>
+            <button type="button" onClick={handleRender} className="btn btn-ghost btn-sm">Rerun render</button>
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-2 overflow-x-auto pb-1 lg:hidden">{regions.map((r) => zoneRow(r, true))}</div>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-hidden lg:grid-cols-[250px_minmax(0,1fr)_300px]">
@@ -327,10 +360,10 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
           </div>
         </section>
 
-        {renderJob?.result && renderJob.result.candidates.length > 1 && (
-          <div className="col-span-full flex items-center gap-2 overflow-x-auto px-1 lg:col-start-2 lg:col-end-3">
-            {renderJob.result.candidates.map((c) => (
-              <button key={c.id} type="button" onClick={() => chooseCandidate(c.id)} title={c.scores.map((s) => `${s.key}: ${s.score} — ${s.reason}`).join('\n')} className={`relative h-20 w-16 shrink-0 overflow-hidden rounded-[10px] border-2 ${chosenCandidateId === c.id ? 'border-[var(--color-accent)]' : 'border-transparent opacity-70 hover:opacity-100'}`}>
+        {renderJob?.result && renderJob.candidates.length > 1 && (
+          <div className={`col-span-full flex items-center gap-2 overflow-x-auto px-1 lg:col-start-2 lg:col-end-3 ${isChoosing ? 'pointer-events-none opacity-60' : ''}`}>
+            {renderJob.candidates.map((c) => (
+              <button key={c.id} type="button" disabled={isChoosing} onClick={() => handleChooseCandidate(c.id)} title={c.scores.map((s) => `${s.key}: ${s.score} — ${s.reason}`).join('\n')} className={`relative h-20 w-16 shrink-0 overflow-hidden rounded-[10px] border-2 ${chosenCandidateId === c.id ? 'border-[var(--color-accent)]' : 'border-transparent opacity-70 hover:opacity-100'}`}>
                 <img src={c.image} alt="" className="h-full w-full object-cover" />
                 <span className={`absolute right-1 bottom-1 rounded-full px-1.5 text-[10px] font-semibold text-white ${c.passed ? 'bg-[#1F6B48]' : 'bg-[#6B5420]'}`}>{c.total}</span>
               </button>
