@@ -44,7 +44,9 @@ export function createRenderRouter(opts: { store?: JobStore; deps?: Partial<Runn
   router.post('/jobs', (req, res) => {
     const parsed = inputSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ') });
-    const input = parsed.data;
+    // The brand comes from the signed-in user when there is one; the body's brandId is only a fallback for unauthenticated test setups.
+    const sessionBrand = (req as any).user?.brand_id as string | undefined;
+    const input = { ...parsed.data, brandId: sessionBrand || parsed.data.brandId };
 
     const config = getOrCreateBrandConfig(input.brandId);
     const brandKey = config.key_mode === 'brand_byo_key' ? config.byo_api_key_encrypted : null;

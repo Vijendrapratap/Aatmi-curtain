@@ -11,6 +11,7 @@ import {
 } from '../types/brand';
 import { CurtainTemplate, Fabric, FabricAssignment } from '../types/curtain';
 import { DEFAULT_FABRICS, DEFAULT_TEMPLATES } from '../data/defaultCatalog';
+import { fetchMe, loginApi, logoutApi, acceptInviteApi, loadCollection, putDocumentApi, deleteDocumentApi, SessionInfo } from './accountClient';
 
 export interface BrandStoreState {
   // Tenancy & Auth
@@ -20,6 +21,13 @@ export interface BrandStoreState {
   demoUsers: BrandUser[];
   setCurrentBrand: (brandId: string) => void;
   setCurrentUser: (user: BrandUser | null) => void;
+
+  // Session (server-backed accounts)
+  session: 'loading' | 'signed_out' | 'signed_in';
+  bootstrapSession: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  acceptInvite: (token: string, name: string, password: string) => Promise<void>;
   updateBrand: (brandId: string, updates: Partial<Brand>) => Promise<Brand>;
   createBrand: (brandData: Omit<Brand, 'id' | 'created_at' | 'activated_at' | 'status' | 'onboarding_step'>) => Promise<Brand>;
 
@@ -67,86 +75,6 @@ export interface BrandStoreState {
   setActiveDesignId: (designId: string | null) => void;
 }
 
-const INITIAL_BRANDS: Brand[] = [
-  {
-    id: 'brand-aatmi-01',
-    name: 'Maison Aatmi',
-    slug: 'aatmi',
-    logo_url: null,
-    theme_accent_color: '#5B4FE0',
-    primary_contact_name: 'Elena Vance',
-    primary_contact_email: 'elena@aatmi.design',
-    primary_contact_phone: '+1 (555) 234-5678',
-    status: 'active',
-    onboarding_step: 5,
-    created_at: '2026-01-15T09:00:00Z',
-    activated_at: '2026-01-16T11:30:00Z',
-  },
-  {
-    id: 'brand-lumina-02',
-    name: 'Lumina Drapery Studio',
-    slug: 'lumina',
-    logo_url: null,
-    theme_accent_color: '#2FA875',
-    primary_contact_name: 'Marcus Thorne',
-    primary_contact_email: 'marcus@luminadrapes.com',
-    primary_contact_phone: '+1 (555) 890-1234',
-    status: 'active',
-    onboarding_step: 5,
-    created_at: '2026-02-01T14:20:00Z',
-    activated_at: '2026-02-02T10:00:00Z',
-  },
-  {
-    id: 'brand-vivienne-03',
-    name: 'Atelier Vivienne',
-    slug: 'vivienne',
-    logo_url: null,
-    theme_accent_color: '#C9A961',
-    primary_contact_name: 'Vivienne Laurent',
-    primary_contact_email: 'vivienne@atelier-vivienne.fr',
-    primary_contact_phone: null,
-    status: 'pending_review',
-    onboarding_step: 1,
-    created_at: '2026-03-05T08:15:00Z',
-    activated_at: null,
-  },
-];
-
-const INITIAL_USERS: BrandUser[] = [
-  {
-    id: 'usr-elena-01',
-    brand_id: 'brand-aatmi-01',
-    name: 'Elena Vance',
-    email: 'elena@aatmi.design',
-    role: 'brand_admin',
-    created_at: '2026-01-15T09:00:00Z',
-  },
-  {
-    id: 'usr-julian-02',
-    brand_id: 'brand-aatmi-01',
-    name: 'Julian Croft',
-    email: 'julian@aatmi.design',
-    role: 'brand_staff',
-    created_at: '2026-01-20T10:00:00Z',
-  },
-  {
-    id: 'usr-marcus-01',
-    brand_id: 'brand-lumina-02',
-    name: 'Marcus Thorne',
-    email: 'marcus@luminadrapes.com',
-    role: 'brand_admin',
-    created_at: '2026-02-01T14:20:00Z',
-  },
-  {
-    id: 'usr-pratap-ops',
-    brand_id: 'brand-aatmi-01',
-    name: 'Pratap Singh (Platform Ops)',
-    email: 'pratap@platform.curtain.ai',
-    role: 'platform_admin',
-    created_at: '2026-01-01T00:00:00Z',
-  },
-];
-
 const INITIAL_MODEL_CONFIGS: Record<string, BrandModelConfig> = {
   'brand-aatmi-01': {
     id: 'config-aatmi-01',
@@ -176,39 +104,10 @@ const INITIAL_MODEL_CONFIGS: Record<string, BrandModelConfig> = {
   },
 };
 
-const INITIAL_DESIGNS: Design[] = [
-  {
-    id: 'design-velvet-salon-01',
-    brand_id: 'brand-aatmi-01',
-    template_id: 'tpl-velvet-houndstooth',
-    template_name: 'Haute Couture Velvet & Houndstooth Drape',
-    name: 'Velvet & Houndstooth Salon',
-    assignments: [
-      { region_id: 'reg-vh-top-velvet', fabric_id: 'fab-charcoal-slate', scale: 1, rotation: 0 },
-      { region_id: 'reg-vh-mid-brass', fabric_id: 'fab-metallic-gold-satin', scale: 1, rotation: 0 },
-      { region_id: 'reg-vh-skirt-houndstooth', fabric_id: 'fab-classic-houndstooth', scale: 1, rotation: 0 },
-    ],
-    final_image_url: '/designs/velvet-salon-preview.png',
-    render_kind: 'preview',
-    created_at: '2026-03-08T14:30:00Z',
-    created_by_user_id: 'usr-elena-01',
-    room_previews: [],
-  },
-];
-
 // Seed templates and fabrics with brand_id for tenancy
-const SEEDED_TEMPLATES: CurtainTemplate[] = DEFAULT_TEMPLATES.map((tpl, i) => ({
-  ...tpl,
-  brand_id: i === 0 || i === 1 ? 'brand-aatmi-01' : null, // null = platform stencils
-  source: i === 0 ? 'user_upload' : 'catalog',
-}));
-
-const SEEDED_FABRICS: Fabric[] = DEFAULT_FABRICS.map((fab, i) => ({
-  ...fab,
-  brand_id: i === 0 || i === 1 ? 'brand-aatmi-01' : null, // null = shared platform catalog available to all brands
-  visibility: (i % 6 === 0 ? 'session_only' : 'catalog') as 'session_only' | 'catalog',
-  source: (i % 4 === 0 ? 'camera_capture' : 'catalog') as 'camera_capture' | 'catalog',
-}));
+// Built-in styles and fabrics are platform-wide (brand_id null); a brand's own live on the server.
+const SEEDED_TEMPLATES: CurtainTemplate[] = DEFAULT_TEMPLATES.map((tpl) => ({ ...tpl, brand_id: null, source: 'catalog' }));
+const SEEDED_FABRICS: Fabric[] = DEFAULT_FABRICS.map((fab) => ({ ...fab, brand_id: null, visibility: 'catalog' as const, source: 'catalog' as const }));
 
 function applyRootTheme(hex: string) {
   if (typeof document === 'undefined') return;
@@ -222,14 +121,61 @@ function applyRootTheme(hex: string) {
 export const useBrandStore = create<BrandStoreState>((set, get) => {
   // Apply initial theme on boot
   if (typeof window !== 'undefined') {
-    applyRootTheme(INITIAL_BRANDS[0].theme_accent_color);
+    applyRootTheme('#5B4FE0');
   }
 
+  /** Writes a brand-owned document through to the server; platform defaults are never persisted. */
+  const persist = (collection: 'designs' | 'fabrics' | 'templates', doc: { id: string; brand_id?: string | null }) => {
+    if (get().session !== 'signed_in' || !doc.brand_id || doc.brand_id !== get().currentBrandId) return;
+    putDocumentApi(collection, doc as any).catch((e) => console.warn(`Could not save ${collection}/${doc.id}:`, e?.message || e));
+  };
+  const unpersist = (collection: 'designs' | 'fabrics' | 'templates', id: string) => {
+    if (get().session !== 'signed_in') return;
+    deleteDocumentApi(collection, id).catch((e) => console.warn(`Could not delete ${collection}/${id}:`, e?.message || e));
+  };
+
+  const applySession = async (info: SessionInfo) => {
+    const brand = info.brand;
+    const isAdmin = info.user.role === 'platform_admin';
+    if (brand) applyRootTheme(brand.theme_accent_color);
+    set({
+      session: 'signed_in',
+      currentUser: info.user,
+      brands: brand ? [brand] : [],
+      currentBrandId: brand?.id || '',
+      activeView: isAdmin ? 'platform_admin' : 'dashboard',
+      activeDesignId: null,
+      designs: [],
+      brandTemplates: SEEDED_TEMPLATES,
+      brandFabrics: SEEDED_FABRICS,
+    });
+    if (brand) {
+      set((state) => ({ modelConfigs: { ...state.modelConfigs, [brand.id]: { id: `config-${brand.id}`, brand_id: brand.id, region_edit_provider: 'openrouter_unified', room_preview_provider: 'openrouter_unified', key_mode: 'platform_managed', monthly_generation_cap: (info as any).brand?.monthly_generation_cap ?? 200, monthly_generations_used: (info as any).brand?.monthly_generations_used ?? 0, updated_at: new Date().toISOString(), updated_by_user_id: 'server' } } }));
+      try {
+        const [designs, fabrics, templates] = await Promise.all([loadCollection<Design>('designs'), loadCollection<Fabric>('fabrics'), loadCollection<CurtainTemplate>('templates')]);
+        set({ designs: [...designs].reverse(), brandFabrics: [...fabrics.reverse(), ...SEEDED_FABRICS], brandTemplates: [...templates.reverse(), ...SEEDED_TEMPLATES], activeDesignId: designs.length ? designs[designs.length - 1].id : null });
+      } catch (e: any) {
+        console.warn('Could not load brand data:', e?.message || e);
+      }
+    }
+  };
+
   return {
-    currentBrandId: 'brand-aatmi-01',
-    brands: INITIAL_BRANDS,
-    currentUser: INITIAL_USERS[0],
-    demoUsers: INITIAL_USERS,
+    currentBrandId: '',
+    brands: [],
+    currentUser: null,
+    demoUsers: [],
+
+    session: 'loading',
+    bootstrapSession: async () => {
+      try { await applySession(await fetchMe()); } catch { set({ session: 'signed_out', currentUser: null }); }
+    },
+    signIn: async (email, password) => { await applySession(await loginApi(email, password)); },
+    signOut: async () => {
+      try { await logoutApi(); } catch { /* the cookie is gone either way */ }
+      set({ session: 'signed_out', currentUser: null, brands: [], currentBrandId: '', designs: [], activeDesignId: null, activeView: 'dashboard' });
+    },
+    acceptInvite: async (token, name, password) => { await applySession(await acceptInviteApi(token, name, password)); },
 
     setCurrentBrand: (brandId) => {
       const brand = get().brands.find((b) => b.id === brandId);
@@ -378,7 +324,7 @@ export const useBrandStore = create<BrandStoreState>((set, get) => {
       }
     },
 
-    designs: INITIAL_DESIGNS,
+    designs: [],
 
     saveDesign: (designData) => {
       const id = 'design-' + Date.now();
@@ -391,6 +337,7 @@ export const useBrandStore = create<BrandStoreState>((set, get) => {
         designs: [newDesign, ...state.designs],
         activeDesignId: id,
       }));
+      persist('designs', newDesign);
       return newDesign;
     },
 
@@ -409,7 +356,8 @@ export const useBrandStore = create<BrandStoreState>((set, get) => {
             : d
         ),
       }));
-
+      const updated = get().designs.find((d) => d.id === designId);
+      if (updated) persist('designs', updated);
       return newPreview;
     },
 
@@ -421,6 +369,8 @@ export const useBrandStore = create<BrandStoreState>((set, get) => {
       set((state) => ({
         designs: state.designs.map((d) => (d.id === designId ? { ...d, ...updates } : d)),
       }));
+      const updated = get().designs.find((d) => d.id === designId);
+      if (updated) persist('designs', updated);
     },
 
     brandTemplates: SEEDED_TEMPLATES,
@@ -435,6 +385,7 @@ export const useBrandStore = create<BrandStoreState>((set, get) => {
       set((state) => ({
         brandFabrics: [withBrand, ...state.brandFabrics],
       }));
+      persist('fabrics', withBrand);
     },
 
     updateBrandFabric: (fabricId, updates) => {
@@ -443,12 +394,16 @@ export const useBrandStore = create<BrandStoreState>((set, get) => {
           f.id === fabricId ? { ...f, ...updates } : f
         ),
       }));
+      const updated = get().brandFabrics.find((f) => f.id === fabricId);
+      if (updated) persist('fabrics', updated);
     },
 
     archiveBrandFabric: (fabricId) => {
+      const existing = get().brandFabrics.find((f) => f.id === fabricId);
       set((state) => ({
         brandFabrics: state.brandFabrics.filter((f) => f.id !== fabricId),
       }));
+      if (existing?.brand_id) unpersist('fabrics', fabricId);
     },
 
     bulkAddBrandFabrics: (fabrics) => {
@@ -462,6 +417,7 @@ export const useBrandStore = create<BrandStoreState>((set, get) => {
       set((state) => ({
         brandFabrics: [...branded, ...state.brandFabrics],
       }));
+      branded.forEach((f) => persist('fabrics', f));
     },
 
     addBrandTemplate: (template) => {
@@ -472,6 +428,7 @@ export const useBrandStore = create<BrandStoreState>((set, get) => {
       set((state) => ({
         brandTemplates: [withBrand, ...state.brandTemplates],
       }));
+      persist('templates', withBrand);
     },
 
     applyBrandTheme: (hex) => {
@@ -480,7 +437,7 @@ export const useBrandStore = create<BrandStoreState>((set, get) => {
 
     activeView: 'dashboard',
     setActiveView: (activeView) => set({ activeView }),
-    activeDesignId: INITIAL_DESIGNS[0].id,
+    activeDesignId: null,
     setActiveDesignId: (activeDesignId) => set({ activeDesignId }),
   };
 });

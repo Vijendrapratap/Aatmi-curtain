@@ -4,13 +4,13 @@ A brand tool for curtain makers. Staff put a curtain design in, choose a fabric 
 
 - **Stack:** Vite + React 19 single-page app, Express API, zustand state, vitest. `sharp` for server-side image compositing.
 - **Models (via OpenRouter):** `google/gemini-3-pro-image` for generation, `google/gemini-2.5-flash` for analysis and grading. Both are overridable through env vars.
-- **State:** in-memory only. Designs, fabrics and styles live in the browser session; render jobs live in the server process. There is no database yet.
+- **Accounts and data:** built into the server. Users, brands, invites and sessions plus each brand's designs, fabrics and styles live in one SQLite file (Node's built-in `node:sqlite`); images are stored as files and served from `/images/`. Render jobs still live in the server process.
 
 ---
 
 ## 1. The flow
 
-The app has four pages: **Home**, **Generate**, **Library**, **Designs**. Generate is where the work happens.
+The app has four pages: **Home**, **Generate**, **Library**, **Designs**, plus **Room** (reached from Generate or a design) and **Brands** (admins). Generate is where the work happens.
 
 ```mermaid
 flowchart LR
@@ -23,8 +23,8 @@ flowchart LR
     subgraph Out["Result"]
         R["Best of 3 variations\n(other two switchable)"]
         DL["Download"]
-        RM["Place in a room\n(room photo in → staged image out)"]
-        H["Saved to Designs\n+ session history"]
+        RM["Room page\n(room photo + light in → staged image out)"]
+        H["Save → Designs\n+ session history"]
     end
     D --> A --> F --> G --> R
     R --> DL
@@ -34,7 +34,9 @@ flowchart LR
 
 1. **Design in.** Drop a curtain photo or drawing, take a photo, or pick a saved style from the Library. The image is sent to the analyzer, which returns the fabric areas (top band, accent band, skirt, left and right panels, and so on) with a plain-language name, a description and a polygon each. The areas are numbered on the image.
 2. **Fabrics in.** Each area gets a row with a Choose button. Sources: the catalog (photographed fabrics only), a file upload, or the camera. Areas with the same name (mirrored panels) share one choice. Areas left alone stay exactly as photographed.
-3. **Generate.** One button. About a minute later the best of three variations is shown; the other two can be switched to. Download gives the full-resolution PNG. "Place in a room" takes a room photo and runs the same pipeline in staging mode. Every generation is saved as a Design and listed in the session history strip.
+3. **Light.** As photographed (background stays pixel-identical), Daylight, Golden hour, Evening or Night. Anything but "as photographed" relights the whole image, so the pixel lock is skipped and the grader is told not to penalise lighting changes.
+4. **Generate.** One button. About a minute later the best of three variations is shown; the other two can be switched to (a switch is re-locked on the server). **Save** names the result and stores it under Designs; Download gives the full-resolution PNG; every generation is listed in the session history strip.
+5. **Room.** "Place in a room" opens the Room page: the saved curtain, a room photo (upload or camera), a light choice, and three graded placements, each kept on the design.
 
 Size rules: images under 240 px wide are refused (the analyzer has nothing to work with); under 1500 px a note explains the background will be softer. The generated image is always at the model's full resolution (about 2K on the long side), never shrunk to the source.
 
@@ -108,18 +110,23 @@ flowchart TB
 src/
   App.tsx                      view router (dashboard · editor=Generate · library · design_detail · settings)
   components/brand/
-    GeneratePage.tsx           the Generate page (design in, fabrics in, image out)
-    DesignDetailView.tsx       a saved design: rerun, room staging, share, spec sheet
+    GeneratePage.tsx           the Generate page (design in, fabrics in, light, image out)
+    RoomPage.tsx               place a saved curtain in a room photo
+    AdminPage.tsx              admins: brands and invites
+    DesignDetailView.tsx       a saved design: rerun, room placements, share, spec sheet
     BrandDashboard.tsx         Home
     library/                   Library: styles and fabrics tabs
     CameraCaptureModal.tsx     photograph a fabric
     StylePickerModal.tsx       pick a saved style
   components/NewTemplateModal.tsx   add a style from a photo (analyzer) or a stencil preset
+  pages/SignIn.tsx, pages/InviteAccept.tsx
   lib/
     renderClient.ts            browser client for the render job API
-    brandStore.ts, store.ts    zustand stores (in-memory)
+    accountClient.ts           browser client for auth, admin and brand data
+    brandStore.ts, store.ts    zustand stores (session, brand data with write-through)
   server/
-    api.ts                     Express app: brands, analyzer, legacy routes, mounts /api/render
+    api.ts                     Express app: mounts auth, admin, data, images, analyzer and /api/render
+    db.ts, auth.ts, imageStore.ts, accountRoutes.ts   accounts and persistence
     renderAgent/               the render pipeline (one file per stage, tests alongside)
     openrouter.ts              key resolution and model constants
     images.ts, brandConfigs.ts shared helpers
@@ -130,7 +137,24 @@ docs/superpowers/specs/        design documents (render agent, Generate page)
 
 ---
 
-## 3. API
+## 3. Accounts
+
+- **One brand per login.** A user belongs to exactly one brand, or is a platform admin. The header shows the brand; there is no switching.
+- **Admins create brands and invite users.** There is no public sign-up. On the Brands page an admin creates a brand, then creates an invite for an email address and sends the link it produces (`/invite/<token>`, valid 7 days, single use). The invitee sets a name and password and lands in that brand.
+- **First admin** is created on start-up from `ADMIN_EMAIL` and `ADMIN_PASSWORD` when the database has no admin yet.
+- Passwords are hashed with scrypt and a per-user salt. Sessions are random tokens in an `HttpOnly` cookie, 30 days. Suspended brands cannot sign in.
+- A brand's designs, fabrics and uploaded styles are loaded on sign-in and written through on every save; the built-in catalog is merged in as platform defaults. Any data-URL image inside a saved document is moved to the image store before the JSON is written.
+
+Tables: `brands`, `users`, `invites`, `sessions`, `documents(brand_id, collection, id, json)`. Code: `src/server/db.ts`, `auth.ts`, `imageStore.ts`, `accountRoutes.ts`; client `src/lib/accountClient.ts`, pages `SignIn.tsx`, `InviteAccept.tsx`, `AdminPage.tsx`.
+
+## 4. API
+
+| Route | Purpose |
+| --- | --- |
+| `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me` | session |
+| `GET /api/auth/invite/:token`, `POST /api/auth/invite/:token/accept` | invite lookup and acceptance |
+| `GET/POST /api/admin/brands`, `PATCH /api/admin/brands/:id`, `POST /api/admin/brands/:id/invites` | admin only |
+| `GET /api/data/:collection`, `PUT /api/data/:collection/:id`, `DELETE …` | the signed-in user's brand documents (`designs`, `fabrics`, `templates`) |
 
 | Route | Purpose |
 | --- | --- |
@@ -149,7 +173,7 @@ Routes under `/api/generate-curtain-*` and `/api/ai/*` are older paths kept for 
 
 ---
 
-## 4. Configuration
+## 5. Configuration
 
 Copy `.env.example` to `.env`.
 
@@ -159,12 +183,15 @@ Copy `.env.example` to `.env`.
 | `OPENROUTER_ROOM_VIZ_MODEL` | no | image generation model (default `google/gemini-3-pro-image`) |
 | `OPENROUTER_VISION_MODEL` | no | analysis, window detection and grading (default `google/gemini-2.5-flash`) |
 | `GEMINI_API_KEY`, `GEMINI_IMAGE_MODEL` | no | direct Gemini fallback for the generate stage only |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` | first start | creates the first admin when no admin exists |
+| `DATA_DIR` | no | where the SQLite file and images live (default `./data`) |
+| `APP_URL` | no | public URL used in invite links (default: the request host) |
 
 The dev server reads `.env` at start. If you change the key, restart it: `dotenv` never overrides a value already in the process environment.
 
 ---
 
-## 5. Run, test, build
+## 6. Run, test, build
 
 ```bash
 npm install
@@ -180,10 +207,11 @@ Tests cover every pipeline stage with real behaviour and only the provider calls
 
 ---
 
-## 6. Quality rules and known limits
+## 7. Quality rules and known limits
 
 - Only photographed fabrics are offered in the picker; the drawn SVG tiles in the built-in catalog are filtered out because the model cannot reproduce them convincingly.
 - The built-in sample styles are 250–450 px wide. They generate, but a real photo at 1500 px or wider gives a sharper background. Add your own styles through the Library or straight into Generate.
 - The background outside the curtain (or outside the window box, for staging) is guaranteed pixel-identical to the source. A manually chosen runner-up is re-locked on the server before it is shown.
 - A job costs 3 image generations and 3 grading calls (6 and 6 if a retry round runs), about 60–90 s.
-- Everything is in memory: a server restart drops running jobs; a browser refresh drops the session history. Persistence is the next piece of work.
+- Render jobs are in memory: a server restart drops running jobs. Saved designs, fabrics, styles and accounts persist in `DATA_DIR`; back that directory up.
+- Invite links are shown to the admin to send by hand; there is no email delivery or password reset yet.

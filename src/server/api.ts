@@ -39,8 +39,21 @@ import { Brand, BrandModelConfig } from '../types/brand';
 import { parseBase64Image } from './images';
 import { SERVER_MODEL_CONFIGS, getOrCreateBrandConfig } from './brandConfigs';
 import { createRenderRouter } from './renderAgent/routes';
+import { getDb } from './db';
+import { attachUser, bootstrapAdmin, requireUser } from './auth';
+import { IMAGES_DIR } from './imageStore';
+import { createAuthRouter, createAdminRouter, createDataRouter } from './accountRoutes';
 
-apiApp.use('/api/render', createRenderRouter());
+// Accounts: one SQLite file under DATA_DIR; the first admin comes from ADMIN_EMAIL / ADMIN_PASSWORD.
+const db = getDb();
+const firstAdmin = bootstrapAdmin(db);
+if (firstAdmin) console.log(`[accounts] created first admin ${firstAdmin.email}`);
+apiApp.use(attachUser(db));
+apiApp.use('/images', express.static(IMAGES_DIR, { maxAge: '365d', immutable: true }));
+apiApp.use('/api/auth', createAuthRouter(db));
+apiApp.use('/api/admin', createAdminRouter(db, { appUrl: () => process.env.APP_URL || '' }));
+apiApp.use('/api/data', createDataRouter(db));
+apiApp.use('/api/render', requireUser, createRenderRouter());
 
 // In-Memory Multi-Tenant Store for Brands & Model Configurations
 const SERVER_BRANDS: Map<string, Brand> = new Map([
@@ -221,7 +234,7 @@ apiApp.post('/api/test-provider', async (req, res) => {
  * Endpoint: Analyze a Curtain Image and detect replaceable fabric regions (VLM)
  * Implements Section 6.1 of the specification.
  */
-apiApp.post('/api/analyze-curtain', async (req, res) => {
+apiApp.post('/api/analyze-curtain', requireUser, async (req, res) => {
   try {
     const { imageBase64, mimeType = 'image/jpeg' } = req.body;
     if (!imageBase64) {

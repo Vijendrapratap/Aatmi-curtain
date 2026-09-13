@@ -1,9 +1,9 @@
 // src/App.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useBrandStore } from './lib/brandStore';
 import { useStudioStore } from './lib/store';
 import { SignIn } from './pages/SignIn';
-import { OnboardingWizard } from './components/brand/OnboardingWizard';
+import { InviteAccept } from './pages/InviteAccept';
 import { BrandHeader } from './components/brand/BrandHeader';
 import { BrandDashboard } from './components/brand/BrandDashboard';
 import { GeneratePage } from './components/brand/GeneratePage';
@@ -11,7 +11,7 @@ import { RoomPage } from './components/brand/RoomPage';
 import { LibraryPage } from './components/brand/library/LibraryPage';
 import { DesignDetailView } from './components/brand/DesignDetailView';
 import { BrandSettingsView } from './components/brand/BrandSettingsView';
-import { PlatformAdminView } from './components/brand/PlatformAdminView';
+import { AdminPage } from './components/brand/AdminPage';
 import { NewTemplateModal } from './components/NewTemplateModal';
 import { SpecSheetModal } from './components/SpecSheetModal';
 import { CurtainTemplate } from './types/curtain';
@@ -19,7 +19,9 @@ import { CurtainTemplate } from './types/curtain';
 export default function App() {
   const {
     currentUser,
-    setCurrentUser,
+    session,
+    bootstrapSession,
+    signOut,
     activeView,
     setActiveView,
     addBrandTemplate,
@@ -33,8 +35,8 @@ export default function App() {
   const { assignments } = useStudioStore();
   const fabrics = brandFabrics.filter((f) => f.brand_id === currentBrandId || !f.brand_id);
 
-  // Authentication state
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+  useEffect(() => { bootstrapSession(); }, []);
+  const inviteToken = typeof window !== 'undefined' ? (window.location.pathname.match(/^\/invite\/([^/]+)/) || [])[1] : undefined;
 
   // Global modals
   const [isNewTemplateModalOpen, setIsNewTemplateModalOpen] = useState(false);
@@ -57,40 +59,22 @@ export default function App() {
     setActiveView('editor');
   };
 
-  // Pre-auth Onboarding View
-  if (activeView === 'onboarding') {
-    return (
-      <OnboardingWizard
-        onComplete={() => {
-          setIsAuthenticated(true);
-          setActiveView('dashboard');
-        }}
-        onCancel={() => {
-          if (isAuthenticated) {
-            setActiveView('dashboard');
-          } else {
-            setActiveView('dashboard');
-            setIsAuthenticated(false);
-          }
-        }}
-      />
-    );
+  if (inviteToken && session !== 'signed_in') {
+    return <InviteAccept token={inviteToken} onDone={() => undefined} />;
   }
 
-  // Pre-auth Sign In View
-  if (!isAuthenticated) {
-    return (
-      <SignIn
-        onStartOnboarding={() => setActiveView('onboarding')}
-        onSuccess={() => setIsAuthenticated(true)}
-      />
-    );
+  if (session === 'loading') {
+    return <div className="flex min-h-dvh items-center justify-center bg-[var(--color-bg-base)] text-[13px] text-[var(--color-text-secondary)]">Loading…</div>;
+  }
+
+  if (session === 'signed_out') {
+    return <SignIn />;
   }
 
   return (
     <div className="flex min-h-dvh flex-col bg-[var(--color-bg-base)] font-sans text-[var(--color-text-primary)] antialiased">
       {/* Top Header with Multi-Tenant Switcher, Navigation & Usage Meter */}
-      <BrandHeader onSignOut={() => setIsAuthenticated(false)} />
+      <BrandHeader onSignOut={() => { signOut(); }} />
 
       {/* Main View Router */}
       <main className="flex-1 flex flex-col min-h-0">
@@ -126,7 +110,7 @@ export default function App() {
           />
         )}
 
-        {activeView === 'platform_admin' && <PlatformAdminView />}
+        {activeView === 'platform_admin' && <AdminPage />}
       </main>
 
       {/* Global Modals */}
