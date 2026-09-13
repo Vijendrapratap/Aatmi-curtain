@@ -335,16 +335,28 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
     const reader = new FileReader();
     reader.onload = (ev) => {
       const b64 = ev.target?.result as string;
-      setUploadedImage(b64);
-      setTemplateName(file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '));
-      analyzeCurtainImage(b64);
+      const probe = new Image();
+      probe.onload = () => {
+        if (probe.naturalWidth < 1000) {
+          setErrorMessage(`This photo is ${probe.naturalWidth} px wide. Renders need at least 1000 px; 1500 px or more gives the best result.`);
+          return;
+        }
+        if (probe.naturalWidth < 1500) {
+          setErrorMessage(`This photo is ${probe.naturalWidth} px wide. Renders look best from 1500 px or wider, but you can continue.`);
+        } else {
+          setErrorMessage(null);
+        }
+        setUploadedImage(b64);
+        setTemplateName(file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '));
+        analyzeCurtainImage(b64);
+      };
+      probe.src = b64;
     };
     reader.readAsDataURL(file);
   };
 
   const analyzeCurtainImage = async (b64: string) => {
     setStep('analyzing');
-    setErrorMessage(null);
 
     try {
       const res = await fetch('/api/analyze-curtain', {
@@ -895,9 +907,22 @@ export const NewTemplateModal: React.FC<NewTemplateModalProps> = ({
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
-                            <p className="text-[11px] text-[#9E9088] mt-1 pl-5">
-                              {reg.description}
-                            </p>
+                            <label className="mt-1 block pl-5">
+                              <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#9E9088]">
+                                What this zone is, in plain words
+                              </span>
+                              <input
+                                type="text"
+                                value={reg.description}
+                                placeholder="e.g. top pleated band, roughly the upper 60%"
+                                onChange={(e) =>
+                                  setDetectedRegions((prev) =>
+                                    prev.map((r) => (r.id === reg.id ? { ...r, description: e.target.value } : r))
+                                  )
+                                }
+                                className="mt-0.5 w-full rounded-md border border-[#E2D9CE] bg-white/60 px-2 py-1 text-[11px] text-[#4A3F35] focus:border-[#D4AF37] focus:outline-none"
+                              />
+                            </label>
                           </div>
                         ))}
                       </div>
