@@ -5,7 +5,6 @@ export const apiApp = express();
 
 apiApp.use(express.json({ limit: '50mb' }));
 apiApp.use(express.urlencoded({ extended: true, limit: '50mb' }));
-apiApp.use('/api/render', createRenderRouter());
 
 // Lazy initialization of GoogleGenAI
 function getGenAIClient(): GoogleGenAI | null {
@@ -40,6 +39,8 @@ import { Brand, BrandModelConfig } from '../types/brand';
 import { parseBase64Image } from './images';
 import { SERVER_MODEL_CONFIGS, getOrCreateBrandConfig } from './brandConfigs';
 import { createRenderRouter } from './renderAgent/routes';
+
+apiApp.use('/api/render', createRenderRouter());
 
 // In-Memory Multi-Tenant Store for Brands & Model Configurations
 const SERVER_BRANDS: Map<string, Brand> = new Map([
