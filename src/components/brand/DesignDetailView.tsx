@@ -6,8 +6,7 @@ import { useBrandStore } from '../../lib/brandStore';
 import { useStudioStore } from '../../lib/store';
 import { Design } from '../../types/brand';
 import { deriveJourney, JourneyStepId } from '../../lib/journey';
-import { providerLabel } from '../../lib/labels';
-import { generateSequentialRedesign } from '../../utils/maskedPipeline';
+import { buildFabricSwapInput, startRender, pollRender, STAGE_COPY, RenderJobView, toDataUrl } from '../../lib/renderClient';
 import { JourneyStrip } from '../JourneyStrip';
 
 interface DesignDetailViewProps {
@@ -17,7 +16,7 @@ interface DesignDetailViewProps {
 type RoomSource = 'template_original' | 'uploaded';
 
 export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSheet }) => {
-  const { designs, activeDesignId, setActiveDesignId, brandTemplates, brandFabrics, currentBrandId, getModelConfig, addRoomPreview, updateDesign, setActiveView } = useBrandStore();
+  const { designs, activeDesignId, setActiveDesignId, brandTemplates, brandFabrics, currentBrandId, addRoomPreview, updateDesign, setActiveView } = useBrandStore();
   const { loadAssignments } = useStudioStore();
 
   const brandDesigns = designs.filter((d) => d.brand_id === currentBrandId);
@@ -30,7 +29,8 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
   const [pendingRoom, setPendingRoom] = useState<{ source: RoomSource; photo: string } | null>(null);
   const [isStaging, setIsStaging] = useState(false);
   const [isRendering, setIsRendering] = useState(false);
-  const [renderStep, setRenderStep] = useState('');
+  const [activeJob, setActiveJob] = useState<RenderJobView | null>(null);
+  const [reviewStage, setReviewStage] = useState<{ source: RoomSource; photo: string; job: RenderJobView } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const template = useMemo(() => brandTemplates.find((t) => t.id === design?.template_id), [brandTemplates, design?.template_id]);
@@ -52,7 +52,6 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
   // Every curtain style is a real photograph (built-in ones live in /templates/, uploads are user photos),
   // so the style's own photo is always a valid room to stage in.
   const templateHasRealRoom = Boolean(template);
-  const modelConfig = getModelConfig(currentBrandId);
   const steps = deriveJourney({ page: 'design', zoneCount: design.assignments.length, assignedCount: design.assignments.length, hasPhotoreal: design.render_kind === 'photoreal', roomPreviewCount: roomPreviews.length });
 
   const goToStudio = () => {
@@ -89,24 +88,18 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
     if (!template) return;
     setIsRendering(true);
     setError(null);
+    setActiveJob(null);
     try {
-      const result = await generateSequentialRedesign({
-        template,
-        assignments: design.assignments,
-        fabrics,
-        onStep: setRenderStep,
-        callEdit: (payload) => fetch('/api/generate-curtain-fabric', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...payload, brandId: currentBrandId, provider: modelConfig.region_edit_provider }),
-        }).then((r) => r.json()),
-      });
-      if (result?.imageUrl) updateDesign(design.id, { final_image_url: result.imageUrl, render_kind: 'photoreal' });
+      const body = await buildFabricSwapInput(template, design.assignments, fabrics, currentBrandId);
+      const job = await pollRender(await startRender(body), setActiveJob);
+      if (job.status === 'failed') throw new Error(job.error || 'Render did not finish');
+      if (job.result) updateDesign(design.id, { final_image_url: job.result.finalImage, render_kind: 'photoreal', render_candidates: job.result.candidates, render_prompt: job.result.prompt });
+      if (job.status === 'needs_review') setError('No render option passed the quality check. The best one was kept; rerun if it is not right.');
     } catch (err: any) {
-      setError(`Photoreal render did not finish: ${err.message || 'unknown error'}.`);
+      setError(`Render did not finish: ${err.message || 'unknown error'}.`);
     } finally {
       setIsRendering(false);
-      setRenderStep('');
+      setActiveJob(null);
     }
   };
 
@@ -125,15 +118,13 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
     setIsStaging(true);
     setError(null);
     setPendingRoom(null);
+    setActiveJob(null);
     try {
-      const resp = await fetch('/api/room-visualize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomPhoto: photo, designImage: design.final_image_url, brandId: currentBrandId, roomSource: source }),
-      });
-      const data = await resp.json();
-      if (!resp.ok || !data.success) throw new Error(data.error || 'Room staging failed');
-      addRoomPreview(design.id, { design_id: design.id, brand_id: currentBrandId, room_source: source, room_photo_url: photo, output_url: data.outputUrl, provider_used: data.providerUsed || modelConfig.room_preview_provider });
+      const body = { kind: 'room_stage' as const, brandId: currentBrandId, roomPhoto: await toDataUrl(photo), curtainImage: await toDataUrl(design.final_image_url) };
+      const job = await pollRender(await startRender(body), setActiveJob);
+      if (job.status === 'failed' || !job.result) throw new Error(job.error || 'Room staging failed');
+      if (job.status === 'needs_review') { setReviewStage({ source, photo, job }); return; }
+      addRoomPreview(design.id, { design_id: design.id, brand_id: currentBrandId, room_source: source, room_photo_url: photo, output_url: job.result.finalImage, provider_used: 'render_agent', candidates: job.result.candidates });
       setSelectedPreviewIndex(roomPreviews.length);
       setTimeout(() => scrollTo('design-room'), 50);
     } catch (err: any) {
@@ -141,7 +132,16 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setIsStaging(false);
+      setActiveJob(null);
     }
+  };
+
+  const acceptReviewStage = () => {
+    if (!reviewStage) return;
+    const { source, photo, job } = reviewStage;
+    addRoomPreview(design.id, { design_id: design.id, brand_id: currentBrandId, room_source: source, room_photo_url: photo, output_url: job.result!.finalImage, provider_used: 'render_agent', candidates: job.result!.candidates });
+    setSelectedPreviewIndex(roomPreviews.length);
+    setReviewStage(null);
   };
 
   const sectionHeader = (id: string, step: string, title: string, lede: string) => (
@@ -179,11 +179,11 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
 
       {/* Step 3: Render */}
       <section className="brand-card space-y-4 p-5 sm:p-6">
-        {sectionHeader('design-render', 'Step 3', 'Render', design.render_kind === 'photoreal' ? 'Photoreal render made from your fabric choices.' : 'This is the studio preview. Create a photoreal render for the client-ready image.')}
+        {sectionHeader('design-render', 'Step 3', 'Render', design.render_kind === 'photoreal' ? 'Rendered from your fabric choices and checked for quality.' : 'This is the studio sketch. Render it for the client-ready image.')}
         <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_260px]">
           <div className="media-frame relative mx-auto aspect-[4/5] w-full max-w-lg rounded-[16px]">
             <img src={design.final_image_url} alt={design.name} className="h-full w-full object-cover" />
-            <span className="badge badge-muted absolute top-3 left-3">{design.render_kind === 'photoreal' ? 'Photoreal render' : 'Live preview'}</span>
+            <span className="badge badge-muted absolute top-3 left-3">{design.render_kind === 'photoreal' ? 'Rendered' : 'Sketch'}</span>
             {isRendering && <div className="ai-generation-shimmer pointer-events-none absolute inset-0" />}
           </div>
           <div className="space-y-3">
@@ -204,10 +204,10 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
             </div>
             {design.render_kind !== 'photoreal' && (
               <button type="button" disabled={isRendering || !template} title={template ? undefined : 'The curtain style for this design is no longer available'} onClick={handlePhotoreal} className="btn btn-primary btn-block">
-                <Sparkles className={`h-3.5 w-3.5 ${isRendering ? 'animate-spin' : ''}`} />{isRendering ? renderStep || 'Rendering…' : 'Create photoreal render'}
+                <Sparkles className={`h-3.5 w-3.5 ${isRendering ? 'animate-spin' : ''}`} />{isRendering ? (activeJob ? STAGE_COPY[activeJob.stage] : 'Starting…') : 'Render'}
               </button>
             )}
-            <p className="text-[11px] text-[var(--color-text-tertiary)]">Uses 1 monthly render · about 20 seconds per zone.</p>
+            <p className="text-[11px] text-[var(--color-text-tertiary)]">Uses 1 monthly render · about a minute.</p>
           </div>
         </div>
       </section>
@@ -220,8 +220,8 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
           <div className="relative flex h-80 flex-col items-center justify-center overflow-hidden rounded-2xl bg-[var(--color-bg-sunken)]">
             <div className="ai-generation-shimmer absolute inset-0" />
             <Sparkles className="z-10 h-8 w-8 animate-spin text-[var(--color-accent)]" />
-            <p className="z-10 mt-3 text-[13px] font-semibold">Staging with {providerLabel(modelConfig.room_preview_provider)}…</p>
-            <p className="z-10 text-[12px] text-[var(--color-text-secondary)]">Finding the window and matching the daylight. About 30 seconds.</p>
+            <p className="z-10 mt-3 text-[13px] font-semibold">{activeJob ? STAGE_COPY[activeJob.stage] : 'Starting…'}</p>
+            <p className="z-10 text-[12px] text-[var(--color-text-secondary)]">Finding the window, trying 3 options, checking each. About a minute.</p>
           </div>
         ) : currentPreview ? (
           <div className="space-y-3">
@@ -237,7 +237,7 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
               <span className="absolute right-3 bottom-3 rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-semibold text-white">Before</span>
               <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderPos}%` }}>
                 <img src={currentPreview.output_url} alt="Room with curtain" className="absolute inset-0 h-full w-full max-w-none object-cover" style={{ width: '100%', height: '100%' }} />
-                <span className="absolute bottom-3 left-3 rounded-full bg-[var(--color-accent)] px-2.5 py-1 text-[11px] font-semibold text-white">With your curtain · {providerLabel(currentPreview.provider_used)}</span>
+                <span className="absolute bottom-3 left-3 rounded-full bg-[var(--color-accent)] px-2.5 py-1 text-[11px] font-semibold text-white">With your curtain</span>
               </div>
               <div className="pointer-events-none absolute top-0 bottom-0 w-0.5 bg-white shadow-xl" style={{ left: `${sliderPos}%` }}>
                 <div className="absolute top-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--color-border-subtle)] bg-white text-xs font-bold text-[var(--color-accent)] shadow-lg">↔</div>
@@ -324,7 +324,27 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
               <label className="btn btn-ghost cursor-pointer">Choose another photo<input type="file" accept="image/*" className="hidden" onChange={chooseRoomFile} /></label>
               <button type="button" onClick={handleStage} className="btn btn-primary"><Sparkles className="h-3.5 w-3.5" /> Stage curtain in this room</button>
             </div>
-            <p className="text-[11px] text-[var(--color-text-tertiary)]">Uses 1 monthly render · staged with {providerLabel(modelConfig.room_preview_provider)}.</p>
+            <p className="text-[11px] text-[var(--color-text-tertiary)]">Uses 1 monthly render.</p>
+          </div>
+        </div>
+      )}
+
+      {reviewStage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1A1814]/45 p-4 backdrop-blur-sm">
+          <div role="dialog" aria-label="Review staging" className="brand-card w-full max-w-2xl space-y-4 p-5">
+            <div>
+              <p className="eyebrow-label">Needs review</p>
+              <h3 className="mt-0.5 font-display text-[18px] font-semibold">No staging option passed the quality check</h3>
+              <p className="text-[13px] text-[var(--color-text-secondary)]">This is the best of {reviewStage.job.result!.candidates.length}. Keep it, or try again.</p>
+            </div>
+            <div className="media-frame aspect-[16/10] rounded-[14px]"><img src={reviewStage.job.result!.finalImage} alt="Best staging option" className="h-full w-full object-cover" /></div>
+            <ul className="space-y-1 text-[12px] text-[var(--color-text-secondary)]">
+              {reviewStage.job.result!.candidates.find((c) => c.id === reviewStage.job.result!.chosenId)?.scores.filter((s) => s.score < 6).map((s) => <li key={s.key}>{s.key.replace(/_/g, ' ')}: {s.reason}</li>)}
+            </ul>
+            <div className="flex items-center justify-end gap-2">
+              <button type="button" onClick={() => { const r = reviewStage; setReviewStage(null); setPendingRoom({ source: r.source, photo: r.photo }); }} className="btn btn-ghost">Rerun</button>
+              <button type="button" onClick={acceptReviewStage} className="btn btn-primary">Accept</button>
+            </div>
           </div>
         </div>
       )}
