@@ -2,8 +2,8 @@
 // /api/auth (login, invites), /api/admin (brands, invites), /api/data (per-brand documents).
 import express from 'express';
 import { z } from 'zod';
-import { Db, COLLECTIONS, Collection, createBrand, getBrand, listBrands, listDocuments, putDocument, deleteDocument, updateBrand } from './db';
-import { AuthedRequest, acceptInvite, clearSessionCookie, createInvite, createSession, deleteSession, getInviteStatus, login, publicBrand, publicUser, requireAdmin, requireUser, setSessionCookie } from './auth';
+import { Db, COLLECTIONS, Collection, createBrand, getBrand, listBrands, listBrandUsers, listDocuments, putDocument, deleteDocument, updateBrand, getUserByEmail, insertUser } from './db';
+import { AuthedRequest, acceptInvite, clearSessionCookie, createInvite, createSession, deleteSession, getInviteStatus, hashPassword, login, publicBrand, publicUser, requireAdmin, requireUser, setSessionCookie } from './auth';
 import { externalizeImages } from './imageStore';
 
 export function createAuthRouter(db: Db): express.Router {
@@ -56,7 +56,7 @@ export function createAdminRouter(db: Db, opts: { appUrl?: () => string } = {}):
   r.use(requireAdmin);
 
   r.get('/brands', (_req, res) => {
-    res.json({ brands: listBrands(db).map((b) => ({ ...publicBrand(b), user_count: b.user_count })) });
+    res.json({ brands: listBrands(db).map((b) => ({ ...publicBrand(b), user_count: b.user_count, users: listBrandUsers(db, b.id) })) });
   });
 
   r.post('/brands', (req, res) => {
@@ -71,6 +71,16 @@ export function createAdminRouter(db: Db, opts: { appUrl?: () => string } = {}):
     const b = updateBrand(db, req.params.id, parsed.data);
     if (!b) return res.status(404).json({ error: 'Brand not found.' });
     res.json({ brand: publicBrand(b) });
+  });
+
+  /** Direct account creation: the admin sets the password and hands it over. */
+  r.post('/brands/:id/users', (req: AuthedRequest, res) => {
+    const parsed = z.object({ email: z.string().email(), name: z.string().min(1), password: z.string().min(8) }).safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: 'Enter a name, a valid email and a password of at least 8 characters.' });
+    if (!getBrand(db, req.params.id)) return res.status(404).json({ error: 'Brand not found.' });
+    if (getUserByEmail(db, parsed.data.email)) return res.status(409).json({ error: 'An account with this email already exists.' });
+    const user = insertUser(db, { email: parsed.data.email, name: parsed.data.name, password_hash: hashPassword(parsed.data.password), role: 'brand', brand_id: req.params.id });
+    res.status(201).json({ user: publicUser(user) });
   });
 
   r.post('/brands/:id/invites', (req: AuthedRequest, res) => {

@@ -143,7 +143,7 @@ export const useBrandStore = create<BrandStoreState>((set, get) => {
       currentUser: info.user,
       brands: brand ? [brand] : [],
       currentBrandId: brand?.id || '',
-      activeView: isAdmin ? 'platform_admin' : 'dashboard',
+      activeView: brand ? 'dashboard' : isAdmin ? 'platform_admin' : 'dashboard',
       activeDesignId: null,
       designs: [],
       brandTemplates: SEEDED_TEMPLATES,

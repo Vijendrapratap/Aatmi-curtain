@@ -139,9 +139,9 @@ docs/superpowers/specs/        design documents (render agent, Generate page)
 
 ## 3. Accounts
 
-- **One brand per login.** A user belongs to exactly one brand, or is a platform admin. The header shows the brand; there is no switching.
-- **Admins create brands and invite users.** There is no public sign-up. On the Brands page an admin creates a brand, then creates an invite for an email address and sends the link it produces (`/invite/<token>`, valid 7 days, single use). The invitee sets a name and password and lands in that brand.
-- **First admin** is created on start-up from `ADMIN_EMAIL` and `ADMIN_PASSWORD` when the database has no admin yet.
+- **One brand per login.** A user belongs to exactly one brand. The header shows the brand; there is no switching. The admin belongs to a home brand too (`ADMIN_BRAND`, default "Aatmi") and lands on Home like everyone else, with an extra **Brands** tab.
+- **Admins create brands and their users.** There is no public sign-up. On the Brands page an admin creates a brand, then either **adds a user** with a password to hand over, or creates an **invite link** (`/invite/<token>`, valid 7 days, single use) so the person sets their own.
+- **Admin credentials come from `.env`.** On every start the server makes `ADMIN_EMAIL` / `ADMIN_PASSWORD` authoritative: it creates that admin or resets its password. Restart the server after changing them.
 - Passwords are hashed with scrypt and a per-user salt. Sessions are random tokens in an `HttpOnly` cookie, 30 days. Suspended brands cannot sign in.
 - A brand's designs, fabrics and uploaded styles are loaded on sign-in and written through on every save; the built-in catalog is merged in as platform defaults. Any data-URL image inside a saved document is moved to the image store before the JSON is written.
 
@@ -153,7 +153,7 @@ Tables: `brands`, `users`, `invites`, `sessions`, `documents(brand_id, collectio
 | --- | --- |
 | `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me` | session |
 | `GET /api/auth/invite/:token`, `POST /api/auth/invite/:token/accept` | invite lookup and acceptance |
-| `GET/POST /api/admin/brands`, `PATCH /api/admin/brands/:id`, `POST /api/admin/brands/:id/invites` | admin only |
+| `GET/POST /api/admin/brands`, `PATCH /api/admin/brands/:id`, `POST /api/admin/brands/:id/users`, `POST /api/admin/brands/:id/invites` | admin only |
 | `GET /api/data/:collection`, `PUT /api/data/:collection/:id`, `DELETE …` | the signed-in user's brand documents (`designs`, `fabrics`, `templates`) |
 
 | Route | Purpose |
@@ -183,7 +183,7 @@ Copy `.env.example` to `.env`.
 | `OPENROUTER_ROOM_VIZ_MODEL` | no | image generation model (default `google/gemini-3-pro-image`) |
 | `OPENROUTER_VISION_MODEL` | no | analysis, window detection and grading (default `google/gemini-2.5-flash`) |
 | `GEMINI_API_KEY`, `GEMINI_IMAGE_MODEL` | no | direct Gemini fallback for the generate stage only |
-| `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` | first start | creates the first admin when no admin exists |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`, `ADMIN_BRAND` | yes | the admin account (created or reset on every start) and its home brand |
 | `DATA_DIR` | no | where the SQLite file and images live (default `./data`) |
 | `APP_URL` | no | public URL used in invite links (default: the request host) |
 

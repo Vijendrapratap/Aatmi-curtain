@@ -33,12 +33,14 @@ export const logoutApi = () => call<{ ok: true }>('POST', '/api/auth/logout');
 export const getInviteApi = (token: string) => call<{ email: string; brandName: string; expiresAt: string }>('GET', `/api/auth/invite/${encodeURIComponent(token)}`);
 export const acceptInviteApi = async (token: string, name: string, password: string) => toSession(await call('POST', `/api/auth/invite/${encodeURIComponent(token)}/accept`, { name, password }));
 
-export interface AdminBrand extends Brand { user_count: number; monthly_generation_cap: number; monthly_generations_used: number }
-const toAdminBrand = (b: any): AdminBrand => ({ ...toBrand(b), user_count: b.user_count ?? 0, monthly_generation_cap: b.monthly_generation_cap ?? 0, monthly_generations_used: b.monthly_generations_used ?? 0 });
+export interface AdminBrandUser { id: string; email: string; name: string; role: string; created_at: string }
+export interface AdminBrand extends Brand { user_count: number; users: AdminBrandUser[]; monthly_generation_cap: number; monthly_generations_used: number }
+const toAdminBrand = (b: any): AdminBrand => ({ ...toBrand(b), user_count: b.user_count ?? 0, users: b.users ?? [], monthly_generation_cap: b.monthly_generation_cap ?? 0, monthly_generations_used: b.monthly_generations_used ?? 0 });
 
 export const listBrandsApi = async () => (await call<{ brands: any[] }>('GET', '/api/admin/brands')).brands.map(toAdminBrand);
 export const createBrandApi = async (name: string, accent?: string) => toAdminBrand((await call<{ brand: any }>('POST', '/api/admin/brands', { name, accent })).brand);
 export const patchBrandApi = async (id: string, patch: { name?: string; status?: 'active' | 'suspended'; accent?: string; monthly_cap?: number }) => toAdminBrand((await call<{ brand: any }>('PATCH', `/api/admin/brands/${id}`, patch)).brand);
+export const createUserApi = (brandId: string, input: { email: string; name: string; password: string }) => call<{ user: any }>('POST', `/api/admin/brands/${brandId}/users`, input);
 export const createInviteApi = (brandId: string, email: string) => call<{ token: string; email: string; url: string; expiresAt: string }>('POST', `/api/admin/brands/${brandId}/invites`, { email });
 
 export type Collection = 'designs' | 'fabrics' | 'templates';

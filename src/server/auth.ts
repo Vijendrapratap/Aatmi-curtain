@@ -2,7 +2,7 @@
 // Passwords (scrypt), sessions (cookie token), invites, and the Express guards.
 import crypto from 'node:crypto';
 import type { Request, Response, NextFunction } from 'express';
-import { Db, UserRow, InviteRow, BrandRow, getUser, getUserByEmail, insertUser, getBrand, countAdmins, now } from './db';
+import { Db, UserRow, InviteRow, BrandRow, getUser, getUserByEmail, insertUser, getBrand, countAdmins, now, createBrand, listBrands } from './db';
 
 export const SESSION_COOKIE = 'aatmi_session';
 export const SESSION_DAYS = 30;
@@ -86,14 +86,18 @@ export function syncAdminFromEnv(db: Db, env: NodeJS.ProcessEnv = process.env): 
   const email = env.ADMIN_EMAIL?.trim().toLowerCase();
   const password = env.ADMIN_PASSWORD;
   if (!email || !password) return { action: 'skipped' };
+  // The admin designs too: they belong to a home brand (ADMIN_BRAND, default "Aatmi"), created on first start.
+  const brandName = (env.ADMIN_BRAND || 'Aatmi').trim();
+  const homeBrand = listBrands(db).find((b) => b.name.toLowerCase() === brandName.toLowerCase()) || createBrand(db, { name: brandName });
   const existing = getUserByEmail(db, email);
   if (!existing) {
-    insertUser(db, { email, name: env.ADMIN_NAME || 'Admin', password_hash: hashPassword(password), role: 'admin', brand_id: null });
+    insertUser(db, { email, name: env.ADMIN_NAME || 'Admin', password_hash: hashPassword(password), role: 'admin', brand_id: homeBrand.id });
     return { action: 'created', email };
   }
-  if (existing.role === 'admin' && verifyPassword(password, existing.password_hash)) return { action: 'unchanged', email };
-  db.prepare("UPDATE users SET password_hash = ?, role = 'admin', brand_id = NULL WHERE id = ?").run(hashPassword(password), existing.id);
-  db.prepare('DELETE FROM sessions WHERE user_id = ?').run(existing.id);
+  const passwordOk = verifyPassword(password, existing.password_hash);
+  if (existing.role === 'admin' && passwordOk && existing.brand_id) return { action: 'unchanged', email };
+  db.prepare("UPDATE users SET password_hash = ?, role = 'admin', brand_id = COALESCE(brand_id, ?) WHERE id = ?").run(passwordOk ? existing.password_hash : hashPassword(password), homeBrand.id, existing.id);
+  if (!passwordOk) db.prepare('DELETE FROM sessions WHERE user_id = ?').run(existing.id);
   return { action: 'updated', email };
 }
 

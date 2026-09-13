@@ -34,6 +34,14 @@ describe('passwords and sessions', () => {
     expect(login(db, 'root@x.io', 'second-pass')?.role).toBe('admin');
     expect(syncAdminFromEnv(db, {} as any).action).toBe('skipped');
   });
+  it('the admin belongs to a home brand so they can design too', () => {
+    const db = createDb(':memory:');
+    syncAdminFromEnv(db, { ADMIN_EMAIL: 'root@x.io', ADMIN_PASSWORD: 'first-pass', ADMIN_BRAND: 'Aatmi' } as any);
+    const admin = login(db, 'root@x.io', 'first-pass')!;
+    expect(admin.brand_id).toBeTruthy();
+    syncAdminFromEnv(db, { ADMIN_EMAIL: 'root@x.io', ADMIN_PASSWORD: 'first-pass', ADMIN_BRAND: 'Aatmi' } as any);
+    expect(createBrand(db, { name: 'Other' }).id).not.toBe(admin.brand_id);
+  });
   it('resolves and expires sessions', () => {
     const db = createDb(':memory:');
     const admin = bootstrapAdmin(db, { ADMIN_EMAIL: 'root@x.io', ADMIN_PASSWORD: 'secret-pass' } as any)!;
@@ -136,6 +144,20 @@ describe('account routes', () => {
     expect((await call('admin', 'GET', '/api/admin/brands')).body.brands.find((b: any) => b.id === brandId).user_count).toBe(1);
   });
 
+  it('admin adds a user with a password directly; that user can sign in', async () => {
+    const brands = (await call('admin', 'GET', '/api/admin/brands')).body.brands;
+    const b = brands.find((x: any) => x.name === 'Maison Test');
+    expect((await call('admin', 'POST', `/api/admin/brands/${b.id}/users`, { email: 'direct@maison.test', name: 'Direct', password: 'short' })).status).toBe(400);
+    const made = await call('admin', 'POST', `/api/admin/brands/${b.id}/users`, { email: 'direct@maison.test', name: 'Direct', password: 'direct-pass-1' });
+    expect(made.status).toBe(201);
+    expect((await call('admin', 'POST', `/api/admin/brands/${b.id}/users`, { email: 'direct@maison.test', name: 'Direct', password: 'direct-pass-1' })).status).toBe(409);
+    const login = await call('direct', 'POST', '/api/auth/login', { email: 'direct@maison.test', password: 'direct-pass-1' });
+    expect(login.status).toBe(200);
+    expect(login.body.brand.id).toBe(b.id);
+    const listed = (await call('admin', 'GET', '/api/admin/brands')).body.brands.find((x: any) => x.id === b.id);
+    expect(listed.users.map((u: any) => u.email)).toContain('direct@maison.test');
+  });
+
   it('brand data is scoped, images are externalized, admins have no brand data', async () => {
     const put = await call('staff', 'PUT', '/api/data/designs/d1', { name: 'Design 1', final_image_url: PNG });
     expect(put.status).toBe(200);
@@ -144,7 +166,7 @@ describe('account routes', () => {
     const list = await call('staff', 'GET', '/api/data/designs');
     expect(list.body.items).toHaveLength(1);
     expect(listDocuments(db, put.body.item.brand_id, 'designs')).toHaveLength(1);
-    expect((await call('admin', 'GET', '/api/data/designs')).status).toBe(403);
+    expect((await call('admin', 'GET', '/api/data/designs')).body.items).toHaveLength(0); // the admin's own brand, empty
     expect((await call('staff', 'GET', '/api/data/nope')).status).toBe(404);
     expect((await call('staff', 'DELETE', '/api/data/designs/d1')).body.deleted).toBe(true);
     expect((await call('staff', 'GET', '/api/data/designs')).body.items).toHaveLength(0);

@@ -88,6 +88,10 @@ export function listBrands(db: Db): Array<BrandRow & { user_count: number }> {
   return db.prepare('SELECT b.*, (SELECT COUNT(*) FROM users u WHERE u.brand_id = b.id) AS user_count FROM brands b ORDER BY b.created_at').all() as unknown as Array<BrandRow & { user_count: number }>;
 }
 
+export function listBrandUsers(db: Db, brandId: string): Array<{ id: string; email: string; name: string; role: string; created_at: string }> {
+  return db.prepare('SELECT id, email, name, role, created_at FROM users WHERE brand_id = ? ORDER BY created_at').all(brandId) as unknown as Array<{ id: string; email: string; name: string; role: string; created_at: string }>;
+}
+
 export function createBrand(db: Db, input: { name: string; accent?: string; monthly_cap?: number }): BrandRow {
   const id = `brand-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
   let slug = slugify(input.name);

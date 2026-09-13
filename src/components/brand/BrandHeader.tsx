@@ -41,16 +41,16 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ onSignOut }) => {
   const used = modelConfig.monthly_generations_used || 0;
   const percentUsed = Math.min(100, Math.round((used / cap) * 100));
 
-  const navItems: Array<{ id: BrandStoreState['activeView']; label: string; icon: typeof Layers; match: (view: string) => boolean }> = isAdmin ? [
-    { id: 'platform_admin', label: 'Brands', icon: Building2, match: (v) => v === 'platform_admin' },
-  ] : [
+  const hasBrand = Boolean(currentBrand);
+  const brandNav: Array<{ id: BrandStoreState['activeView']; label: string; icon: typeof Layers; match: (view: string) => boolean }> = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard, match: (v) => v === 'dashboard' },
     { id: 'editor', label: 'Generate', icon: Sparkles, match: (v) => v === 'editor' },
     { id: 'library_styles', label: 'Library', icon: Layers, match: (v) => v.startsWith('library') },
     { id: 'design_detail', label: 'Designs', icon: FolderKanban, match: (v) => v === 'design_detail' },
   ];
+  const navItems = [...(hasBrand ? brandNav : []), ...(isAdmin ? [{ id: 'platform_admin' as const, label: 'Brands', icon: Building2, match: (v: string) => v === 'platform_admin' }] : [])];
 
-  const canManage = currentUser?.role === 'brand_admin';
+  const canManage = hasBrand && (currentUser?.role === 'brand_admin' || currentUser?.role === 'platform_admin');
 
   useEffect(() => {
     const onPointerDown = (event: MouseEvent) => {
@@ -123,7 +123,7 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ onSignOut }) => {
         </nav>
 
         <div className="flex items-center gap-2">
-          {!isAdmin && <div
+          {hasBrand && <div
             className="hidden items-center gap-2 rounded-[10px] bg-[var(--color-bg-sunken)] px-2.5 py-1.5 md:flex"
             title={`${used} of ${cap} renders used this month`}
             aria-label={`${used} of ${cap} renders used this month`}
@@ -183,7 +183,7 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ onSignOut }) => {
                       Settings
                     </button>
                   )}
-                  {!isAdmin && (
+                  {hasBrand && (
                   <button type="button" className="w-full rounded-[10px] px-3 py-2 text-left text-[13px] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-sunken)]" onClick={() => go('settings_profile')}>
                     Brand profile
                   </button>
