@@ -78,13 +78,30 @@ export function acceptInvite(db: Db, token: string, input: { name: string; passw
   return { user };
 }
 
-/** Creates the first admin from ADMIN_EMAIL / ADMIN_PASSWORD when none exists. */
+/**
+ * Makes ADMIN_EMAIL / ADMIN_PASSWORD authoritative: creates that admin if missing, otherwise
+ * resets its password to the env value (and ensures the admin role). Returns what happened.
+ */
+export function syncAdminFromEnv(db: Db, env: NodeJS.ProcessEnv = process.env): { action: 'created' | 'updated' | 'unchanged' | 'skipped'; email?: string } {
+  const email = env.ADMIN_EMAIL?.trim().toLowerCase();
+  const password = env.ADMIN_PASSWORD;
+  if (!email || !password) return { action: 'skipped' };
+  const existing = getUserByEmail(db, email);
+  if (!existing) {
+    insertUser(db, { email, name: env.ADMIN_NAME || 'Admin', password_hash: hashPassword(password), role: 'admin', brand_id: null });
+    return { action: 'created', email };
+  }
+  if (existing.role === 'admin' && verifyPassword(password, existing.password_hash)) return { action: 'unchanged', email };
+  db.prepare("UPDATE users SET password_hash = ?, role = 'admin', brand_id = NULL WHERE id = ?").run(hashPassword(password), existing.id);
+  db.prepare('DELETE FROM sessions WHERE user_id = ?').run(existing.id);
+  return { action: 'updated', email };
+}
+
+/** Kept for callers that only want the first-admin behaviour. */
 export function bootstrapAdmin(db: Db, env: NodeJS.ProcessEnv = process.env): UserRow | null {
   if (countAdmins(db) > 0) return null;
-  const email = env.ADMIN_EMAIL;
-  const password = env.ADMIN_PASSWORD;
-  if (!email || !password) return null;
-  return insertUser(db, { email, name: env.ADMIN_NAME || 'Admin', password_hash: hashPassword(password), role: 'admin', brand_id: null });
+  const r = syncAdminFromEnv(db, env);
+  return r.action === 'created' ? getUserByEmail(db, r.email!) ?? null : null;
 }
 
 // ---- Express glue

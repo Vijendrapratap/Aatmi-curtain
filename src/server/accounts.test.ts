@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createDb, createBrand, listDocuments } from './db';
-import { hashPassword, verifyPassword, bootstrapAdmin, createSession, getSessionUser, createInvite, acceptInvite, attachUser, getInviteStatus } from './auth';
+import { hashPassword, verifyPassword, bootstrapAdmin, syncAdminFromEnv, login, createSession, getSessionUser, createInvite, acceptInvite, attachUser, getInviteStatus } from './auth';
 import { storeImage, externalizeImages } from './imageStore';
 import { createAuthRouter, createAdminRouter, createDataRouter } from './accountRoutes';
 
@@ -24,6 +24,15 @@ describe('passwords and sessions', () => {
     expect(bootstrapAdmin(db, { ADMIN_EMAIL: 'root@x.io', ADMIN_PASSWORD: 'secret-pass' } as any)?.role).toBe('admin');
     expect(bootstrapAdmin(db, { ADMIN_EMAIL: 'other@x.io', ADMIN_PASSWORD: 'secret-pass' } as any)).toBeNull();
     expect(bootstrapAdmin(createDb(':memory:'), {} as any)).toBeNull();
+  });
+  it('env credentials are authoritative: a changed ADMIN_PASSWORD resets the admin password', () => {
+    const db = createDb(':memory:');
+    expect(syncAdminFromEnv(db, { ADMIN_EMAIL: 'Root@X.io', ADMIN_PASSWORD: 'first-pass' } as any).action).toBe('created');
+    expect(syncAdminFromEnv(db, { ADMIN_EMAIL: 'root@x.io', ADMIN_PASSWORD: 'first-pass' } as any).action).toBe('unchanged');
+    expect(syncAdminFromEnv(db, { ADMIN_EMAIL: 'root@x.io', ADMIN_PASSWORD: 'second-pass' } as any).action).toBe('updated');
+    expect(login(db, 'root@x.io', 'first-pass')).toBeNull();
+    expect(login(db, 'root@x.io', 'second-pass')?.role).toBe('admin');
+    expect(syncAdminFromEnv(db, {} as any).action).toBe('skipped');
   });
   it('resolves and expires sessions', () => {
     const db = createDb(':memory:');

@@ -40,14 +40,15 @@ import { parseBase64Image } from './images';
 import { SERVER_MODEL_CONFIGS, getOrCreateBrandConfig } from './brandConfigs';
 import { createRenderRouter } from './renderAgent/routes';
 import { getDb } from './db';
-import { attachUser, bootstrapAdmin, requireUser } from './auth';
+import { attachUser, syncAdminFromEnv, requireUser } from './auth';
 import { IMAGES_DIR } from './imageStore';
 import { createAuthRouter, createAdminRouter, createDataRouter } from './accountRoutes';
 
 // Accounts: one SQLite file under DATA_DIR; the first admin comes from ADMIN_EMAIL / ADMIN_PASSWORD.
 const db = getDb();
-const firstAdmin = bootstrapAdmin(db);
-if (firstAdmin) console.log(`[accounts] created first admin ${firstAdmin.email}`);
+const adminSync = syncAdminFromEnv(db);
+if (adminSync.action !== 'skipped') console.log(`[accounts] admin ${adminSync.email}: ${adminSync.action} from ADMIN_EMAIL / ADMIN_PASSWORD`);
+else console.warn('[accounts] ADMIN_EMAIL / ADMIN_PASSWORD not set; no admin can sign in until they are');
 apiApp.use(attachUser(db));
 apiApp.use('/images', express.static(IMAGES_DIR, { maxAge: '365d', immutable: true }));
 apiApp.use('/api/auth', createAuthRouter(db));
