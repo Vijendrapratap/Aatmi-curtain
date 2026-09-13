@@ -193,11 +193,11 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
 
       {/* Step 3: Render */}
       <section className="brand-card space-y-4 p-5 sm:p-6">
-        {sectionHeader('design-render', 'Step 3', 'Render', design.render_kind === 'photoreal' ? 'Rendered from your fabric choices and checked for quality.' : 'This is the studio sketch. Render it for the client-ready image.')}
+        {sectionHeader('design-render', 'Step 3', 'Render', design.render_kind === 'photoreal' ? 'Rendered from your fabric choices and checked for quality.' : 'Not rendered yet. Render it for the client-ready image.')}
         <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_260px]">
           <div className="media-frame relative mx-auto aspect-[4/5] w-full max-w-lg rounded-[16px]">
             <img src={design.final_image_url} alt={design.name} className="h-full w-full object-cover" />
-            <span className="badge badge-muted absolute top-3 left-3">{design.render_kind === 'photoreal' ? 'Rendered' : 'Sketch'}</span>
+            <span className="badge badge-muted absolute top-3 left-3">{design.render_kind === 'photoreal' ? 'Rendered' : 'Not rendered'}</span>
             {isRendering && <div className="ai-generation-shimmer pointer-events-none absolute inset-0" />}
           </div>
           <div className="space-y-3">

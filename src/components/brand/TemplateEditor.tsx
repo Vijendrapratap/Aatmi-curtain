@@ -7,7 +7,7 @@ import { useStudioStore } from '../../lib/store';
 import { CurtainTemplate } from '../../types/curtain';
 import { deriveJourney, JourneyStepId } from '../../lib/journey';
 import { buildFabricSwapInput, startRender, pollRender, chooseCandidate, STAGE_COPY, RenderJobView } from '../../lib/renderClient';
-import { renderCurtainOnCanvas, getTemplateRealPhotoUrl } from '../../utils/fabricRenderer';
+import { getTemplateRealPhotoUrl } from '../../utils/fabricRenderer';
 import { JourneyStrip } from '../JourneyStrip';
 import { FabricPickerSheet } from './FabricPickerSheet';
 import { StylePickerModal } from './StylePickerModal';
@@ -33,16 +33,11 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [chosenCandidateId, setChosenCandidateId] = useState<string | null>(null);
   const [isChoosing, setIsChoosing] = useState(false);
-  const [canvasDataUrl, setCanvasDataUrl] = useState('');
-  const [hasCanvasFrame, setHasCanvasFrame] = useState(false);
   const [status, setStatus] = useState<{ kind: 'ok' | 'info'; text: string } | null>(null);
   const [isSaveOpen, setIsSaveOpen] = useState(false);
   const [saveHint, setSaveHint] = useState<string | null>(null);
   const [designName, setDesignName] = useState('');
 
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const offscreenRef = useRef<HTMLCanvasElement | null>(null);
-  const renderSeq = useRef(0);
   const renderAbortRef = useRef<AbortController | null>(null);
   const zonesRailRef = useRef<HTMLDivElement | null>(null);
 
@@ -53,7 +48,6 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
     // A render still in flight belongs to the template we just left.
     renderAbortRef.current?.abort();
     setGeneratedImageUrl(null);
-    setHasCanvasFrame(false);
     setStatus(null);
     setRenderJob(null);
     setChosenCandidateId(null);
@@ -64,32 +58,6 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
   useEffect(() => {
     if (currentTemplate && currentTemplate.id !== selectedTemplateId) selectTemplate(currentTemplate.id, templates);
   }, [currentTemplate?.id, selectedTemplateId]);
-
-  useEffect(() => {
-    if (!currentTemplate) return;
-    const seq = ++renderSeq.current;
-    let cancelled = false;
-    const run = async () => {
-      if (!offscreenRef.current) offscreenRef.current = document.createElement('canvas');
-      const offscreen = offscreenRef.current;
-      try {
-        const dataUrl = await renderCurtainOnCanvas(offscreen, currentTemplate, assignments, scopedFabrics, { width: 800, height: 1000 });
-        if (cancelled || seq !== renderSeq.current) return;
-        const visible = canvasRef.current;
-        const ctx = visible?.getContext('2d');
-        if (!visible || !ctx) return;
-        if (visible.width !== offscreen.width) visible.width = offscreen.width;
-        if (visible.height !== offscreen.height) visible.height = offscreen.height;
-        ctx.drawImage(offscreen, 0, 0);
-        setHasCanvasFrame(true);
-        setCanvasDataUrl((prev) => (prev === dataUrl ? prev : dataUrl));
-      } catch (e) {
-        console.error('Preview render error:', e);
-      }
-    };
-    run();
-    return () => { cancelled = true; };
-  }, [currentTemplate, assignments, scopedFabrics]);
 
   const plateUrl = useMemo(() => (currentTemplate ? getTemplateRealPhotoUrl(currentTemplate, 800, 1000) : ''), [currentTemplate?.id]);
 
@@ -168,7 +136,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
 
   const handleConfirmSave = () => {
     if (!currentTemplate) return;
-    const finalUrl = generatedImageUrl || canvasDataUrl || currentTemplate.original_image_url;
+    const finalUrl = generatedImageUrl || plateUrl || currentTemplate.original_image_url;
     const design = saveDesign({
       brand_id: currentBrandId,
       template_id: currentTemplate.id,
@@ -316,9 +284,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
 
         <section className="relative flex min-h-[420px] min-w-0 items-center justify-center overflow-hidden rounded-[18px] bg-[var(--color-bg-sunken)] p-4 shadow-[var(--shadow-card)] lg:min-h-0">
           <div className="studio-stage media-frame overflow-hidden rounded-[16px] bg-[var(--color-bg-surface)]">
-            {plateUrl && !hasCanvasFrame && !generatedImageUrl && <img src={plateUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />}
-            <canvas ref={canvasRef} width={800} height={1000} className={`relative h-full w-full object-contain ${generatedImageUrl ? 'hidden' : 'block'} ${isGenerating ? 'opacity-60' : ''}`} />
-            {generatedImageUrl && <img src={generatedImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />}
+            <img src={generatedImageUrl || plateUrl} alt="" className={`relative h-full w-full object-cover ${isGenerating ? 'opacity-60' : ''}`} />
             <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               {regions.map((region) => {
                 const isSelected = region.id === activeRegionId;
@@ -343,10 +309,34 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
                 );
               })}
             </svg>
+            {!generatedImageUrl && regions.map((region) => {
+              const assignment = assignments.find((a) => a.region_id === region.id);
+              const fabric = scopedFabrics.find((f) => f.id === assignment?.fabric_id);
+              const xs = region.polygon_coords.map((p) => p.x);
+              const ys = region.polygon_coords.map((p) => p.y);
+              const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
+              const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+              const isSelected = region.id === activeRegionId;
+              return (
+                <button
+                  key={`chip-${region.id}`}
+                  type="button"
+                  onClick={() => handleSelectRegion(region.id)}
+                  onMouseEnter={() => setHoveredRegionId(region.id)}
+                  onMouseLeave={() => setHoveredRegionId(null)}
+                  style={{ left: `${cx}%`, top: `${cy}%` }}
+                  title={`${region.display_name}: ${fabric ? fabric.name : 'no fabric yet'}`}
+                  className={`absolute flex max-w-[45%] -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full bg-[var(--color-bg-surface)]/95 py-1 pr-2.5 pl-1 text-[11px] font-semibold shadow-[var(--shadow-ring)] ${isSelected ? 'ring-2 ring-[var(--color-accent)]' : ''}`}
+                >
+                  {fabric ? <img src={fabric.image_url} alt="" className="h-5 w-5 shrink-0 rounded-full object-cover" /> : <span className="h-5 w-5 shrink-0 rounded-full border border-dashed border-[var(--color-text-tertiary)]" />}
+                  <span className="truncate">{fabric ? fabric.name : 'Choose a fabric'}</span>
+                </button>
+              );
+            })}
             {isGenerating && <div className="ai-generation-shimmer pointer-events-none absolute inset-0" />}
             <div className="absolute right-3 bottom-3 left-3 flex items-end justify-between gap-2">
-              <span className="badge badge-muted" title={generatedImageUrl ? 'Made by the AI model from your fabrics and checked for quality. This is what clients see.' : 'Instant sketch drawn by the studio. Press Render for the client-ready image.'}>
-                {generatedImageUrl ? (renderJob?.status === 'needs_review' ? 'Rendered · needs review' : 'Rendered') : 'Sketch'}
+              <span className="badge badge-muted" title={generatedImageUrl ? 'Made by the AI model from your fabrics and checked for quality. This is what clients see.' : 'The curtain photo with your fabric choices marked. Press Render for the client-ready image.'}>
+                {generatedImageUrl ? (renderJob?.status === 'needs_review' ? 'Rendered · needs review' : 'Rendered') : 'Not rendered yet'}
               </span>
               <button type="button" className="compact-only rounded-[8px] bg-[var(--color-bg-surface)] px-3 py-1.5 text-[12px] font-semibold shadow-[var(--shadow-ring)]" onClick={() => setIsPickerSheetOpen(true)}>
                 {activeRegion ? `Fabric for ${activeRegion.display_name}` : 'Choose a fabric'}
