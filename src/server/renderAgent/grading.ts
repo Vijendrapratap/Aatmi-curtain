@@ -3,6 +3,9 @@ import type { GradeItem, RenderJobKind } from './types';
 import { RetryableError } from './errors';
 
 export const MIN_ITEM_SCORE = 6;
+/** Stricter floors for items that decide whether the job did what was asked. */
+export const ITEM_MIN: Record<string, number> = { target_zones: 7, window_mounted: 7 };
+export const itemMin = (key: string) => ITEM_MIN[key] ?? MIN_ITEM_SCORE;
 export const MIN_TOTAL_SCORE = 35;
 
 const SHARED = [
@@ -13,7 +16,7 @@ const SHARED = [
 
 export const RUBRICS: Record<RenderJobKind, Array<{ key: string; question: string }>> = {
   fabric_swap: [
-    { key: 'target_zones', question: 'Is the intended fabric on the intended zones, and nowhere else?' },
+    { key: 'target_zones', question: 'Is the intended fabric applied to the ENTIRE intended area, edge to edge including corners and every part of a band, with no trace of the old fabric left, and nowhere else? Use the close-up images.' },
     { key: 'other_zones_unchanged', question: 'Does every zone that was not meant to change keep its original colour and pattern?' },
     ...SHARED,
   ],
@@ -26,15 +29,19 @@ export const RUBRICS: Record<RenderJobKind, Array<{ key: string; question: strin
 
 export function buildGradePrompt(
   kind: RenderJobKind,
-  context: { changes?: Array<{ zoneName: string; fabricName: string }>; relitAs?: string }
+  context: { changes?: Array<{ zoneName: string; fabricName: string }>; relitAs?: string; crops?: number }
 ): { text: string } {
   const changes = context.changes ?? [];
+  const crops = context.crops ?? 0;
+  const base = kind === 'fabric_swap' ? changes.length + 2 : 3;
+  const cropLegend = Array.from({ length: crops }, (_, i) => `Image ${base + 1 + i}: close-up of ${changes[i] ? `the ${changes[i].zoneName}` : `changed area ${i + 1}`} in the candidate; check that the new fabric fills it completely.`);
   const legend =
     kind === 'fabric_swap'
       ? ['Image 1: the original curtain photograph.']
           .concat(changes.map((c, i) => `Image ${i + 2}: swatch of ${c.fabricName}.`))
-          .concat([`Image ${changes.length + 2}: the candidate render to grade.`])
-      : ['Image 1: the original room photograph.', 'Image 2: the curtain design that should be hung.', 'Image 3: the candidate render to grade.'];
+          .concat([`Image ${base}: the candidate render to grade.`])
+          .concat(cropLegend)
+      : ['Image 1: the original room photograph.', 'Image 2: the curtain design that should be hung.', 'Image 3: the candidate render to grade.'].concat(cropLegend);
   const expectation =
     kind === 'fabric_swap'
       ? changes.map((c, i) => `${c.zoneName} should now show ${c.fabricName} (Image ${i + 2}).`).join(' ')
@@ -51,8 +58,8 @@ export function buildGradePrompt(
   return { text };
 }
 
-export function gradeImages(_kind: RenderJobKind, original: string, swatches: string[], candidate: string): string[] {
-  return [original, ...swatches, candidate];
+export function gradeImages(_kind: RenderJobKind, original: string, swatches: string[], candidate: string, crops: string[] = []): string[] {
+  return [original, ...swatches, candidate, ...crops];
 }
 
 export function parseGrade(raw: string, kind: RenderJobKind): GradeItem[] {
@@ -77,11 +84,11 @@ export function total(items: GradeItem[]): number {
 }
 
 export function passes(items: GradeItem[]): boolean {
-  return items.every((i) => i.score >= MIN_ITEM_SCORE) && total(items) >= MIN_TOTAL_SCORE;
+  return items.every((i) => i.score >= itemMin(i.key)) && total(items) >= MIN_TOTAL_SCORE;
 }
 
 export function reasonsBelowThreshold(items: GradeItem[]): string[] {
-  return items.filter((i) => i.score < MIN_ITEM_SCORE).map((i) => `${i.key}: ${i.reason}`);
+  return items.filter((i) => i.score < itemMin(i.key)).map((i) => `${i.key}: ${i.reason}`);
 }
 
 /**

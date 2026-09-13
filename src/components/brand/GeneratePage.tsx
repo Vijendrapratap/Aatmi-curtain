@@ -7,6 +7,7 @@ import { useStudioStore } from '../../lib/store';
 import { CurtainTemplate, Fabric } from '../../types/curtain';
 import { startRender, pollRender, chooseCandidate, toDataUrl, STAGE_COPY, RenderJobView, LIGHTING_OPTIONS, Lighting } from '../../lib/renderClient';
 import { CameraCaptureModal } from './CameraCaptureModal';
+import { areaAnchors } from '../../lib/areaGeometry';
 import { StylePickerModal } from './StylePickerModal';
 
 interface Area {
@@ -62,11 +63,6 @@ function areasFromTemplate(t: CurtainTemplate): Area[] {
   return t.regions.map((r) => ({ id: r.id, name: r.display_name, description: r.description, location: r.location, polygon: r.polygon_coords }));
 }
 
-function centreOf(polygon: Array<{ x: number; y: number }>) {
-  const xs = polygon.map((p) => p.x);
-  const ys = polygon.map((p) => p.y);
-  return { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 };
-}
 
 export const GeneratePage: React.FC = () => {
   const { brandTemplates, brandFabrics, currentBrandId, saveDesign, updateDesign, addBrandFabric, setActiveDesignId, setActiveView } = useBrandStore();
@@ -357,7 +353,7 @@ export const GeneratePage: React.FC = () => {
             <div className="relative overflow-hidden rounded-[14px] bg-[var(--color-bg-sunken)]">
               <img src={design.image} alt={design.name} className="block h-auto w-full" />
               {design.areas.map((a, i) => {
-                const c = centreOf(a.polygon);
+                const c = areaAnchors(design.areas.map((z) => z.polygon))[i];
                 const f = slots[a.id];
                 return (
                   <button key={a.id} type="button" onClick={() => setPickerFor(a.id)} style={{ left: `${c.x}%`, top: `${c.y}%` }} title={`${a.name}${f ? `: ${f.name}` : ''}`} className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full bg-[var(--color-bg-surface)]/95 py-1 pr-2.5 pl-1 text-[11px] font-semibold shadow-[var(--shadow-ring)] ${pickerFor === a.id ? 'ring-2 ring-[var(--color-accent)]' : ''}`}>

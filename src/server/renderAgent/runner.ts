@@ -7,6 +7,7 @@ import { buildFabricSwapPrompt, buildRoomStagePrompt, closestAspectRatio, isReli
 import { buildGradePrompt, gradeImages, parseGrade, passes, total, retryFeedback } from './grading';
 import { getImageSize, polygonMaskPng, bboxMaskPng, lockOutsideMask } from './lock';
 import { withRetry, FatalError } from './errors';
+import { drawAreaGuide, cropArea } from './guide';
 
 export const CANDIDATES_PER_ROUND = 1; // default; the request may ask for up to 3
 export const MAX_CANDIDATES = 3;
@@ -80,7 +81,10 @@ export async function runRenderJob(job: RenderJob, partial: Partial<RunnerDeps> 
       ? { changes: job.input.changes.map((c) => ({ zoneName: zones.find((z) => z.id === c.regionId)?.display_name ?? c.regionId, fabricName: c.fabricName })) }
       : {};
     const relitAs = isRelit(job.input.lighting) ? LIGHTING_TEXT[job.input.lighting] : undefined;
-    const gradePrompt = buildGradePrompt(job.kind, { ...gradeContext, relitAs }).text;
+    const changedZones = job.input.kind === 'fabric_swap' ? job.input.changes.map((c) => (job.input as any).zones.find((z: any) => z.id === c.regionId)).filter(Boolean) : [];
+    const gradePrompt = buildGradePrompt(job.kind, { ...gradeContext, relitAs, crops: changedZones.length }).text;
+    // The model sees the areas, not just their names: Image 2 is the photo with outlines and numbers.
+    const guide = job.input.kind === 'fabric_swap' ? await drawAreaGuide(original, job.input.zones) : undefined;
 
     const relit = isRelit(job.input.lighting);
     const mask = relit ? '' : await buildMask(job, width, height);
@@ -91,7 +95,7 @@ export async function runRenderJob(job: RenderJob, partial: Partial<RunnerDeps> 
     for (let round = 1; round <= MAX_ROUNDS; round++) {
       update({ round, stage: 'prompt' });
       const prompt: BuiltPrompt = job.input.kind === 'fabric_swap'
-        ? buildFabricSwapPrompt(job.input, previousProblems)
+        ? buildFabricSwapPrompt(job.input, previousProblems, guide)
         : buildRoomStagePrompt(job.input, windowBbox!, previousProblems);
       lastPrompt = prompt;
 
@@ -108,9 +112,10 @@ export async function runRenderJob(job: RenderJob, partial: Partial<RunnerDeps> 
       for (const f of generateFailures) console.warn('Render candidate failed to generate:', f.reason?.message || f.reason);
 
       update({ stage: 'grade' });
+      const cropsByImage = await Promise.all(images.map((image) => Promise.all(changedZones.map((z: any) => cropArea(image, z)))));
       const gradeSettled = await Promise.allSettled(
         images.map(async (image, i): Promise<Candidate> => {
-          const scores = await retry(async () => parseGrade(await deps.ask({ prompt: gradePrompt, images: gradeImages(job.kind, original, swatches, image), apiKey: job.apiKey }), job.kind));
+          const scores = await retry(async () => parseGrade(await deps.ask({ prompt: gradePrompt, images: gradeImages(job.kind, original, swatches, image, cropsByImage[i]), apiKey: job.apiKey }), job.kind));
           return { id: `${job.id}-r${round}-c${i + 1}`, round, image, scores, total: total(scores), passed: passes(scores) };
         })
       );

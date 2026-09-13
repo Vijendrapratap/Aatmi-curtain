@@ -40,7 +40,7 @@ describe('runRenderJob fabric_swap', () => {
     expect(out.candidates).toHaveLength(3);
     expect(out.result).not.toHaveProperty('candidates');
     expect(out.result?.chosenId).toBe(out.candidates[0].id);
-    expect(out.result?.prompt).toContain('Replace the Top');
+    expect(out.result?.prompt).toContain('the Top');
     expect(stages).toEqual(expect.arrayContaining(['generate', 'grade', 'lock', 'store']));
     // seeds differ per candidate
     const seeds = generate.mock.calls.map((c: any) => c[0].seed);

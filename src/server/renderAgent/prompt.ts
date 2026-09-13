@@ -1,5 +1,6 @@
 // src/server/renderAgent/prompt.ts
 import type { BuiltPrompt, FabricSwapInput, RoomStageInput, Bbox, ZoneInput, Lighting } from './types';
+import { describeExtent } from '../../lib/areaGeometry';
 
 export const LIGHTING_TEXT: Record<Exclude<Lighting, 'as_photographed'>, string> = {
   daylight: 'bright natural daylight from the window, soft neutral shadows',
@@ -16,7 +17,7 @@ const PRESERVE_TAIL =
   'Keep the rod, wall, floor, window and everything outside the curtain exactly as in Image 1. No text, no watermark, no added objects, no change of camera angle or crop.';
 
 function zoneLabel(z: ZoneInput): string {
-  return `${z.display_name} (${z.description}; ${z.location})`;
+  return `${z.display_name} (${z.description}; ${z.location}; ${describeExtent(z.polygon_coords)})`;
 }
 
 function problemsTail(previousProblems?: string[]): string {
@@ -24,7 +25,11 @@ function problemsTail(previousProblems?: string[]): string {
   return `\n\nPrevious attempt problems, avoid these: ${previousProblems.join('; ')}.`;
 }
 
-export function buildFabricSwapPrompt(input: FabricSwapInput, previousProblems?: string[]): BuiltPrompt {
+/**
+ * @param guide optional data URL of Image 1 with every area outlined and numbered (1..n in zone order).
+ *              When present it is sent as Image 2 and the swatches shift to Image 3 onwards.
+ */
+export function buildFabricSwapPrompt(input: FabricSwapInput, previousProblems?: string[], guide?: string): BuiltPrompt {
   const zoneById = new Map(input.zones.map((z) => [z.id, z]));
   const changed = input.changes.map((c) => {
     const zone = zoneById.get(c.regionId);
@@ -33,15 +38,18 @@ export function buildFabricSwapPrompt(input: FabricSwapInput, previousProblems?:
   });
   const untouched = input.zones.filter((z) => !input.changes.some((c) => c.regionId === z.id));
 
+  const offset = guide ? 3 : 2; // first swatch image number
+  const numberOf = (zone: ZoneInput) => input.zones.indexOf(zone) + 1;
   const legend = ['Image 1: the curtain photograph.']
-    .concat(changed.map(({ zone }, i) => `Image ${i + 2}: fabric for the ${zone.display_name}.`))
+    .concat(guide ? ['Image 2: the same photograph with every area outlined in colour and numbered; the numbers below refer to these outlines.'] : [])
+    .concat(changed.map(({ zone }, i) => `Image ${i + offset}: fabric for ${guide ? `area ${numberOf(zone)}, the ` : 'the '}${zone.display_name}.`))
     .join('\n');
 
   const relit = isRelit(input.lighting);
   const lightLine = relit ? 'Light the fabric consistently with the new lighting described below.' : 'Keep the original lighting, shadows and highlights.';
   const instructions = changed
     .map(({ change, zone }, i) =>
-      `Replace the ${zoneLabel(zone)} entirely with the fabric in Image ${i + 2} (${change.fabricName}, ${change.weave}, colour ${change.colorHex}). The fabric must fall into the existing pleats and folds. Pattern repeat about 1/20 of the curtain height. ${lightLine}`
+      `Replace ${guide ? `area ${numberOf(zone)} (outlined in Image 2), the ` : 'the '}${zoneLabel(zone)} entirely with the fabric in Image ${i + offset} (${change.fabricName}, ${change.weave}, colour ${change.colorHex}). Cover the whole area edge to edge, including corners and every part of the band, leaving none of the old fabric visible. The fabric must fall into the existing pleats and folds. Pattern repeat about 1/20 of the curtain height. ${lightLine}`
     )
     .join('\n\n');
 
@@ -59,7 +67,7 @@ export function buildFabricSwapPrompt(input: FabricSwapInput, previousProblems?:
     `${legend}\n\n${instructions}\n\n${untouchedClause}${relightClause}${preserve}` +
     problemsTail(previousProblems);
 
-  return { text, images: [input.templatePhoto, ...changed.map(({ change }) => change.swatch)] };
+  return { text, images: [input.templatePhoto, ...(guide ? [guide] : []), ...changed.map(({ change }) => change.swatch)] };
 }
 
 export function buildRoomStagePrompt(input: RoomStageInput, windowBbox: Bbox, previousProblems?: string[]): BuiltPrompt {

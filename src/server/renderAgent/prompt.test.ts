@@ -13,9 +13,9 @@ const base: FabricSwapInput = {
   templateName: 'Velvet & Houndstooth',
   templatePhoto: PHOTO,
   zones: [
-    { id: 'top', display_name: 'Upper header', description: 'deeply pleated upper band', location: 'upper half, 0% to 50% height', polygon_coords: [] },
-    { id: 'mid', display_name: 'Transition band', description: 'narrow horizontal satin band', location: '50% to 57.5% height', polygon_coords: [] },
-    { id: 'skirt', display_name: 'Lower skirt', description: 'houndstooth skirt', location: '57.5% to 96% height', polygon_coords: [] },
+    { id: 'top', display_name: 'Upper header', description: 'deeply pleated upper band', location: 'upper half, 0% to 50% height', polygon_coords: [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 50 }, { x: 0, y: 50 }] },
+    { id: 'mid', display_name: 'Transition band', description: 'narrow horizontal satin band', location: '50% to 57.5% height', polygon_coords: [{ x: 0, y: 50 }, { x: 100, y: 50 }, { x: 100, y: 57.5 }, { x: 0, y: 57.5 }] },
+    { id: 'skirt', display_name: 'Lower skirt', description: 'houndstooth skirt', location: '57.5% to 96% height', polygon_coords: [{ x: 0, y: 57.5 }, { x: 100, y: 57.5 }, { x: 100, y: 96 }, { x: 0, y: 96 }] },
   ],
   changes: [
     { regionId: 'top', fabricName: 'Denim Floral', weave: 'printed denim', colorHex: '#3b4a6b', category: 'Geometric', swatch: SWATCH_A },
@@ -35,9 +35,9 @@ describe('buildFabricSwapPrompt', () => {
 Image 1: the curtain photograph.
 Image 2: fabric for the Upper header.
 
-Replace the Upper header (deeply pleated upper band; upper half, 0% to 50% height) entirely with the fabric in Image 2 (Denim Floral, printed denim, colour #3b4a6b). The fabric must fall into the existing pleats and folds. Pattern repeat about 1/20 of the curtain height. Keep the original lighting, shadows and highlights.
+Replace the Upper header (deeply pleated upper band; upper half, 0% to 50% height; covers roughly x 0–100%, y 0–50% of the image) entirely with the fabric in Image 2 (Denim Floral, printed denim, colour #3b4a6b). Cover the whole area edge to edge, including corners and every part of the band, leaving none of the old fabric visible. The fabric must fall into the existing pleats and folds. Pattern repeat about 1/20 of the curtain height. Keep the original lighting, shadows and highlights.
 
-Leave these zones exactly as they are in Image 1: Transition band (narrow horizontal satin band; 50% to 57.5% height); Lower skirt (houndstooth skirt; 57.5% to 96% height).
+Leave these zones exactly as they are in Image 1: Transition band (narrow horizontal satin band; 50% to 57.5% height; covers roughly x 0–100%, y 50–58% of the image); Lower skirt (houndstooth skirt; 57.5% to 96% height; covers roughly x 0–100%, y 58–96% of the image).
 Keep the rod, wall, floor, window and everything outside the curtain exactly as in Image 1. No text, no watermark, no added objects, no change of camera angle or crop.`
     );
   });
@@ -51,6 +51,17 @@ Keep the rod, wall, floor, window and everything outside the curtain exactly as 
   });
   it('throws when a change references an unknown zone', () => {
     expect(() => buildFabricSwapPrompt({ ...base, changes: [{ ...base.changes[0], regionId: 'nope' }] })).toThrow(/unknown zone/i);
+  });
+});
+
+describe('guide image', () => {
+  it('sends the guide as Image 2, shifts swatches to Image 3, and refers to numbered areas', () => {
+    const p = buildFabricSwapPrompt(base, undefined, 'data:image/png;base64,GUIDE');
+    expect(p.images).toEqual([PHOTO, 'data:image/png;base64,GUIDE', SWATCH_A]);
+    expect(p.text).toContain('Image 2: the same photograph with every area outlined in colour and numbered');
+    expect(p.text).toContain('Image 3: fabric for area 1, the Upper header.');
+    expect(p.text).toContain('Replace area 1 (outlined in Image 2), the Upper header');
+    expect(p.text).toContain('fabric in Image 3 (Denim Floral');
   });
 });
 

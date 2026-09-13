@@ -1019,7 +1019,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         name: 'center_ivory_field',
         display_name: 'Centre field',
         description: 'Soft off-white ivory cream velvet center drapery field.',
-        location: 'Center body inside border frame (5% to 75% width, 0% to 75% height)',
+        location: 'Ivory field: x 3–74%, y 0–83% of the photo',
         order: 1,
         stencil_type: 'color_block',
         suggested_sam_prompt: 'ivory cream soft velvet main curtain drapery body',
@@ -1027,7 +1027,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         default_color: '#F2ECE1',
         accent_color: '#D4AF37',
         polygon_coords: [
-          { x: 5, y: 0 }, { x: 74, y: 0 }, { x: 74, y: 74 }, { x: 5, y: 74 }
+          { x: 3.5, y: 0 }, { x: 74, y: 0 }, { x: 74, y: 83 }, { x: 3.5, y: 83 }
         ],
       },
       {
@@ -1035,7 +1035,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         name: 'greek_key_ribbon',
         display_name: 'Greek key ribbon',
         description: 'Embroidered geometric Greek key ribbon running along bottom and right edge.',
-        location: 'Inner border framing center field (74% to 82% width & 74% to 82% height)',
+        location: 'Narrow band down the right edge of the field (x 74–82%, full height to 92%) and along its bottom (y 83–92%)',
         order: 2,
         stencil_type: 'frame_border',
         suggested_sam_prompt: 'embroidered greek key geometric ribbon border',
@@ -1043,8 +1043,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         default_color: '#D1BA86',
         accent_color: '#D97706',
         polygon_coords: [
-          { x: 5, y: 74 }, { x: 82, y: 74 }, { x: 82, y: 0 },
-          { x: 74, y: 0 }, { x: 74, y: 82 }, { x: 5, y: 82 }
+          { x: 74, y: 0 }, { x: 82, y: 0 }, { x: 82, y: 92 }, { x: 3.5, y: 92 }, { x: 3.5, y: 83 }, { x: 74, y: 83 }
         ],
       },
       {
@@ -1052,7 +1051,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         name: 'outer_gold_border',
         display_name: 'Outer frame and hem',
         description: 'Wide tailored mustard gold / ochre velvet border framing outer edge and bottom hem.',
-        location: 'Outer perimeter border (82% to 95% width & 82% to 96% height)',
+        location: 'Gold velvet border down the right edge (x 82–100%, full height) and along the bottom (y 92–100%)',
         order: 3,
         stencil_type: 'frame_border',
         suggested_sam_prompt: 'mustard gold ochre velvet outer frame and bottom hem',
@@ -1060,8 +1059,7 @@ export const DEFAULT_TEMPLATES: CurtainTemplate[] = [
         default_color: '#A88428',
         accent_color: '#EAB308',
         polygon_coords: [
-          { x: 5, y: 82 }, { x: 95, y: 82 }, { x: 95, y: 0 },
-          { x: 82, y: 0 }, { x: 82, y: 96 }, { x: 5, y: 96 }
+          { x: 82, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 100 }, { x: 0, y: 100 }, { x: 0, y: 92 }, { x: 82, y: 92 }
         ],
       },
     ],

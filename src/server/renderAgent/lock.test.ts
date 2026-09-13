@@ -22,6 +22,17 @@ describe('polygonMaskPng', () => {
   });
 });
 
+describe('polygonMaskPng dilation', () => {
+  it('grows the mask a little beyond the polygon edge', async () => {
+    const zones = [{ id: 'a', display_name: '', description: '', location: '', polygon_coords: [{ x: 0, y: 0 }, { x: 50, y: 0 }, { x: 50, y: 100 }, { x: 0, y: 100 }] }];
+    const tight = await polygonMaskPng(zones, 100, 100, 0, 0);
+    const grown = await polygonMaskPng(zones, 100, 100, 0, 3);
+    expect((await pixelAt(tight, 52, 50))[0]).toBe(0);
+    expect((await pixelAt(grown, 52, 50))[0]).toBe(255);
+    expect((await pixelAt(grown, 58, 50))[0]).toBe(0);
+  });
+});
+
 describe('bboxMaskPng', () => {
   it('expands the box by the given percent and clamps to the image', async () => {
     const mask = await bboxMaskPng({ x: 40, y: 40, width: 20, height: 20 }, 100, 100, 15, 0);

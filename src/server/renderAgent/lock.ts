@@ -25,10 +25,15 @@ async function rasterizeMaskSvg(svg: string, featherPx: number): Promise<string>
   return toDataUrl(await img.png().toBuffer());
 }
 
-export async function polygonMaskPng(zones: ZoneInput[], width: number, height: number, featherPx = 6): Promise<string> {
+/**
+ * Union of the zone polygons, grown by `dilatePct` of the shorter image side so a slightly loose
+ * polygon never lets the old fabric show through at an area's edge after the lock.
+ */
+export async function polygonMaskPng(zones: ZoneInput[], width: number, height: number, featherPx = 6, dilatePct = 2.5): Promise<string> {
+  const grow = (dilatePct / 100) * Math.min(width, height) * 2; // stroke straddles the edge, so half of it extends outward
   const polys = zones
     .filter((z) => z.polygon_coords && z.polygon_coords.length >= 3)
-    .map((z) => `<polygon fill="white" points="${z.polygon_coords.map((p) => `${(p.x / 100) * width},${(p.y / 100) * height}`).join(' ')}"/>`)
+    .map((z) => `<polygon fill="white" stroke="white" stroke-width="${grow}" stroke-linejoin="round" points="${z.polygon_coords.map((p) => `${(p.x / 100) * width},${(p.y / 100) * height}`).join(' ')}"/>`)
     .join('');
   if (!polys) throw new FatalError('Template has no zone polygons to build a curtain mask from', 'NO_MASK');
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="100%" height="100%" fill="black"/>${polys}</svg>`;

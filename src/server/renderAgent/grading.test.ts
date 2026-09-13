@@ -62,6 +62,18 @@ describe('passes', () => {
     expect(passes(good)).toBe(true);
     expect(total(good)).toBe(40);
   });
+  it('target_zones needs at least 7; other items 6', () => {
+    const items = good.map((g, i) => (i === 0 ? { ...g, score: 6 } : { ...g, score: 8 }));
+    expect(passes(items)).toBe(false);
+    const ok = good.map((g, i) => (i === 0 ? { ...g, score: 7 } : { ...g, score: 8 }));
+    expect(passes(ok)).toBe(true);
+  });
+  it('lists close-up crops after the candidate in the grade prompt and image order', () => {
+    const { text } = buildGradePrompt('fabric_swap', { changes: [{ zoneName: 'Upper header', fabricName: 'Denim Floral' }], crops: 1 });
+    expect(text).toContain('Image 3: the candidate render to grade.');
+    expect(text).toContain('Image 4: close-up of the Upper header in the candidate');
+    expect(gradeImages('fabric_swap', 'o', ['s'], 'c', ['crop'])).toEqual(['o', 's', 'c', 'crop']);
+  });
   it('fails on one item below 6 even with a high total', () => {
     const items = good.map((g, i) => (i === 0 ? { ...g, score: 5 } : { ...g, score: 10 }));
     expect(passes(items)).toBe(false);
