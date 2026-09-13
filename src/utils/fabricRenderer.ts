@@ -5,15 +5,9 @@ import { generateRealisticPlate, drawPhotographicPleats } from './realisticPhoto
  * Returns the authentic high-resolution real photograph data URL for a template
  */
 export function getTemplateRealPhotoUrl(template: CurtainTemplate, width = 800, height = 1000): string {
-  if (template.plate_id) {
-    return generateRealisticPlate(template.plate_id, width, height);
-  }
-  if (template.real_photo_url) {
-    return template.real_photo_url;
-  }
-  if (template.original_image_url && (template.original_image_url.startsWith('data:') || template.original_image_url.startsWith('http'))) {
-    return template.original_image_url;
-  }
+  if (template.real_photo_url) return template.real_photo_url;
+  if (template.original_image_url) return template.original_image_url;
+  if (template.plate_id) return generateRealisticPlate(template.plate_id, width, height);
   return generateRealisticPlate('default', width, height);
 }
 
