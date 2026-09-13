@@ -6,7 +6,7 @@ import { useBrandStore } from '../../lib/brandStore';
 import { useStudioStore } from '../../lib/store';
 import { CurtainTemplate } from '../../types/curtain';
 import { deriveJourney, JourneyStepId } from '../../lib/journey';
-import { generateSequentialRedesign } from '../../utils/maskedPipeline';
+import { buildFabricSwapInput, startRender, pollRender, STAGE_COPY, RenderJobView } from '../../lib/renderClient';
 import { renderCurtainOnCanvas, getTemplateRealPhotoUrl } from '../../utils/fabricRenderer';
 import { JourneyStrip } from '../JourneyStrip';
 import { FabricPickerSheet } from './FabricPickerSheet';
@@ -28,9 +28,10 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
   const [isStylePickerOpen, setIsStylePickerOpen] = useState(false);
   const [isZoneChooserOpen, setIsZoneChooserOpen] = useState(false);
   const [isPickerSheetOpen, setIsPickerSheetOpen] = useState(false);
+  const [renderJob, setRenderJob] = useState<RenderJobView | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generationStepText, setGenerationStepText] = useState('');
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
+  const [chosenCandidateId, setChosenCandidateId] = useState<string | null>(null);
   const [canvasDataUrl, setCanvasDataUrl] = useState('');
   const [hasCanvasFrame, setHasCanvasFrame] = useState(false);
   const [status, setStatus] = useState<{ kind: 'ok' | 'info'; text: string } | null>(null);
@@ -106,35 +107,38 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
     setGeneratedImageUrl(null);
   }, [safeRegions, assignFabricToRegion, assignFabricToAllRegions]);
 
-  const handlePhotoreal = async () => {
+  const handleRender = async () => {
     if (!currentTemplate) return;
+    if (assignments.length === 0) { setStatus({ kind: 'info', text: 'Choose a fabric for at least one zone before rendering.' }); return; }
     setIsGenerating(true);
     setStatus(null);
     setGeneratedImageUrl(null);
+    setRenderJob(null);
     try {
-      const result = await generateSequentialRedesign({
-        template: currentTemplate,
-        assignments,
-        fabrics: scopedFabrics,
-        onStep: (msg) => setGenerationStepText(msg),
-        callEdit: (payload) => fetch('/api/generate-curtain-fabric', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...payload, brandId: currentBrandId, provider: getModelConfig(currentBrandId).region_edit_provider }),
-        }).then((r) => r.json()),
-      });
-      if (result?.imageUrl) {
-        setGeneratedImageUrl(result.imageUrl);
-        setStatus({ kind: 'ok', text: 'Photoreal render ready. Save the design to keep it.' });
-      } else {
-        setStatus({ kind: 'info', text: 'The render finished without an image. Showing the live preview instead.' });
+      const body = await buildFabricSwapInput(currentTemplate, assignments, scopedFabrics, currentBrandId);
+      const jobId = await startRender(body);
+      const job = await pollRender(jobId, setRenderJob);
+      if (job.status === 'failed') {
+        setStatus({ kind: 'info', text: job.error || 'The render did not finish.' });
+      } else if (job.result) {
+        setGeneratedImageUrl(job.result.finalImage);
+        setChosenCandidateId(job.result.chosenId);
+        setStatus(job.status === 'needs_review'
+          ? { kind: 'info', text: 'No option passed the quality check. Showing the best one; accept it or rerun.' }
+          : { kind: 'ok', text: 'Render ready. Save the design to keep it.' });
       }
     } catch (err: any) {
-      setStatus({ kind: 'info', text: `Photoreal render did not finish (${err.message || 'unknown error'}). Showing the live preview instead.` });
+      setStatus({ kind: 'info', text: err.message || 'The render did not finish.' });
     } finally {
       setIsGenerating(false);
-      setGenerationStepText('');
     }
+  };
+
+  const chooseCandidate = (id: string) => {
+    const c = renderJob?.result?.candidates.find((x) => x.id === id);
+    if (!c) return;
+    setChosenCandidateId(id);
+    setGeneratedImageUrl(c.image);
   };
 
   const handleConfirmSave = () => {
@@ -150,6 +154,8 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
       render_kind: generatedImageUrl ? 'photoreal' : 'preview',
       created_by_user_id: 'usr-current',
       room_previews: [],
+      render_candidates: renderJob?.result?.candidates,
+      render_prompt: renderJob?.result?.prompt,
     });
     setIsSaveOpen(false);
     setActiveDesignId(design.id);
@@ -272,7 +278,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
         <section className="relative flex min-h-[420px] min-w-0 items-center justify-center overflow-hidden rounded-[18px] bg-[var(--color-bg-sunken)] p-4 shadow-[var(--shadow-card)] lg:min-h-0">
           <div className="studio-stage media-frame overflow-hidden rounded-[16px] bg-[var(--color-bg-surface)]">
             {plateUrl && !hasCanvasFrame && !generatedImageUrl && <img src={plateUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />}
-            <canvas ref={canvasRef} width={800} height={1000} className={`relative h-full w-full object-contain ${generatedImageUrl ? 'hidden' : 'block'}`} />
+            <canvas ref={canvasRef} width={800} height={1000} className={`relative h-full w-full object-contain ${generatedImageUrl ? 'hidden' : 'block'} ${isGenerating ? 'opacity-60' : ''}`} />
             {generatedImageUrl && <img src={generatedImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />}
             <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               {regions.map((region) => {
@@ -300,15 +306,31 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
             </svg>
             {isGenerating && <div className="ai-generation-shimmer pointer-events-none absolute inset-0" />}
             <div className="absolute right-3 bottom-3 left-3 flex items-end justify-between gap-2">
-              <span className="badge badge-muted" title={generatedImageUrl ? 'Made by the AI model from your fabrics. This is what clients see.' : 'Instant preview drawn by the studio. Create a photoreal render for the final image.'}>
-                {generatedImageUrl ? 'Photoreal render' : 'Live preview'}
+              <span className="badge badge-muted" title={generatedImageUrl ? 'Made by the AI model from your fabrics and checked for quality. This is what clients see.' : 'Instant sketch drawn by the studio. Press Render for the client-ready image.'}>
+                {generatedImageUrl ? (renderJob?.status === 'needs_review' ? 'Rendered · needs review' : 'Rendered') : 'Sketch'}
               </span>
               <button type="button" className="compact-only rounded-[8px] bg-[var(--color-bg-surface)] px-3 py-1.5 text-[12px] font-semibold shadow-[var(--shadow-ring)]" onClick={() => setIsPickerSheetOpen(true)}>
                 {activeRegion ? `Fabric for ${activeRegion.display_name}` : 'Choose a fabric'}
               </button>
             </div>
+            {isGenerating && renderJob && (
+              <div className="absolute top-3 left-3 rounded-[10px] bg-[var(--color-bg-surface)]/90 px-3 py-2 text-[12px] font-semibold shadow-[var(--shadow-ring)]">
+                {STAGE_COPY[renderJob.stage]}{renderJob.round > 1 ? ` · round ${renderJob.round}` : ''}
+              </div>
+            )}
           </div>
         </section>
+
+        {renderJob?.result && renderJob.result.candidates.length > 1 && (
+          <div className="col-span-full flex items-center gap-2 overflow-x-auto px-1 lg:col-start-2 lg:col-end-3">
+            {renderJob.result.candidates.map((c) => (
+              <button key={c.id} type="button" onClick={() => chooseCandidate(c.id)} title={c.scores.map((s) => `${s.key}: ${s.score} — ${s.reason}`).join('\n')} className={`relative h-20 w-16 shrink-0 overflow-hidden rounded-[10px] border-2 ${chosenCandidateId === c.id ? 'border-[var(--color-accent)]' : 'border-transparent opacity-70 hover:opacity-100'}`}>
+                <img src={c.image} alt="" className="h-full w-full object-cover" />
+                <span className={`absolute right-1 bottom-1 rounded-full px-1.5 text-[10px] font-semibold text-white ${c.passed ? 'bg-[#1F6B48]' : 'bg-[#6B5420]'}`}>{c.total}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         <aside className="hidden min-h-0 overflow-hidden lg:flex">
           <FabricPickerSheet
@@ -333,9 +355,9 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
           {firstUnassigned ? <> · next: <button type="button" className="font-semibold text-[var(--color-accent)]" onClick={() => handleSelectRegion(firstUnassigned.id)}>{firstUnassigned.display_name}</button></> : ' · ready to save'}
         </span>
         <div className="flex items-center gap-2">
-          <button type="button" disabled={isGenerating} onClick={handlePhotoreal} className="btn btn-secondary flex-col items-start gap-0 py-1" style={{ height: 'auto', minHeight: 40 }}>
-            <span className="flex items-center gap-2"><Sparkles className={`h-3.5 w-3.5 ${isGenerating ? 'animate-spin' : ''}`} />{isGenerating ? generationStepText || 'Rendering…' : 'Photoreal render'}</span>
-            <span className="studio-action-note">Uses 1 monthly render · about 20s per zone</span>
+          <button type="button" disabled={isGenerating} onClick={handleRender} className="btn btn-secondary flex-col items-start gap-0 py-1" style={{ height: 'auto', minHeight: 40 }}>
+            <span className="flex items-center gap-2"><Sparkles className={`h-3.5 w-3.5 ${isGenerating ? 'animate-spin' : ''}`} />{isGenerating ? (renderJob ? STAGE_COPY[renderJob.stage] : 'Starting…') : renderJob?.status === 'needs_review' ? 'Rerun render' : 'Render'}</span>
+            <span className="studio-action-note">Uses 1 monthly render · about a minute</span>
           </button>
           <button type="button" onClick={() => { setSaveHint(null); setIsSaveOpen(true); }} className="btn btn-primary">
             <Check className="h-3.5 w-3.5" /> Save design <ArrowRight className="h-3.5 w-3.5" />

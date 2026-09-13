@@ -105,7 +105,7 @@ export const BrandDashboard: React.FC<BrandDashboardProps> = ({ onOpenNewStyle }
               <button key={d.id} type="button" onClick={() => openDesign(d.id)} className="brand-card brand-card-interactive overflow-hidden text-left">
                 <div className="media-frame aspect-[4/5]">
                   <img src={d.final_image_url} alt="" className="h-full w-full object-cover" />
-                  <span className="badge badge-muted absolute top-3 left-3">{d.render_kind === 'photoreal' ? 'Photoreal render' : 'Live preview'}</span>
+                  <span className="badge badge-muted absolute top-3 left-3">{d.render_kind === 'photoreal' ? 'Rendered' : 'Sketch'}</span>
                   {d.room_previews.length > 0 && <span className="badge badge-accent absolute top-3 right-3">In room</span>}
                 </div>
                 <div className="p-4">
