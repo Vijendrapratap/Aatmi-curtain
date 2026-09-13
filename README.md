@@ -32,7 +32,7 @@ flowchart LR
     R --> H
 ```
 
-1. **Design in.** Drop a curtain photo or drawing, take a photo, or pick a saved style from the Library. The image is sent to the analyzer, which returns the fabric areas (top band, accent band, skirt, left and right panels, and so on) with a plain-language name, a description and a polygon each. The areas are numbered on the image.
+1. **Design in.** Drop a curtain photo or drawing, take a photo, or pick a saved style from the Library. The image is sent to the analyzer, which returns the fabric areas (top band, accent band, skirt, left and right panels, and so on) with a plain-language name, a description and a polygon each. The areas are numbered on the image, each label at its area's centre and pushed apart when two would overlap.
 2. **Fabrics in.** Each area gets a row with a Choose button. Sources: the catalog (photographed fabrics only), a file upload, or the camera. Areas with the same name (mirrored panels) share one choice. Areas left alone stay exactly as photographed.
 3. **Light.** As photographed (background stays pixel-identical), Daylight, Golden hour, Evening or Night. Anything but "as photographed" relights the whole image, so the pixel lock is skipped and the grader is told not to penalise lighting changes.
 4. **Generate.** One button. About a minute later the best of three variations is shown; the other two can be switched to (a switch is re-locked on the server). **Save** names the result and stores it under Designs; Download gives the full-resolution PNG; every generation is listed in the session history strip.
@@ -78,14 +78,17 @@ flowchart TB
     end
 
     subgraph Pipeline["Render job (runner.ts)"]
-        P["prompt.ts\narea descriptions + lighting → instruction"]
+        GD["guide.ts\nnumbered outline image + per-area crops"]
+        P["prompt.ts\narea descriptions + outline guide + lighting → instruction"]
         WD["windowDetect.ts\n(room_stage only)"]
         GEN["imageClient.generateImage ×3\n(parallel, distinct seeds, 2K)"]
-        GR["grading.ts + imageClient.askVision\n5-item rubric, relight-aware"]
+        GR["grading.ts + imageClient.askVision\n5-item rubric with close-up crops, relight-aware"]
         SEL{"any pass?\n(no item < 6, total ≥ 35)"}
         RETRY["round 2 with grader's complaints\n(max 2 rounds)"]
-        LK["lock.ts (sharp)\ncomposite winner inside the curtain / window mask\nskipped when relit"]
+        LK["lock.ts (sharp)\ncomposite winner inside the dilated curtain / window mask\nskipped when relit"]
         WD --> P
+        GD --> P
+        GD --> GR
         P --> GEN --> GR --> SEL
         SEL -- no --> RETRY --> GEN
         SEL -- yes --> LK
@@ -111,11 +114,12 @@ flowchart TB
 | Stage | Module | What happens |
 | --- | --- | --- |
 | Validate | `routes.ts` | zod-validates the body, requires every image to be a PNG/JPEG/WEBP data URL, resolves the brand's OpenRouter key, enforces the monthly quota (one unit per job), returns `202 { jobId }`. |
-| Prompt | `prompt.ts` | Builds one instruction from the design's areas: an image legend, a "replace area X with the fabric in Image N" line per changed area, and a preservation clause naming every untouched area and the background. |
+| Guide | `guide.ts` | Draws the photo with every area outlined in its own colour and numbered (labels at the area centroids, de-overlapped), and cuts an upscaled close-up of each changed area. Both are made locally with `sharp`; nothing is sent to a model for this. |
+| Prompt | `prompt.ts` | Builds one instruction from the design's areas: an image legend (Image 1 the photo, Image 2 the numbered outline guide, then one swatch per changed area), a "replace area N, outlined in Image 2, … edge to edge" line per changed area with its extent in percent, a preservation clause naming every untouched area and the background, and the lighting clause when the light is changed. |
 | Generate | `imageClient.ts` | One call by default, up to three in parallel with distinct seeds (the page's Variations control), at 2K, aspect ratio matched to the source. Hosted-URL results are downloaded and normalised to data URLs. On a `400` the client falls back once to chat-completions image output. 120 s timeout per call. |
-| Grade | `grading.ts` | A vision model scores each candidate 0–10 on: target areas changed, other areas unchanged, pleats and lighting preserved, no artifacts, likeness to the swatch. Pass = no item below 6 and total ≥ 35. |
+| Grade | `grading.ts` | A vision model sees the original, the swatches, the candidate and a close-up crop of every changed area, and scores 0–10 on: target areas fully covered edge to edge, other areas unchanged, pleats and lighting preserved, no artifacts, likeness to the swatch. Pass = target areas ≥ 7, every other item ≥ 6, total ≥ 35. |
 | Select / retry | `runner.ts` | Highest-scoring pass wins. If none pass, one more round runs with the grader's below-threshold reasons appended to the prompt. After two failed rounds the job ends `needs_review` with the best candidate. A single failed candidate never kills a round (`Promise.allSettled`). |
-| Lock | `lock.ts` | The winner is composited inside a feathered mask (the union of the area polygons; for room staging, the detected window box expanded 20 %) over the original, so the background is pixel-identical. Output is at the larger of the source and candidate resolution. |
+| Lock | `lock.ts` | The winner is composited inside a feathered mask over the original: the union of the area polygons grown by 2.5 % (so a loose polygon cannot reveal old fabric at a seam), or for room staging the detected window box expanded 20 %. Output is at the larger of the source and candidate resolution. Skipped when the light was changed. |
 | Store | `jobs.ts` | Result, prompt and all candidates with scores are kept on the job. In-progress polls omit candidate images; the terminal response includes them. The GET view never carries the API key or the input images. |
 
 **Room staging** is the same job with `kind: 'room_stage'`: a window-detection call first (`windowDetect.ts`, returns a box covering the window and any existing curtains, or a fatal `NO_WINDOW_DETECTED`), then the same generate → grade → lock loop with a room-specific rubric.
@@ -139,13 +143,14 @@ src/
   components/NewTemplateModal.tsx   add a style from a photo (analyzer) or a stencil preset
   pages/SignIn.tsx, pages/InviteAccept.tsx
   lib/
+    areaGeometry.ts            centroids, label de-overlap and extent text, shared by the page and the guide image
     renderClient.ts            browser client for the render job API
     accountClient.ts           browser client for auth, admin and brand data
     brandStore.ts, store.ts    zustand stores (session, brand data with write-through)
   server/
     api.ts                     Express app: mounts auth, admin, data, images, analyzer and /api/render
     db.ts, auth.ts, imageStore.ts, accountRoutes.ts   accounts and persistence
-    renderAgent/               the render pipeline (one file per stage, tests alongside)
+    renderAgent/               the render pipeline (one file per stage, tests alongside; guide.ts makes the outline image and crops)
     openrouter.ts              key resolution and model constants
     images.ts, brandConfigs.ts shared helpers
   types/                       CurtainTemplate, Region, Fabric, Design, RoomPreview
@@ -229,6 +234,7 @@ Tests cover every pipeline stage with real behaviour and only the provider calls
 
 - Only photographed fabrics are offered in the picker; the drawn SVG tiles in the built-in catalog are filtered out because the model cannot reproduce them convincingly.
 - The built-in sample styles are 250–450 px wide. They generate, but a real photo at 1500 px or wider gives a sharper background. Add your own styles through the Library or straight into Generate.
+- Built-in styles carry hand-drawn area polygons in `src/data/defaultCatalog.ts`. Wrong polygons show up as piled-up labels and half-replaced borders; the Greek key style was redrawn from its photo on 2026-09-14, the others have not been audited. To see exactly what the model is told, render the guide with `drawAreaGuide` from `src/server/renderAgent/guide.ts`.
 - The background outside the curtain (or outside the window box, for staging) is guaranteed pixel-identical to the source. A manually chosen runner-up is re-locked on the server before it is shown.
 - A job costs one image generation and one grading call per variation (default 1; up to 3), doubled if a retry round runs. About 25 s per variation.
 - Render jobs are in memory: a server restart drops running jobs. Saved designs, fabrics, styles and accounts persist in `DATA_DIR`; back that directory up.
