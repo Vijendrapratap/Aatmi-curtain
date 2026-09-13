@@ -27,7 +27,7 @@ export const SignIn: React.FC = () => {
     <div className="flex min-h-dvh items-center justify-center bg-[var(--color-bg-base)] p-4 font-sans text-[var(--color-text-primary)]">
       <div className="brand-card w-full max-w-md space-y-5 p-6">
         <div>
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-accent)] text-white"><Sparkles className="h-5 w-5" /></span>
+          <span className="icon-tile"><Sparkles className="h-5 w-5" /></span>
           <p className="eyebrow-label mt-4">Aatmi Curtain Studio</p>
           <h1 className="page-title">Sign in</h1>
           <p className="page-lede">Use the email your admin invited. No account yet? Ask your admin for an invite link.</p>

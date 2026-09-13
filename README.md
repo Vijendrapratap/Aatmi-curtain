@@ -3,7 +3,7 @@
 A brand tool for curtain makers. Staff put a curtain design in, choose a fabric for any area of it, and get a client-grade image out. Optionally the result is placed into a photo of the customer's room. One OpenRouter key powers everything.
 
 - **Stack:** Vite + React 19 single-page app, Express API, zustand state, vitest. `sharp` for server-side image compositing.
-- **Models (via OpenRouter):** `google/gemini-3-pro-image` for generation, `google/gemini-2.5-flash` for analysis and grading. Both are overridable through env vars.
+- **Models (via OpenRouter):** `openai/gpt-5.4-image-2` (GPT Image 2) for generation, `google/gemini-2.5-flash` for analysis and grading. Both are overridable through env vars; `google/gemini-3-pro-image` is the tested alternative for generation.
 - **Accounts and data:** built into the server. Users, brands, invites and sessions plus each brand's designs, fabrics and styles live in one SQLite file (Node's built-in `node:sqlite`); images are stored as files and served from `/images/`. Render jobs still live in the server process.
 
 ---
@@ -92,7 +92,7 @@ flowchart TB
     end
 
     subgraph Provider["OpenRouter"]
-        IM["/api/v1/images\n(gemini-3-pro-image)"]
+        IM["/api/v1/images\n(gpt-5.4-image-2)"]
         CH["/api/v1/chat/completions\n(gemini-2.5-flash)"]
     end
 
@@ -112,7 +112,7 @@ flowchart TB
 | --- | --- | --- |
 | Validate | `routes.ts` | zod-validates the body, requires every image to be a PNG/JPEG/WEBP data URL, resolves the brand's OpenRouter key, enforces the monthly quota (one unit per job), returns `202 { jobId }`. |
 | Prompt | `prompt.ts` | Builds one instruction from the design's areas: an image legend, a "replace area X with the fabric in Image N" line per changed area, and a preservation clause naming every untouched area and the background. |
-| Generate | `imageClient.ts` | Three parallel calls to the images endpoint with distinct seeds at 2K, aspect ratio matched to the source. Hosted-URL results are downloaded and normalised to data URLs. On a `400` the client falls back once to chat-completions image output. 120 s timeout per call. |
+| Generate | `imageClient.ts` | One call by default, up to three in parallel with distinct seeds (the page's Variations control), at 2K, aspect ratio matched to the source. Hosted-URL results are downloaded and normalised to data URLs. On a `400` the client falls back once to chat-completions image output. 120 s timeout per call. |
 | Grade | `grading.ts` | A vision model scores each candidate 0–10 on: target areas changed, other areas unchanged, pleats and lighting preserved, no artifacts, likeness to the swatch. Pass = no item below 6 and total ≥ 35. |
 | Select / retry | `runner.ts` | Highest-scoring pass wins. If none pass, one more round runs with the grader's below-threshold reasons appended to the prompt. After two failed rounds the job ends `needs_review` with the best candidate. A single failed candidate never kills a round (`Promise.allSettled`). |
 | Lock | `lock.ts` | The winner is composited inside a feathered mask (the union of the area polygons; for room staging, the detected window box expanded 20 %) over the original, so the background is pixel-identical. Output is at the larger of the source and candidate resolution. |
@@ -198,7 +198,7 @@ Copy `.env.example` to `.env`.
 | Variable | Required | Meaning |
 | --- | --- | --- |
 | `OPENROUTER_API_KEY` | yes | the one key for analysis, generation, grading and staging. A brand can also store its own key in Settings. |
-| `OPENROUTER_ROOM_VIZ_MODEL` | no | image generation model (default `google/gemini-3-pro-image`) |
+| `OPENROUTER_ROOM_VIZ_MODEL` | no | image generation model (default `openai/gpt-5.4-image-2`) |
 | `OPENROUTER_VISION_MODEL` | no | analysis, window detection and grading (default `google/gemini-2.5-flash`) |
 | `GEMINI_API_KEY`, `GEMINI_IMAGE_MODEL` | no | direct Gemini fallback for the generate stage only |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`, `ADMIN_BRAND` | yes | the admin account (created or reset on every start) and its home brand |
@@ -230,6 +230,6 @@ Tests cover every pipeline stage with real behaviour and only the provider calls
 - Only photographed fabrics are offered in the picker; the drawn SVG tiles in the built-in catalog are filtered out because the model cannot reproduce them convincingly.
 - The built-in sample styles are 250–450 px wide. They generate, but a real photo at 1500 px or wider gives a sharper background. Add your own styles through the Library or straight into Generate.
 - The background outside the curtain (or outside the window box, for staging) is guaranteed pixel-identical to the source. A manually chosen runner-up is re-locked on the server before it is shown.
-- A job costs 3 image generations and 3 grading calls (6 and 6 if a retry round runs), about 60–90 s.
+- A job costs one image generation and one grading call per variation (default 1; up to 3), doubled if a retry round runs. About 25 s per variation.
 - Render jobs are in memory: a server restart drops running jobs. Saved designs, fabrics, styles and accounts persist in `DATA_DIR`; back that directory up.
 - Invite links are shown to the admin to send by hand; there is no email delivery or password reset yet.

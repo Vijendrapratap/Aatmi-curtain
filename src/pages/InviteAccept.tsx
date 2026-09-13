@@ -36,7 +36,7 @@ export const InviteAccept: React.FC<{ token: string; onDone: () => void }> = ({ 
     <div className="flex min-h-dvh items-center justify-center bg-[var(--color-bg-base)] p-4 font-sans text-[var(--color-text-primary)]">
       <div className="brand-card w-full max-w-md space-y-5 p-6">
         <div>
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-accent)] text-white"><Sparkles className="h-5 w-5" /></span>
+          <span className="icon-tile"><Sparkles className="h-5 w-5" /></span>
           <p className="eyebrow-label mt-4">You're invited</p>
           <h1 className="page-title">{invite ? `Join ${invite.brandName}` : 'Checking your invite…'}</h1>
           {invite && <p className="page-lede">Set a password for <strong className="font-semibold">{invite.email}</strong> to start generating curtain designs.</p>}

@@ -33,6 +33,7 @@ export interface FabricSwapInput {
   changes: ZoneChange[];
   curtainMask?: string; // optional data URL override; derived from polygons when absent
   lighting?: Lighting; // anything but as_photographed relights the whole image and skips the pixel lock
+  variations?: 1 | 2 | 3; // candidates per round (default 1)
 }
 
 export interface RoomStageInput {
@@ -41,6 +42,7 @@ export interface RoomStageInput {
   roomPhoto: string; // data URL
   curtainImage: string; // data URL
   lighting?: Lighting;
+  variations?: 1 | 2 | 3;
 }
 
 export type RenderJobInput = FabricSwapInput | RoomStageInput;

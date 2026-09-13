@@ -23,7 +23,8 @@ export const OPENROUTER_RECOMMENDED_MODELS = {
   inpaintingDev: 'black-forest-labs/flux-1-dev',
 
   // Stage 3: Architectural Room Visualization & Real-Photo Staging
-  roomVizArchitectural: 'google/gemini-3-pro-image', // Nano Banana Pro
+  roomVizArchitectural: 'openai/gpt-5.4-image-2', // GPT Image 2 (default for renders and staging)
+  roomVizGemini: 'google/gemini-3-pro-image', // Nano Banana Pro (alternative)
   roomVizHighRes: 'bytedance-seed/seedream-4.5',
   roomVizStandard: 'google/gemini-3.1-flash-image',
 } as const;

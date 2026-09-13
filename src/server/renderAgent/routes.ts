@@ -8,6 +8,7 @@ import { getOrCreateBrandConfig } from '../brandConfigs';
 import { getEffectiveOpenRouterKey } from '../openrouter';
 import { parseBase64Image } from '../images';
 const lighting = z.enum(['as_photographed', 'daylight', 'golden_hour', 'evening', 'night']).optional();
+const variations = z.union([z.literal(1), z.literal(2), z.literal(3)]).optional();
 
 const rasterDataUrl = z.string().refine((s) => s.startsWith('data:image/') && parseBase64Image(s) !== null, 'must be a PNG, JPEG or WEBP data URL');
 const point = z.object({ x: z.number(), y: z.number() });
@@ -21,6 +22,7 @@ const fabricSwapSchema = z.object({
   changes: z.array(z.object({ regionId: z.string(), fabricName: z.string(), weave: z.string(), colorHex: z.string(), category: z.string(), swatch: rasterDataUrl })).min(1),
   curtainMask: rasterDataUrl.optional(),
   lighting,
+  variations,
 });
 
 const roomStageSchema = z.object({
@@ -29,6 +31,7 @@ const roomStageSchema = z.object({
   roomPhoto: rasterDataUrl,
   curtainImage: rasterDataUrl,
   lighting,
+  variations,
 });
 
 const inputSchema = z.discriminatedUnion('kind', [fabricSwapSchema, roomStageSchema]);

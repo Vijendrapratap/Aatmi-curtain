@@ -18,7 +18,7 @@ const roomGradeReply = (score: number) => JSON.stringify({ items: RUBRICS.room_s
 
 async function fabricInput(): Promise<FabricSwapInput> {
   return {
-    kind: 'fabric_swap', brandId: 'b', templateName: 'T',
+    kind: 'fabric_swap', brandId: 'b', templateName: 'T', variations: 3 as const,
     templatePhoto: await solid(40, 50, [255, 0, 0]),
     zones: [{ id: 'top', display_name: 'Top', description: 'd', location: 'l', polygon_coords: [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 50 }, { x: 0, y: 50 }] }],
     changes: [{ regionId: 'top', fabricName: 'F', weave: 'w', colorHex: '#000', category: 'c', swatch: await solid(8, 8, [0, 255, 0]) }],
@@ -35,8 +35,8 @@ describe('runRenderJob fabric_swap', () => {
     const stages: string[] = [];
     const out = await runRenderJob(job, { generate, ask, sleep: async () => undefined, onUpdate: (j) => stages.push(j.stage) });
     expect(out.status).toBe('done');
-    expect(generate).toHaveBeenCalledTimes(CANDIDATES_PER_ROUND);
-    expect(ask).toHaveBeenCalledTimes(CANDIDATES_PER_ROUND);
+    expect(generate).toHaveBeenCalledTimes(3);
+    expect(ask).toHaveBeenCalledTimes(3);
     expect(out.candidates).toHaveLength(3);
     expect(out.result).not.toHaveProperty('candidates');
     expect(out.result?.chosenId).toBe(out.candidates[0].id);
@@ -59,7 +59,7 @@ describe('runRenderJob fabric_swap', () => {
     const generate = vi.fn(async () => { if (n++ === 0) throw new RetryableError('429'); return blue; });
     const out = await runRenderJob(job, { generate, ask: async () => gradeReply(9), sleep: async () => undefined });
     expect(out.status).toBe('done');
-    expect(generate).toHaveBeenCalledTimes(CANDIDATES_PER_ROUND + 1);
+    expect(generate).toHaveBeenCalledTimes(3 + 1);
   });
 
   it('fails the job on a fatal error with its message', async () => {
@@ -79,8 +79,8 @@ describe('runRenderJob fabric_swap', () => {
     const out = await runRenderJob(job, { generate, ask, sleep: async () => undefined });
     expect(out.status).toBe('needs_review');
     expect(out.round).toBe(MAX_ROUNDS);
-    expect(generate).toHaveBeenCalledTimes(CANDIDATES_PER_ROUND * MAX_ROUNDS);
-    const secondRoundPrompt = generate.mock.calls[CANDIDATES_PER_ROUND][0].prompt;
+    expect(generate).toHaveBeenCalledTimes(3 * MAX_ROUNDS);
+    const secondRoundPrompt = generate.mock.calls[3][0].prompt;
     expect(secondRoundPrompt).toContain('Previous attempt problems, avoid these: target_zones: bad zone');
     expect(out.candidates).toHaveLength(6);
     expect(out.result?.finalImage).toBeTruthy(); // best candidate, locked
@@ -116,6 +116,23 @@ describe('runRenderJob fabric_swap', () => {
   });
 });
 
+describe('runRenderJob variations', () => {
+  it('generates one candidate by default and honours the requested count', async () => {
+    const store = new JobStore();
+    const base = await fabricInput();
+    const one = store.create({ ...base, variations: undefined }, 'k');
+    const blue = await solid(40, 50, [0, 0, 255]);
+    const generate = vi.fn(async () => blue);
+    const out = await runRenderJob(one, { generate, ask: async () => gradeReply(9), sleep: async () => undefined });
+    expect(out.status).toBe('done');
+    expect(generate).toHaveBeenCalledTimes(1);
+    const two = store.create({ ...base, variations: 2 }, 'k');
+    const generate2 = vi.fn(async () => blue);
+    await runRenderJob(two, { generate: generate2, ask: async () => gradeReply(9), sleep: async () => undefined });
+    expect(generate2).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe('runRenderJob lighting', () => {
   it('skips the pixel lock when the image is relit', async () => {
     const store = new JobStore();
@@ -131,7 +148,7 @@ describe('runRenderJob lighting', () => {
 describe('runRenderJob room_stage', () => {
   it('detects the window, prompts with it, and locks with the bbox mask', async () => {
     const store = new JobStore();
-    const input: RoomStageInput = { kind: 'room_stage', brandId: 'b', roomPhoto: await solid(60, 40, [255, 0, 0]), curtainImage: await solid(10, 12, [0, 255, 0]) };
+    const input: RoomStageInput = { kind: 'room_stage', brandId: 'b', roomPhoto: await solid(60, 40, [255, 0, 0]), curtainImage: await solid(10, 12, [0, 255, 0]), variations: 3 };
     const job = store.create(input, 'k');
     const generate = vi.fn<(req: GenerateRequest) => Promise<string>>(async () => solid(60, 40, [0, 0, 255]));
     const detectWindow = vi.fn(async () => ({ x: 25, y: 10, width: 50, height: 80 }));
@@ -143,7 +160,7 @@ describe('runRenderJob room_stage', () => {
   });
   it('fails fatally when no window is found', async () => {
     const store = new JobStore();
-    const input: RoomStageInput = { kind: 'room_stage', brandId: 'b', roomPhoto: await solid(60, 40, [255, 0, 0]), curtainImage: await solid(10, 12, [0, 255, 0]) };
+    const input: RoomStageInput = { kind: 'room_stage', brandId: 'b', roomPhoto: await solid(60, 40, [255, 0, 0]), curtainImage: await solid(10, 12, [0, 255, 0]), variations: 3 };
     const job = store.create(input, 'k');
     const out = await runRenderJob(job, { generate: vi.fn(), ask: vi.fn(), detectWindow: async () => { throw new FatalError('no window', 'NO_WINDOW_DETECTED'); }, sleep: async () => undefined });
     expect(out.status).toBe('failed');

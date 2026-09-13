@@ -86,6 +86,7 @@ export const GeneratePage: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isChoosing, setIsChoosing] = useState(false);
   const [lighting, setLighting] = useState<Lighting>('as_photographed');
+  const [variations, setVariations] = useState<1 | 2 | 3>(1);
   const [saveName, setSaveName] = useState<string | null>(null);
   const [current, setCurrent] = useState<Generation | null>(null);
   const [history, setHistory] = useState<Generation[]>([]);
@@ -220,6 +221,7 @@ export const GeneratePage: React.FC = () => {
         zones: design.areas.map((a) => ({ id: a.id, display_name: a.name, description: a.description, location: a.location, polygon_coords: a.polygon })),
         changes,
         lighting,
+        variations,
       };
       const done = await pollRender(await startRender(body), setJob, { signal: controller.signal });
       if (done.status === 'failed' || !done.result) throw new Error(done.error || 'Generation did not finish.');
@@ -227,7 +229,7 @@ export const GeneratePage: React.FC = () => {
       setCurrent(gen);
       setHistory((h) => [gen, ...h]);
       setSaveName(null);
-      if (done.status === 'needs_review') setNotice({ kind: 'info', text: 'None of the three options passed every quality check. The best one is shown; try another variation or generate again.' });
+      if (done.status === 'needs_review') setNotice({ kind: 'info', text: 'None of the options passed every quality check. The best one is shown; try another variation or generate again.' });
     } catch (err: any) {
       if (err?.code !== 'CANCELLED') setNotice({ kind: 'error', text: err.message || 'Generation did not finish.' });
     } finally {
@@ -330,7 +332,7 @@ export const GeneratePage: React.FC = () => {
         {/* 1. Design */}
         <section className="brand-card flex flex-col gap-3 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-semibold"><span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-accent)] text-[11px] text-white">1</span>Design</span>
+            <span className="text-[13px] font-semibold"><span className="step-dot mr-2">1</span>Design</span>
             {design && (
               <div className="flex items-center gap-1">
                 <button type="button" className="btn btn-ghost btn-sm" disabled={isAnalyzing || busy} onClick={() => analyze(design.image, design.name)} title="Find the fabric areas again"><RefreshCw className={`h-3.5 w-3.5 ${isAnalyzing ? 'animate-spin' : ''}`} /> Redetect</button>
@@ -341,7 +343,7 @@ export const GeneratePage: React.FC = () => {
 
           {!design ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-[14px] border-2 border-dashed border-[var(--color-border-strong)] bg-[var(--color-bg-sunken)] p-6 text-center">
-              <Upload className="h-8 w-8 text-[var(--color-accent)]" />
+              <span className="icon-tile"><Upload className="h-5 w-5" /></span>
               <p className="text-[14px] font-semibold">Drop a curtain design here</p>
               <p className="text-[12px] text-[var(--color-text-secondary)]">A photo or drawing of the curtain, {GOOD_WIDTH} px wide or more. The fabric areas are found for you.</p>
               <div className="flex flex-wrap items-center justify-center gap-2">
@@ -359,7 +361,7 @@ export const GeneratePage: React.FC = () => {
                 const f = slots[a.id];
                 return (
                   <button key={a.id} type="button" onClick={() => setPickerFor(a.id)} style={{ left: `${c.x}%`, top: `${c.y}%` }} title={`${a.name}${f ? `: ${f.name}` : ''}`} className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full bg-[var(--color-bg-surface)]/95 py-1 pr-2.5 pl-1 text-[11px] font-semibold shadow-[var(--shadow-ring)] ${pickerFor === a.id ? 'ring-2 ring-[var(--color-accent)]' : ''}`}>
-                    <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] text-white ${f ? 'bg-[#1F6B48]' : 'bg-[var(--color-accent)]'}`}>{i + 1}</span>
+                    <span className={`step-dot h-5 w-5 text-[10px] ${f ? 'is-done' : ''}`}>{i + 1}</span>
                     <span className="max-w-[110px] truncate">{a.name}</span>
                   </button>
                 );
@@ -372,7 +374,7 @@ export const GeneratePage: React.FC = () => {
 
         {/* 2. Fabrics */}
         <section className="brand-card flex flex-col gap-3 p-4">
-          <span className="text-[13px] font-semibold"><span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-accent)] text-[11px] text-white">2</span>Fabrics</span>
+          <span className="text-[13px] font-semibold"><span className="step-dot mr-2">2</span>Fabrics</span>
           {!design ? (
             <p className="text-[13px] text-[var(--color-text-secondary)]">Add a design first. Each fabric area it contains appears here with its own fabric choice.</p>
           ) : (
@@ -381,7 +383,7 @@ export const GeneratePage: React.FC = () => {
                 const f = slots[a.id];
                 return (
                   <li key={a.id} className="flex items-center gap-3 rounded-[12px] bg-[var(--color-bg-sunken)] px-3 py-2">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent)] text-[11px] font-semibold text-white">{i + 1}</span>
+                    <span className="step-dot h-6 w-6 shrink-0">{i + 1}</span>
                     {f ? <img src={f.image_url} alt="" className="h-10 w-10 shrink-0 rounded-[8px] object-cover" /> : <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-dashed border-[var(--color-text-tertiary)] text-[10px] text-[var(--color-text-tertiary)]">as is</span>}
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[13px] font-semibold">{a.name}</span>
@@ -404,18 +406,28 @@ export const GeneratePage: React.FC = () => {
               </div>
             </div>
           )}
+          {design && (
+            <div>
+              <span className="text-[12px] font-semibold"><Images className="mr-1.5 inline h-3.5 w-3.5 text-[var(--color-accent)]" />Variations</span>
+              <div className="mt-1.5 flex gap-1.5">
+                {([1, 2, 3] as const).map((n) => (
+                  <button key={n} type="button" onClick={() => setVariations(n)} title={n === 1 ? 'One image, fastest and cheapest' : `${n} options to choose from, ${n}× the cost`} className={`rounded-full px-3 py-1 text-[11px] font-semibold ${variations === n ? 'bg-[var(--color-accent)] text-white' : 'bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}>{n}</button>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="mt-auto pt-2">
             <button type="button" className="btn btn-primary btn-block" disabled={!design || busy || isAnalyzing || designTooSmall} onClick={handleGenerate}>
               <Sparkles className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />{isGenerating ? stageLine : current ? 'Generate again' : 'Generate'}
             </button>
-            <p className="mt-1.5 text-center text-[11px] text-[var(--color-text-tertiary)]">{designTooSmall ? 'This design is too small to generate from' : changedAreas.length === 0 ? 'Choose at least one fabric' : `${changedAreas.length} of ${design?.areas.length} areas change · 3 variations · about a minute`}</p>
+            <p className="mt-1.5 text-center text-[11px] text-[var(--color-text-tertiary)]">{designTooSmall ? 'This design is too small to generate from' : changedAreas.length === 0 ? 'Choose at least one fabric' : `${changedAreas.length} of ${design?.areas.length} areas change · ${variations === 1 ? '1 image' : `${variations} variations`} · about ${variations === 1 ? '30 s' : 'a minute'}`}</p>
           </div>
         </section>
 
         {/* 3. Result */}
         <section className="brand-card flex flex-col gap-3 p-4">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[13px] font-semibold"><span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-accent)] text-[11px] text-white">3</span>Result</span>
+            <span className="text-[13px] font-semibold"><span className="step-dot mr-2">3</span>Result</span>
             {current && (
               <div className="flex items-center gap-2">
                 {current.lighting !== 'as_photographed' && <span className="badge badge-muted">{LIGHTING_OPTIONS.find((o) => o.id === current.lighting)?.label}</span>}

@@ -211,7 +211,7 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
           </div>
         ) : (
           <button type="button" onClick={() => setActiveView('room')} className="brand-card brand-card-interactive flex items-center gap-4 p-4 text-left">
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-tint)] text-[var(--color-accent)]"><Upload className="h-6 w-6" /></span>
+            <span className="icon-tile icon-tile-lg shrink-0"><Upload className="h-6 w-6" /></span>
             <span>
               <span className="block text-[14px] font-semibold">Place in a room</span>
               <span className="block text-[12px] text-[var(--color-text-secondary)]">Add a room photo, pick daylight or evening light, and see this curtain on the window.</span>

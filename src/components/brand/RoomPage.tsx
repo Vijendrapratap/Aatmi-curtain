@@ -21,6 +21,7 @@ export const RoomPage: React.FC = () => {
 
   const [roomPhoto, setRoomPhoto] = useState<string | null>(null);
   const [lighting, setLighting] = useState<Lighting>('as_photographed');
+  const [variations, setVariations] = useState<1 | 2 | 3>(1);
   const [job, setJob] = useState<RenderJobView | null>(null);
   const [isStaging, setIsStaging] = useState(false);
   const [isChoosing, setIsChoosing] = useState(false);
@@ -60,12 +61,12 @@ export const RoomPage: React.FC = () => {
     setNotice(null);
     setJob(null);
     try {
-      const body = { kind: 'room_stage' as const, brandId: currentBrandId, roomPhoto: await toDataUrl(roomPhoto), curtainImage: await toDataUrl(design.final_image_url), lighting };
+      const body = { kind: 'room_stage' as const, brandId: currentBrandId, roomPhoto: await toDataUrl(roomPhoto), curtainImage: await toDataUrl(design.final_image_url), lighting, variations };
       const done = await pollRender(await startRender(body), setJob, { signal: controller.signal });
       if (done.status === 'failed' || !done.result) throw new Error(done.error || 'Room placement did not finish.');
       const preview = addRoomPreview(design.id, { design_id: design.id, brand_id: currentBrandId, room_source: 'uploaded', room_photo_url: roomPhoto, output_url: done.result.finalImage, provider_used: done.id, candidates: done.candidates, lighting });
       setSelectedPreviewId(preview.id);
-      if (done.status === 'needs_review') setNotice({ kind: 'info', text: 'None of the three options passed every quality check. The best one is shown; try another variation or place it again.' });
+      if (done.status === 'needs_review') setNotice({ kind: 'info', text: 'None of the options passed every quality check. The best one is shown; try another variation or place it again.' });
     } catch (err: any) {
       if (err?.code !== 'CANCELLED') setNotice({ kind: 'error', text: err.message || 'Room placement did not finish.' });
     } finally {
@@ -120,7 +121,7 @@ export const RoomPage: React.FC = () => {
       <div className="grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]">
         <section className="brand-card flex flex-col gap-4 p-4">
           <div>
-            <span className="text-[13px] font-semibold"><span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-accent)] text-[11px] text-white">1</span>Curtain</span>
+            <span className="text-[13px] font-semibold"><span className="step-dot mr-2">1</span>Curtain</span>
             <div className="mt-2 flex items-center gap-3 rounded-[12px] bg-[var(--color-bg-sunken)] p-2">
               <img src={design.final_image_url} alt={design.name} className="h-20 w-16 rounded-[8px] object-cover" />
               <span className="min-w-0">
@@ -131,7 +132,7 @@ export const RoomPage: React.FC = () => {
           </div>
 
           <div>
-            <span className="text-[13px] font-semibold"><span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-accent)] text-[11px] text-white">2</span>Room photo</span>
+            <span className="text-[13px] font-semibold"><span className="step-dot mr-2">2</span>Room photo</span>
             {roomPhoto ? (
               <div className="relative mt-2 overflow-hidden rounded-[12px] bg-[var(--color-bg-sunken)]">
                 <img src={roomPhoto} alt="Room" className="block h-auto w-full" />
@@ -158,14 +159,23 @@ export const RoomPage: React.FC = () => {
             <p className="mt-1 text-[11px] text-[var(--color-text-tertiary)]">{LIGHTING_OPTIONS.find((o) => o.id === lighting)?.hint}</p>
           </div>
 
+          <div>
+            <span className="text-[13px] font-semibold">Variations</span>
+            <div className="mt-2 flex gap-1.5">
+              {([1, 2, 3] as const).map((n) => (
+                <button key={n} type="button" onClick={() => setVariations(n)} title={n === 1 ? 'One image, fastest and cheapest' : `${n} options to choose from, ${n}× the cost`} className={`rounded-full px-3 py-1 text-[12px] font-semibold ${variations === n ? 'bg-[var(--color-accent)] text-white' : 'bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}>{n}</button>
+              ))}
+            </div>
+          </div>
+
           <button type="button" className="btn btn-primary btn-block mt-auto" disabled={!roomPhoto || isStaging} onClick={handlePlace}>
             <Sparkles className={`h-4 w-4 ${isStaging ? 'animate-spin' : ''}`} />{isStaging ? stageLine : previews.length ? 'Place again' : 'Place in this room'}
           </button>
-          <p className="text-center text-[11px] text-[var(--color-text-tertiary)]">3 variations · about a minute</p>
+          <p className="text-center text-[11px] text-[var(--color-text-tertiary)]">{variations === 1 ? '1 image · about 30 s' : `${variations} variations · about a minute`}</p>
         </section>
 
         <section className="brand-card flex flex-col gap-3 p-4">
-          <span className="text-[13px] font-semibold"><span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-accent)] text-[11px] text-white">3</span>Result</span>
+          <span className="text-[13px] font-semibold"><span className="step-dot mr-2">3</span>Result</span>
           <div className="media-frame relative min-h-[320px] flex-1 overflow-hidden rounded-[14px]">
             {selected ? <img src={selected.output_url} alt="Curtain in the room" className="block h-auto w-full" /> : (
               <div className="flex h-full min-h-[320px] flex-col items-center justify-center gap-2 p-6 text-center text-[13px] text-[var(--color-text-secondary)]">

@@ -28,7 +28,7 @@ afterAll(() => server.close());
 
 async function validBody() {
   return {
-    kind: 'fabric_swap', brandId: 'brand-test', templateName: 'T', templatePhoto: await solid(40, 50),
+    kind: 'fabric_swap', brandId: 'brand-test', templateName: 'T', variations: 3, templatePhoto: await solid(40, 50),
     zones: [{ id: 'top', display_name: 'Top', description: 'd', location: 'l', polygon_coords: [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 50 }, { x: 0, y: 50 }] }],
     changes: [{ regionId: 'top', fabricName: 'F', weave: 'w', colorHex: '#000', category: 'c', swatch: await solid(8, 8) }],
   };

@@ -87,7 +87,7 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ onSignOut }) => {
         : 'Staff';
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)]/85 backdrop-blur-md">
+    <header className="sticky top-0 z-40 w-full border-b border-white/60 bg-[var(--color-bg-surface)]/60 backdrop-blur-xl backdrop-saturate-150">
       <div className="mx-auto flex h-[60px] max-w-[1280px] items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex items-center gap-2.5 py-1 pr-2 pl-1">

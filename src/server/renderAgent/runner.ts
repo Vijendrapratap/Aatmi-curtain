@@ -8,7 +8,8 @@ import { buildGradePrompt, gradeImages, parseGrade, passes, total, retryFeedback
 import { getImageSize, polygonMaskPng, bboxMaskPng, lockOutsideMask } from './lock';
 import { withRetry, FatalError } from './errors';
 
-export const CANDIDATES_PER_ROUND = 3;
+export const CANDIDATES_PER_ROUND = 1; // default; the request may ask for up to 3
+export const MAX_CANDIDATES = 3;
 export const MAX_ROUNDS = 2;
 
 export interface RunnerDeps {
@@ -97,7 +98,7 @@ export async function runRenderJob(job: RenderJob, partial: Partial<RunnerDeps> 
       update({ stage: 'generate' });
       // One exhausted candidate must not kill the round: keep whatever came back.
       const settled = await Promise.allSettled(
-        Array.from({ length: CANDIDATES_PER_ROUND }, (_, i) =>
+        Array.from({ length: Math.min(MAX_CANDIDATES, Math.max(1, job.input.variations ?? CANDIDATES_PER_ROUND)) }, (_, i) =>
           retry(() => deps.generate({ prompt: prompt.text, images: prompt.images, aspectRatio, seed: round * 100 + i + 1, apiKey: job.apiKey }))
         )
       );
