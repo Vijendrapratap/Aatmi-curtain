@@ -2,7 +2,8 @@
 // Browser-side helpers for the render job API.
 import type { CurtainTemplate, Fabric, FabricAssignment } from '../types/curtain';
 
-export interface RenderCandidateView { id: string; round: number; image: string; scores: Array<{ key: string; score: number; reason: string }>; total: number; passed: boolean }
+/** `image` is only sent once the job is terminal, so polling a running job stays small. */
+export interface RenderCandidateView { id: string; round: number; image?: string; scores: Array<{ key: string; score: number; reason: string }>; total: number; passed: boolean }
 export interface RenderJobView {
   id: string;
   kind: 'fabric_swap' | 'room_stage';
@@ -10,7 +11,7 @@ export interface RenderJobView {
   stage: 'prompt' | 'generate' | 'grade' | 'lock' | 'store';
   round: number;
   candidates: RenderCandidateView[];
-  result?: { finalImage: string; chosenId: string; prompt: string; candidates: RenderCandidateView[] };
+  result?: { finalImage: string; chosenId: string; prompt: string };
   error?: string;
 }
 
@@ -23,6 +24,7 @@ export const STAGE_COPY: Record<RenderJobView['stage'], string> = {
 };
 
 export const POLL_INTERVAL_MS = 2000;
+export const POLL_MAX_WAIT_MS = 300_000;
 
 /** Loads any image source (path, http, data, svg) and returns a PNG data URL at its natural size. */
 export function toDataUrl(src: string): Promise<string> {
@@ -69,21 +71,38 @@ export async function startRender(body: object, fetchImpl: typeof fetch = fetch)
   return data.jobId;
 }
 
+function coded(message: string, code: string): Error {
+  return Object.assign(new Error(message), { code });
+}
+
 export async function pollRender(
   jobId: string,
   onUpdate: (job: RenderJobView) => void,
-  opts: { fetchImpl?: typeof fetch; intervalMs?: number; sleep?: (ms: number) => Promise<void> } = {}
+  opts: { fetchImpl?: typeof fetch; intervalMs?: number; sleep?: (ms: number) => Promise<void>; signal?: AbortSignal; maxWaitMs?: number } = {}
 ): Promise<RenderJobView> {
   const fetchImpl = opts.fetchImpl ?? fetch;
   const interval = opts.intervalMs ?? POLL_INTERVAL_MS;
   const sleep = opts.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const deadline = Date.now() + (opts.maxWaitMs ?? POLL_MAX_WAIT_MS);
   for (;;) {
+    // The caller abandoned this render (template or design switched): stop without touching its state.
+    if (opts.signal?.aborted) throw coded('cancelled', 'CANCELLED');
     const res = await fetchImpl(`/api/render/jobs/${jobId}`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || `Render job lookup failed (${res.status})`);
+    if (opts.signal?.aborted) throw coded('cancelled', 'CANCELLED');
     const job = data as RenderJobView;
     onUpdate(job);
     if (job.status === 'done' || job.status === 'needs_review' || job.status === 'failed') return job;
+    if (Date.now() >= deadline) throw coded('Render timed out', 'TIMEOUT');
     await sleep(interval);
   }
+}
+
+/** Switches a finished job to another candidate; the server re-runs the pixel lock for it. */
+export async function chooseCandidate(jobId: string, candidateId: string, fetchImpl: typeof fetch = fetch): Promise<RenderJobView> {
+  const res = await fetchImpl(`/api/render/jobs/${jobId}/choose`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ candidateId }) });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw Object.assign(new Error(data.error || `Could not switch option (${res.status})`), { code: data.code });
+  return data as RenderJobView;
 }

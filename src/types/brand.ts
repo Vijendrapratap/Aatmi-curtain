@@ -50,7 +50,8 @@ export interface BrandUser {
 export interface RenderCandidate {
   id: string;
   round: number;
-  image: string;
+  /** Only sent by the API once its job is terminal, so it can be absent on an in-flight job view. */
+  image?: string;
   scores: Array<{ key: string; score: number; reason: string }>;
   total: number;
   passed: boolean;

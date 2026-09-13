@@ -1,6 +1,6 @@
 // src/components/brand/DesignDetailView.tsx
 // A saved design: its render, room stagings, and sharing options.
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Share2, Download, Check, Sparkles, Plus, Upload, ArrowLeft, FileText, AlertCircle, Image as ImageIcon, X } from 'lucide-react';
 import { useBrandStore } from '../../lib/brandStore';
 import { useStudioStore } from '../../lib/store';
@@ -35,6 +35,12 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
 
   const template = useMemo(() => brandTemplates.find((t) => t.id === design?.template_id), [brandTemplates, design?.template_id]);
   const fabrics = useMemo(() => brandFabrics.filter((f) => f.brand_id === currentBrandId || !f.brand_id), [brandFabrics, currentBrandId]);
+
+  // A render or staging still in flight belongs to the design we just left.
+  const jobAbortRef = useRef<AbortController | null>(null);
+  useEffect(() => {
+    return () => jobAbortRef.current?.abort();
+  }, [design?.id]);
 
   if (!design) {
     return (
@@ -86,17 +92,21 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
 
   const handlePhotoreal = async () => {
     if (!template) return;
+    jobAbortRef.current?.abort();
+    const controller = new AbortController();
+    jobAbortRef.current = controller;
     setIsRendering(true);
     setError(null);
     setActiveJob(null);
     try {
       const body = await buildFabricSwapInput(template, design.assignments, fabrics, currentBrandId);
-      const job = await pollRender(await startRender(body), setActiveJob);
+      const job = await pollRender(await startRender(body), setActiveJob, { signal: controller.signal });
       if (job.status === 'failed') throw new Error(job.error || 'Render did not finish');
-      if (job.result) updateDesign(design.id, { final_image_url: job.result.finalImage, render_kind: 'photoreal', render_candidates: job.result.candidates, render_prompt: job.result.prompt });
+      if (job.result) updateDesign(design.id, { final_image_url: job.result.finalImage, render_kind: 'photoreal', render_candidates: job.candidates, render_prompt: job.result.prompt });
       if (job.status === 'needs_review') setError('No render option passed the quality check. The best one was kept; rerun if it is not right.');
     } catch (err: any) {
-      setError(`Render did not finish: ${err.message || 'unknown error'}.`);
+      // Cancelled means the user moved on; nothing to report.
+      if (err?.code !== 'CANCELLED') setError(`Render did not finish: ${err.message || 'unknown error'}.`);
     } finally {
       setIsRendering(false);
       setActiveJob(null);
@@ -115,19 +125,23 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
   const handleStage = async () => {
     if (!pendingRoom) return;
     const { source, photo } = pendingRoom;
+    jobAbortRef.current?.abort();
+    const controller = new AbortController();
+    jobAbortRef.current = controller;
     setIsStaging(true);
     setError(null);
     setPendingRoom(null);
     setActiveJob(null);
     try {
       const body = { kind: 'room_stage' as const, brandId: currentBrandId, roomPhoto: await toDataUrl(photo), curtainImage: await toDataUrl(design.final_image_url) };
-      const job = await pollRender(await startRender(body), setActiveJob);
+      const job = await pollRender(await startRender(body), setActiveJob, { signal: controller.signal });
       if (job.status === 'failed' || !job.result) throw new Error(job.error || 'Room staging failed');
       if (job.status === 'needs_review') { setReviewStage({ source, photo, job }); return; }
-      addRoomPreview(design.id, { design_id: design.id, brand_id: currentBrandId, room_source: source, room_photo_url: photo, output_url: job.result.finalImage, provider_used: 'render_agent', candidates: job.result.candidates });
+      addRoomPreview(design.id, { design_id: design.id, brand_id: currentBrandId, room_source: source, room_photo_url: photo, output_url: job.result.finalImage, provider_used: 'render_agent', candidates: job.candidates });
       setSelectedPreviewIndex(roomPreviews.length);
       setTimeout(() => scrollTo('design-room'), 50);
     } catch (err: any) {
+      if (err?.code === 'CANCELLED') return;
       setError(err.message || 'Room staging failed.');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
@@ -139,7 +153,7 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
   const acceptReviewStage = () => {
     if (!reviewStage) return;
     const { source, photo, job } = reviewStage;
-    addRoomPreview(design.id, { design_id: design.id, brand_id: currentBrandId, room_source: source, room_photo_url: photo, output_url: job.result!.finalImage, provider_used: 'render_agent', candidates: job.result!.candidates });
+    addRoomPreview(design.id, { design_id: design.id, brand_id: currentBrandId, room_source: source, room_photo_url: photo, output_url: job.result!.finalImage, provider_used: 'render_agent', candidates: job.candidates });
     setSelectedPreviewIndex(roomPreviews.length);
     setReviewStage(null);
   };
@@ -333,11 +347,11 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
             <div>
               <p className="eyebrow-label">Needs review</p>
               <h3 className="mt-0.5 font-display text-[18px] font-semibold">No staging option passed the quality check</h3>
-              <p className="text-[13px] text-[var(--color-text-secondary)]">This is the best of {reviewStage.job.result!.candidates.length}. Keep it, or try again.</p>
+              <p className="text-[13px] text-[var(--color-text-secondary)]">This is the best of {reviewStage.job.candidates.length}. Keep it, or try again.</p>
             </div>
             <div className="media-frame aspect-[16/10] rounded-[14px]"><img src={reviewStage.job.result!.finalImage} alt="Best staging option" className="h-full w-full object-cover" /></div>
             <ul className="space-y-1 text-[12px] text-[var(--color-text-secondary)]">
-              {reviewStage.job.result!.candidates.find((c) => c.id === reviewStage.job.result!.chosenId)?.scores.filter((s) => s.score < 6).map((s) => <li key={s.key}>{s.key.replace(/_/g, ' ')}: {s.reason}</li>)}
+              {reviewStage.job.candidates.find((c) => c.id === reviewStage.job.result!.chosenId)?.scores.filter((s) => s.score < 6).map((s) => <li key={s.key}>{s.key.replace(/_/g, ' ')}: {s.reason}</li>)}
             </ul>
             <div className="flex items-center justify-end gap-2">
               <button type="button" onClick={() => { const r = reviewStage; setReviewStage(null); setPendingRoom({ source: r.source, photo: r.photo }); }} className="btn btn-ghost">Rerun</button>

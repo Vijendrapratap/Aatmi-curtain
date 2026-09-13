@@ -434,7 +434,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
                     style={{ backgroundColor: previewPalette.accent }}
                   >
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>Generate Photorealistic Drapery</span>
+                    <span>Generate Realistic Drapery</span>
                   </button>
                 </div>
 

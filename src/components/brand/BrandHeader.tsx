@@ -202,8 +202,8 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ onSignOut }) => {
         <div className="flex items-center gap-2">
           <div
             className="hidden items-center gap-2 rounded-[10px] bg-[var(--color-bg-sunken)] px-2.5 py-1.5 md:flex"
-            title={`${used} of ${cap} photoreal renders used this month`}
-            aria-label={`${used} of ${cap} photoreal renders used this month`}
+            title={`${used} of ${cap} renders used this month`}
+            aria-label={`${used} of ${cap} renders used this month`}
           >
             <span className="font-mono text-[10px] font-medium tabular-nums text-[var(--color-text-secondary)]">
               {used}/{cap}

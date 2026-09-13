@@ -50,7 +50,7 @@ describe('generateImage', () => {
   });
 
   it('falls back to chat completions when /images answers 400', async () => {
-    const fetchMock = vi.fn(async (url: string) => {
+    const fetchMock = vi.fn(async (url: string, _init?: any) => {
       if (String(url).endsWith('/images')) return fail(400, 'unsupported');
       return ok({ choices: [{ message: { images: [{ image_url: { url: 'data:image/png;base64,BBBB' } }] } }] });
     });
@@ -71,7 +71,7 @@ describe('generateImage', () => {
   });
 
   it('passes an abort signal on every provider call', async () => {
-    const fetchMock = vi.fn(async () => ok({ data: [{ b64_json: 'AAAA' }] }));
+    const fetchMock = vi.fn(async (_url: string, _init?: any) => ok({ data: [{ b64_json: 'AAAA' }] }));
     await generateImage({ prompt: 'p', images: [PNG], aspectRatio: '1:1', seed: 1, apiKey: API_KEY }, { fetch: fetchMock as any });
     expect((fetchMock.mock.calls[0][1] as any).signal).toBeInstanceOf(AbortSignal);
   });
