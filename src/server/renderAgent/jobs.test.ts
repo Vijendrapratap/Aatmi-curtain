@@ -69,6 +69,32 @@ describe('JobStore', () => {
     });
   });
 
+  it('publicView drops candidate images while the job is still running', () => {
+    const store = new JobStore();
+    const job = store.create(fabricInput(), 'k');
+    job.status = 'running';
+    job.candidates = [{ id: 'c1', round: 1, image: 'data:image/png;base64,AAAA', scores: [], total: 40, passed: true }];
+    const view = store.publicView(job);
+
+    expect(view.candidates).toHaveLength(1);
+    expect(view.candidates[0]).not.toHaveProperty('image');
+    expect(view.candidates[0].id).toBe('c1');
+    expect(view.candidates[0].total).toBe(40);
+  });
+
+  it('publicView carries the candidate images and a candidate-free result once terminal', () => {
+    const store = new JobStore();
+    const job = store.create(fabricInput(), 'k');
+    job.status = 'done';
+    job.candidates = [{ id: 'c1', round: 1, image: 'data:image/png;base64,AAAA', scores: [], total: 40, passed: true }];
+    job.result = { finalImage: 'data:image/png;base64,BBBB', chosenId: 'c1', prompt: 'p' };
+    const view = store.publicView(job);
+
+    expect((view.candidates[0] as any).image).toBe('data:image/png;base64,AAAA');
+    expect(view.result).not.toHaveProperty('candidates');
+    expect(view.result!.chosenId).toBe('c1');
+  });
+
   it('JOB_TTL_MS is 30 minutes', () => {
     expect(JOB_TTL_MS).toBe(30 * 60 * 1000);
   });

@@ -1,6 +1,8 @@
 // src/server/renderAgent/jobs.ts
 import type { RenderJob, RenderJobInput } from './types';
 
+const TERMINAL: RenderJob['status'][] = ['done', 'needs_review', 'failed'];
+
 export const JOB_TTL_MS = 30 * 60 * 1000;
 
 export class JobStore {
@@ -26,9 +28,14 @@ export class JobStore {
     this.timers.set(job.id, t);
   }
 
-  /** What the GET endpoint returns: no input images, no api key. */
+  /**
+   * What the GET endpoint returns: no input images, no api key, and — while the job is still
+   * running — no candidate images either, so polling stays cheap. The full images arrive once.
+   */
   publicView(job: RenderJob) {
-    return { id: job.id, kind: job.kind, status: job.status, stage: job.stage, round: job.round, candidates: job.candidates, result: job.result, error: job.error };
+    const terminal = TERMINAL.includes(job.status);
+    const candidates = terminal ? job.candidates : job.candidates.map(({ image, ...rest }) => rest);
+    return { id: job.id, kind: job.kind, status: job.status, stage: job.stage, round: job.round, candidates, result: job.result, error: job.error };
   }
 
   size(): number { return this.jobs.size; }

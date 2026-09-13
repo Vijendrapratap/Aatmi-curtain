@@ -34,6 +34,17 @@ async function validBody() {
   };
 }
 
+async function finishedJobId(): Promise<string> {
+  const res = await fetch(`${base}/api/render/jobs`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(await validBody()) });
+  const { jobId } = await res.json();
+  for (let i = 0; i < 50; i++) {
+    const body = await (await fetch(`${base}/api/render/jobs/${jobId}`)).json();
+    if (body.status === 'done' || body.status === 'needs_review' || body.status === 'failed') return jobId;
+    await new Promise((r) => setTimeout(r, 20));
+  }
+  throw new Error('job never finished');
+}
+
 describe('render routes', () => {
   it('accepts a job, then reports done via polling', async () => {
     const res = await fetch(`${base}/api/render/jobs`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(await validBody()) });
@@ -47,8 +58,33 @@ describe('render routes', () => {
     }
     expect(body.status).toBe('done');
     expect(body.result.finalImage).toMatch(/^data:image\/png;base64,/);
+    expect(body.result.candidates).toBeUndefined();
+    expect(body.candidates).toHaveLength(3);
+    expect(body.candidates[0].image).toMatch(/^data:image\/png;base64,/);
     expect(body.apiKey).toBeUndefined();
     expect(body.input).toBeUndefined();
+  });
+
+  it('re-locks and returns the job when another option is chosen', async () => {
+    const jobId = await finishedJobId();
+    const before = await (await fetch(`${base}/api/render/jobs/${jobId}`)).json();
+    const other = before.candidates[2];
+    expect(other.id).not.toBe(before.result.chosenId);
+
+    const res = await fetch(`${base}/api/render/jobs/${jobId}/choose`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ candidateId: other.id }) });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.result.chosenId).toBe(other.id);
+    expect(body.result.finalImage).toMatch(/^data:image\/png;base64,/);
+    expect(body.candidates).toHaveLength(3);
+  });
+
+  it('404s choose on an unknown job and 400s an unknown option', async () => {
+    const missing = await fetch(`${base}/api/render/jobs/nope/choose`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ candidateId: 'x' }) });
+    expect(missing.status).toBe(404);
+    const jobId = await finishedJobId();
+    const bad = await fetch(`${base}/api/render/jobs/${jobId}/choose`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ candidateId: 'not-a-candidate' }) });
+    expect(bad.status).toBe(400);
   });
   it('rejects a body with an svg swatch', async () => {
     const b = await validBody();
