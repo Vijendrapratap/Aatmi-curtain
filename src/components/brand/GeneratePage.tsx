@@ -36,7 +36,7 @@ interface Generation {
   roomImage?: string;
 }
 
-const MIN_WIDTH = 1000;
+const MIN_WIDTH = 240; // below this the analyzer has nothing to work with
 const GOOD_WIDTH = 1500;
 
 const isPhotographic = (f: Fabric) => !f.image_url.startsWith('data:image/svg');
@@ -115,8 +115,8 @@ export const GeneratePage: React.FC = () => {
     setNotice(null);
     const width = await probeWidth(image);
     setDesignTooSmall(width > 0 && width < MIN_WIDTH);
-    if (width > 0 && width < MIN_WIDTH) setNotice({ kind: 'error', text: `"${t.name}" is only ${width} px wide, too small to generate from. Upload a photo of this curtain at ${GOOD_WIDTH} px or wider instead.` });
-    else if (width > 0 && width < GOOD_WIDTH) setNotice({ kind: 'info', text: `"${t.name}" is ${width} px wide. ${GOOD_WIDTH} px or wider gives a sharper result, but you can continue.` });
+    if (width > 0 && width < MIN_WIDTH) setNotice({ kind: 'error', text: `"${t.name}" is only ${width} px wide, too small to generate from. Upload a larger photo of it instead.` });
+    else if (width > 0 && width < GOOD_WIDTH) setNotice({ kind: 'info', text: `"${t.name}" is ${width} px wide. The result is still generated at full size, but a ${GOOD_WIDTH} px photo gives a sharper background.` });
   };
 
   const analyze = async (image: string, name: string) => {
@@ -153,10 +153,10 @@ export const GeneratePage: React.FC = () => {
     const image = await readFile(file);
     const width = await probeWidth(image);
     if (width < MIN_WIDTH) {
-      setNotice({ kind: 'error', text: `This image is ${width} px wide. Generation needs at least ${MIN_WIDTH} px; ${GOOD_WIDTH} px or more gives the best result.` });
+      setNotice({ kind: 'error', text: `This image is only ${width} px wide, too small to find the fabric areas. Use a larger photo.` });
       return;
     }
-    if (width < GOOD_WIDTH) setNotice({ kind: 'info', text: `This image is ${width} px wide. ${GOOD_WIDTH} px or wider gives a sharper result, but you can continue.` });
+    if (width < GOOD_WIDTH) setNotice({ kind: 'info', text: `This image is ${width} px wide. The result is still generated at full size, but ${GOOD_WIDTH} px or wider gives a sharper background.` });
     cancelJob();
     await analyze(image, file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '));
   };
