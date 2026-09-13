@@ -40,9 +40,18 @@ describe('lockOutsideMask', () => {
     expect(await pixelAt(out, 5, 20)).toEqual([0, 0, 255]);
     expect(await pixelAt(out, 35, 20)).toEqual([255, 0, 0]);
   });
-  it('resizes a candidate of a different size to the original', async () => {
+  it('keeps a larger candidate\'s resolution and upscales the original behind it', async () => {
     const original = await solid(40, 40, [255, 0, 0]);
     const candidate = await solid(80, 80, [0, 0, 255]);
+    const mask = await polygonMaskPng([{ id: 'a', display_name: '', description: '', location: '', polygon_coords: [{ x: 0, y: 0 }, { x: 50, y: 0 }, { x: 50, y: 100 }, { x: 0, y: 100 }] }], 40, 40, 0);
+    const out = await lockOutsideMask(original, candidate, mask);
+    expect(await getImageSize(out)).toEqual({ width: 80, height: 80 });
+    expect(await pixelAt(out, 10, 40)).toEqual([0, 0, 255]);
+    expect(await pixelAt(out, 70, 40)).toEqual([255, 0, 0]);
+  });
+  it('shrinks a smaller candidate up to the original\'s size', async () => {
+    const original = await solid(40, 40, [255, 0, 0]);
+    const candidate = await solid(20, 20, [0, 0, 255]);
     const mask = await polygonMaskPng([{ id: 'a', display_name: '', description: '', location: '', polygon_coords: [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 100 }, { x: 0, y: 100 }] }], 40, 40, 0);
     const out = await lockOutsideMask(original, candidate, mask);
     expect(await getImageSize(out)).toEqual({ width: 40, height: 40 });

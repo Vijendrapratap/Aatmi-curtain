@@ -17,7 +17,8 @@ export function classifyHttpStatus(status: number, body: string): RetryableError
   const snippet = (body || '').replace(/\s+/g, ' ').slice(0, 200);
   const message = `Provider HTTP ${status}: ${snippet}`;
   if (status === 429 || status >= 500) return new RetryableError(message);
-  return new FatalError(message, status === 401 || status === 403 ? 'BAD_KEY' : 'BAD_REQUEST');
+  if (status === 401 || status === 403) return new FatalError('The AI provider rejected the OpenRouter key. Check the key in Settings or in OPENROUTER_API_KEY.', 'BAD_KEY');
+  return new FatalError(message, 'BAD_REQUEST');
 }
 
 const defaultSleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));

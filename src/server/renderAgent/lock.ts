@@ -47,16 +47,25 @@ export async function bboxMaskPng(bbox: Bbox, width: number, height: number, exp
   return rasterizeMaskSvg(svg, featherPx);
 }
 
-/** Composite `candidate` over `original` using `mask` (white = take candidate). Output has original's size. */
+/**
+ * Composite `candidate` over `original` using `mask` (white = take candidate).
+ * Output size is the original's aspect ratio at the larger of the two widths, so a
+ * 2K model result is not thrown away when the source photo is small: the original is
+ * upscaled for the background, the candidate is fitted to the same frame.
+ */
 export async function lockOutsideMask(original: string, candidate: string, mask: string): Promise<string> {
-  const { width, height } = await getImageSize(original);
+  const orig = await getImageSize(original);
+  const cand = await getImageSize(candidate);
+  const width = Math.max(orig.width, cand.width);
+  const height = Math.round((width * orig.height) / orig.width);
   const maskGrey = await sharp(toBuffer(mask)).resize(width, height, { fit: 'fill' }).grayscale().toColourspace('b-w').raw().toBuffer();
   const candidateRgb = await sharp(toBuffer(candidate)).resize(width, height, { fit: 'fill' }).removeAlpha().raw().toBuffer();
   const candidateRgba = await sharp(candidateRgb, { raw: { width, height, channels: 3 } })
     .joinChannel(maskGrey, { raw: { width, height, channels: 1 } })
     .png()
     .toBuffer();
-  const out = await sharp(toBuffer(original)).removeAlpha().composite([{ input: candidateRgba, blend: 'over' }]).png().toBuffer();
+  const background = sharp(toBuffer(original)).resize(width, height, { fit: 'fill', kernel: 'lanczos3' }).removeAlpha();
+  const out = await background.composite([{ input: candidateRgba, blend: 'over' }]).png().toBuffer();
   return toDataUrl(out);
 }
 
