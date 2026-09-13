@@ -26,11 +26,8 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
   const [selectedPreviewIndex, setSelectedPreviewIndex] = useState(0);
   const [sliderPos, setSliderPos] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
-  const [pendingRoom, setPendingRoom] = useState<{ source: RoomSource; photo: string } | null>(null);
-  const [isStaging, setIsStaging] = useState(false);
   const [isRendering, setIsRendering] = useState(false);
   const [activeJob, setActiveJob] = useState<RenderJobView | null>(null);
-  const [reviewStage, setReviewStage] = useState<{ source: RoomSource; photo: string; job: RenderJobView } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const template = useMemo(() => brandTemplates.find((t) => t.id === design?.template_id), [brandTemplates, design?.template_id]);
@@ -55,9 +52,6 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
 
   const roomPreviews = design.room_previews || [];
   const currentPreview = roomPreviews[selectedPreviewIndex] || roomPreviews[0];
-  // Every curtain style is a real photograph (built-in ones live in /templates/, uploads are user photos),
-  // so the style's own photo is always a valid room to stage in.
-  const templateHasRealRoom = Boolean(template);
   const steps = deriveJourney({ page: 'design', zoneCount: design.assignments.length, assignedCount: design.assignments.length, hasPhotoreal: design.render_kind === 'photoreal', roomPreviewCount: roomPreviews.length });
 
   const goToStudio = () => {
@@ -111,51 +105,6 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
       setIsRendering(false);
       setActiveJob(null);
     }
-  };
-
-  const chooseRoomFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setPendingRoom({ source: 'uploaded', photo: reader.result as string });
-    reader.readAsDataURL(file);
-    e.target.value = '';
-  };
-
-  const handleStage = async () => {
-    if (!pendingRoom) return;
-    const { source, photo } = pendingRoom;
-    jobAbortRef.current?.abort();
-    const controller = new AbortController();
-    jobAbortRef.current = controller;
-    setIsStaging(true);
-    setError(null);
-    setPendingRoom(null);
-    setActiveJob(null);
-    try {
-      const body = { kind: 'room_stage' as const, brandId: currentBrandId, roomPhoto: await toDataUrl(photo), curtainImage: await toDataUrl(design.final_image_url) };
-      const job = await pollRender(await startRender(body), setActiveJob, { signal: controller.signal });
-      if (job.status === 'failed' || !job.result) throw new Error(job.error || 'Room staging failed');
-      if (job.status === 'needs_review') { setReviewStage({ source, photo, job }); return; }
-      addRoomPreview(design.id, { design_id: design.id, brand_id: currentBrandId, room_source: source, room_photo_url: photo, output_url: job.result.finalImage, provider_used: 'render_agent', candidates: job.candidates });
-      setSelectedPreviewIndex(roomPreviews.length);
-      setTimeout(() => scrollTo('design-room'), 50);
-    } catch (err: any) {
-      if (err?.code === 'CANCELLED') return;
-      setError(err.message || 'Room staging failed.');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } finally {
-      setIsStaging(false);
-      setActiveJob(null);
-    }
-  };
-
-  const acceptReviewStage = () => {
-    if (!reviewStage) return;
-    const { source, photo, job } = reviewStage;
-    addRoomPreview(design.id, { design_id: design.id, brand_id: currentBrandId, room_source: source, room_photo_url: photo, output_url: job.result!.finalImage, provider_used: 'render_agent', candidates: job.candidates });
-    setSelectedPreviewIndex(roomPreviews.length);
-    setReviewStage(null);
   };
 
   const sectionHeader = (id: string, step: string, title: string, lede: string) => (
@@ -226,16 +175,9 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
 
       {/* Step 4: Room */}
       <section className="brand-card space-y-4 p-5 sm:p-6">
-        {sectionHeader('design-room', 'Step 4', 'Room', 'Stage the curtain in a real room photo. The AI keeps the walls, floor, and furniture and hangs your curtain on the window.')}
+        {sectionHeader('design-room', 'Step 4', 'Room', 'See this curtain in a customer\'s room. The room stays as photographed; you can also change the light.')}
 
-        {isStaging ? (
-          <div className="relative flex h-80 flex-col items-center justify-center overflow-hidden rounded-2xl bg-[var(--color-bg-sunken)]">
-            <div className="ai-generation-shimmer absolute inset-0" />
-            <Sparkles className="z-10 h-8 w-8 animate-spin text-[var(--color-accent)]" />
-            <p className="z-10 mt-3 text-[13px] font-semibold">{activeJob ? STAGE_COPY[activeJob.stage] : 'Starting…'}</p>
-            <p className="z-10 text-[12px] text-[var(--color-text-secondary)]">Finding the window, trying 3 options, checking each. About a minute.</p>
-          </div>
-        ) : currentPreview ? (
+        {currentPreview ? (
           <div className="space-y-3">
             <div
               className="relative mx-auto aspect-[16/10] w-full max-w-4xl cursor-ew-resize touch-none overflow-hidden rounded-2xl bg-neutral-100 shadow-lg select-none"
@@ -262,32 +204,19 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
                   <img src={p.output_url} alt={`Room ${idx + 1}`} className="h-full w-full object-cover" />
                 </button>
               ))}
-              <label className="flex h-16 shrink-0 cursor-pointer items-center gap-2 rounded-xl border-2 border-dashed border-[var(--color-border-strong)] bg-[var(--color-bg-sunken)] px-4 text-[12px] font-semibold text-[var(--color-text-secondary)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]">
-                <Plus className="h-4 w-4" /> Stage in another room
-                <input type="file" accept="image/*" className="hidden" onChange={chooseRoomFile} />
-              </label>
+              <button type="button" onClick={() => setActiveView('room')} className="flex h-16 shrink-0 items-center gap-2 rounded-xl border-2 border-dashed border-[var(--color-border-strong)] bg-[var(--color-bg-sunken)] px-4 text-[12px] font-semibold text-[var(--color-text-secondary)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]">
+                <Plus className="h-4 w-4" /> Place in another room
+              </button>
             </div>
           </div>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="brand-card brand-card-interactive flex cursor-pointer items-center gap-4 p-4">
-              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-tint)] text-[var(--color-accent)]"><Upload className="h-6 w-6" /></span>
-              <span>
-                <span className="block text-[14px] font-semibold">Upload a room photo</span>
-                <span className="block text-[12px] text-[var(--color-text-secondary)]">A straight-on photo of the wall with the window works best.</span>
-              </span>
-              <input type="file" accept="image/*" className="hidden" onChange={chooseRoomFile} />
-            </label>
-            {templateHasRealRoom && template && (
-              <button type="button" onClick={() => setPendingRoom({ source: 'template_original', photo: template.real_photo_url || template.original_image_url })} className="brand-card brand-card-interactive flex items-center gap-4 p-4 text-left">
-                <img src={template.real_photo_url || template.original_image_url} alt="" className="h-14 w-14 shrink-0 rounded-xl object-cover" />
-                <span>
-                  <span className="block text-[14px] font-semibold">Use the style's original room</span>
-                  <span className="block text-[12px] text-[var(--color-text-secondary)]">Reuses the photo this curtain style came from.</span>
-                </span>
-              </button>
-            )}
-          </div>
+          <button type="button" onClick={() => setActiveView('room')} className="brand-card brand-card-interactive flex items-center gap-4 p-4 text-left">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-tint)] text-[var(--color-accent)]"><Upload className="h-6 w-6" /></span>
+            <span>
+              <span className="block text-[14px] font-semibold">Place in a room</span>
+              <span className="block text-[12px] text-[var(--color-text-secondary)]">Add a room photo, pick daylight or evening light, and see this curtain on the window.</span>
+            </span>
+          </button>
         )}
       </section>
 
@@ -317,49 +246,7 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
         </div>
       </section>
 
-      {pendingRoom && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1A1814]/45 p-4 backdrop-blur-sm" onClick={() => setPendingRoom(null)}>
-          <div role="dialog" aria-label="Confirm room photo" className="brand-card w-full max-w-2xl space-y-4 p-5" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="eyebrow-label">Step 4</p>
-                <h3 className="mt-0.5 font-display text-[18px] font-semibold">Stage this curtain in this room?</h3>
-                <p className="text-[13px] text-[var(--color-text-secondary)]">The room stays as photographed. Only the window dressing changes.</p>
-              </div>
-              <button type="button" onClick={() => setPendingRoom(null)} className="btn btn-ghost btn-sm" aria-label="Close"><X className="h-4 w-4" /></button>
-            </div>
-            <div className="grid grid-cols-[minmax(0,1fr)_120px] gap-3">
-              <div className="media-frame aspect-[16/10] rounded-[14px]"><img src={pendingRoom.photo} alt="Room" className="h-full w-full object-cover" /></div>
-              <div className="media-frame aspect-[4/5] rounded-[14px]"><img src={design.final_image_url} alt="Curtain" className="h-full w-full object-cover" /></div>
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <label className="btn btn-ghost cursor-pointer">Choose another photo<input type="file" accept="image/*" className="hidden" onChange={chooseRoomFile} /></label>
-              <button type="button" onClick={handleStage} className="btn btn-primary"><Sparkles className="h-3.5 w-3.5" /> Stage curtain in this room</button>
-            </div>
-            <p className="text-[11px] text-[var(--color-text-tertiary)]">Uses 1 monthly render.</p>
-          </div>
-        </div>
-      )}
 
-      {reviewStage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1A1814]/45 p-4 backdrop-blur-sm">
-          <div role="dialog" aria-label="Review staging" className="brand-card w-full max-w-2xl space-y-4 p-5">
-            <div>
-              <p className="eyebrow-label">Needs review</p>
-              <h3 className="mt-0.5 font-display text-[18px] font-semibold">No staging option passed the quality check</h3>
-              <p className="text-[13px] text-[var(--color-text-secondary)]">This is the best of {reviewStage.job.candidates.length}. Keep it, or try again.</p>
-            </div>
-            <div className="media-frame aspect-[16/10] rounded-[14px]"><img src={reviewStage.job.result!.finalImage} alt="Best staging option" className="h-full w-full object-cover" /></div>
-            <ul className="space-y-1 text-[12px] text-[var(--color-text-secondary)]">
-              {reviewStage.job.candidates.find((c) => c.id === reviewStage.job.result!.chosenId)?.scores.filter((s) => s.score < 6).map((s) => <li key={s.key}>{s.key.replace(/_/g, ' ')}: {s.reason}</li>)}
-            </ul>
-            <div className="flex items-center justify-end gap-2">
-              <button type="button" onClick={() => { const r = reviewStage; setReviewStage(null); setPendingRoom({ source: r.source, photo: r.photo }); }} className="btn btn-ghost">Rerun</button>
-              <button type="button" onClick={acceptReviewStage} className="btn btn-primary">Accept</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

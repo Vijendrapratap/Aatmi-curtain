@@ -52,6 +52,7 @@ export interface BrandStoreState {
   activeView:
     | 'dashboard'
     | 'editor'
+    | 'room'
     | 'library_styles'
     | 'library_fabrics'
     | 'design_detail'

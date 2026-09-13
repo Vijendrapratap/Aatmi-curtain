@@ -23,6 +23,15 @@ export const STAGE_COPY: Record<RenderJobView['stage'], string> = {
   store: 'Finishing',
 };
 
+export type Lighting = 'as_photographed' | 'daylight' | 'golden_hour' | 'evening' | 'night';
+export const LIGHTING_OPTIONS: Array<{ id: Lighting; label: string; hint: string }> = [
+  { id: 'as_photographed', label: 'As photographed', hint: 'Keeps the original light; background stays pixel-identical.' },
+  { id: 'daylight', label: 'Daylight', hint: 'Bright natural light from the window.' },
+  { id: 'golden_hour', label: 'Golden hour', hint: 'Warm late-afternoon sun, long soft shadows.' },
+  { id: 'evening', label: 'Evening', hint: 'Warm lamp light, dim window.' },
+  { id: 'night', label: 'Night', hint: 'Dark window, room lit by lamps.' },
+];
+
 export const POLL_INTERVAL_MS = 2000;
 export const POLL_MAX_WAIT_MS = 300_000;
 

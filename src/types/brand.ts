@@ -67,6 +67,7 @@ export interface RoomPreview {
   provider_used: string;
   created_at: string;
   candidates?: RenderCandidate[];
+  lighting?: string;
 }
 
 export interface Design {
@@ -86,6 +87,7 @@ export interface Design {
   render_kind: 'preview' | 'photoreal';
   render_candidates?: RenderCandidate[];
   render_prompt?: string;
+  lighting?: string;
   created_at: string;
   created_by_user_id: string;
   room_previews: RoomPreview[];

@@ -54,6 +54,24 @@ Keep the rod, wall, floor, window and everything outside the curtain exactly as 
   });
 });
 
+describe('lighting', () => {
+  it('relights the curtain photo and relaxes the preservation clause', () => {
+    const p = buildFabricSwapPrompt({ ...base, lighting: 'night' });
+    expect(p.text).toContain('Relight the whole photograph as night time');
+    expect(p.text).toContain('Light the fabric consistently with the new lighting');
+    expect(p.text).toContain('as in Image 1 apart from the lighting');
+    expect(p.text).not.toContain('Keep the original lighting');
+  });
+  it('as_photographed changes nothing', () => {
+    expect(buildFabricSwapPrompt({ ...base, lighting: 'as_photographed' }).text).toBe(buildFabricSwapPrompt(base).text);
+  });
+  it('relights a staged room', () => {
+    const p = buildRoomStagePrompt({ kind: 'room_stage', brandId: 'b', roomPhoto: PHOTO, curtainImage: SWATCH_A, lighting: 'golden_hour' }, { x: 0, y: 0, width: 100, height: 100 });
+    expect(p.text).toContain('Relight the whole room as warm late-afternoon');
+    expect(p.text).toContain('apart from the lighting');
+  });
+});
+
 describe('buildRoomStagePrompt', () => {
   const input: RoomStageInput = { kind: 'room_stage', brandId: 'b', roomPhoto: PHOTO, curtainImage: SWATCH_A };
   it('attaches room then curtain and writes the window box as percentages', () => {

@@ -1,5 +1,7 @@
 // src/server/renderAgent/types.ts
 export type RenderJobKind = 'fabric_swap' | 'room_stage';
+export type Lighting = 'as_photographed' | 'daylight' | 'golden_hour' | 'evening' | 'night';
+export const LIGHTINGS: Lighting[] = ['as_photographed', 'daylight', 'golden_hour', 'evening', 'night'];
 export type JobStatus = 'queued' | 'running' | 'done' | 'needs_review' | 'failed';
 export type JobStage = 'prompt' | 'generate' | 'grade' | 'lock' | 'store';
 
@@ -30,6 +32,7 @@ export interface FabricSwapInput {
   zones: ZoneInput[];
   changes: ZoneChange[];
   curtainMask?: string; // optional data URL override; derived from polygons when absent
+  lighting?: Lighting; // anything but as_photographed relights the whole image and skips the pixel lock
 }
 
 export interface RoomStageInput {
@@ -37,6 +40,7 @@ export interface RoomStageInput {
   brandId: string;
   roomPhoto: string; // data URL
   curtainImage: string; // data URL
+  lighting?: Lighting;
 }
 
 export type RenderJobInput = FabricSwapInput | RoomStageInput;

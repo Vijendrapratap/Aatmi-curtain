@@ -1,11 +1,11 @@
 // src/components/brand/GeneratePage.tsx
 // One screen: a curtain design in, fabrics for its areas in, a client-grade image out.
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Upload, Camera, Sparkles, Download, X, RefreshCw, Sofa, Check, Images, AlertCircle, Search } from 'lucide-react';
+import { Upload, Camera, Sparkles, Download, X, RefreshCw, Sofa, Check, Images, AlertCircle, Search, Save, Sun } from 'lucide-react';
 import { useBrandStore } from '../../lib/brandStore';
 import { useStudioStore } from '../../lib/store';
 import { CurtainTemplate, Fabric } from '../../types/curtain';
-import { startRender, pollRender, chooseCandidate, toDataUrl, STAGE_COPY, RenderJobView } from '../../lib/renderClient';
+import { startRender, pollRender, chooseCandidate, toDataUrl, STAGE_COPY, RenderJobView, LIGHTING_OPTIONS, Lighting } from '../../lib/renderClient';
 import { CameraCaptureModal } from './CameraCaptureModal';
 import { StylePickerModal } from './StylePickerModal';
 
@@ -27,13 +27,12 @@ interface DesignInput {
 interface Generation {
   id: string;
   at: string;
-  designId: string;
+  designId?: string; // set once saved
   design: DesignInput;
   slots: Record<string, Fabric | undefined>;
+  lighting: Lighting;
   job: RenderJobView;
   finalImage: string;
-  roomPhoto?: string;
-  roomImage?: string;
 }
 
 const MIN_WIDTH = 240; // below this the analyzer has nothing to work with
@@ -70,7 +69,7 @@ function centreOf(polygon: Array<{ x: number; y: number }>) {
 }
 
 export const GeneratePage: React.FC = () => {
-  const { brandTemplates, brandFabrics, currentBrandId, saveDesign, updateDesign, addRoomPreview, addBrandFabric, setActiveDesignId, setActiveView } = useBrandStore();
+  const { brandTemplates, brandFabrics, currentBrandId, saveDesign, updateDesign, addBrandFabric, setActiveDesignId, setActiveView } = useBrandStore();
   const { selectedTemplateId } = useStudioStore();
 
   const fabrics = useMemo(() => brandFabrics.filter((f) => (f.brand_id === currentBrandId || !f.brand_id) && isPhotographic(f)), [brandFabrics, currentBrandId]);
@@ -86,10 +85,10 @@ export const GeneratePage: React.FC = () => {
   const [job, setJob] = useState<RenderJobView | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isChoosing, setIsChoosing] = useState(false);
-  const [isStaging, setIsStaging] = useState(false);
+  const [lighting, setLighting] = useState<Lighting>('as_photographed');
+  const [saveName, setSaveName] = useState<string | null>(null);
   const [current, setCurrent] = useState<Generation | null>(null);
   const [history, setHistory] = useState<Generation[]>([]);
-  const [resultTab, setResultTab] = useState<'curtain' | 'room'>('curtain');
   const abortRef = useRef<AbortController | null>(null);
 
   const cancelJob = () => { abortRef.current?.abort(); abortRef.current = null; };
@@ -206,7 +205,6 @@ export const GeneratePage: React.FC = () => {
     setIsGenerating(true);
     setNotice(null);
     setJob(null);
-    setResultTab('curtain');
     try {
       const templatePhoto = await toDataUrl(design.image);
       const changes = [];
@@ -221,25 +219,14 @@ export const GeneratePage: React.FC = () => {
         templatePhoto,
         zones: design.areas.map((a) => ({ id: a.id, display_name: a.name, description: a.description, location: a.location, polygon_coords: a.polygon })),
         changes,
+        lighting,
       };
       const done = await pollRender(await startRender(body), setJob, { signal: controller.signal });
       if (done.status === 'failed' || !done.result) throw new Error(done.error || 'Generation did not finish.');
-      const saved = saveDesign({
-        brand_id: currentBrandId,
-        template_id: design.templateId || `upload-${Date.now()}`,
-        template_name: design.name,
-        name: `${design.name} · ${changedAreas.map((a) => slots[a.id]!.name).join(', ')}`,
-        assignments: changedAreas.map((a) => ({ region_id: a.id, fabric_id: slots[a.id]!.id, scale: 1, rotation: 0 })),
-        final_image_url: done.result.finalImage,
-        render_kind: 'photoreal',
-        created_by_user_id: 'usr-current',
-        room_previews: [],
-        render_candidates: done.candidates,
-        render_prompt: done.result.prompt,
-      });
-      const gen: Generation = { id: done.id, at: new Date().toISOString(), designId: saved.id, design, slots: { ...slots }, job: done, finalImage: done.result.finalImage };
+      const gen: Generation = { id: done.id, at: new Date().toISOString(), design, slots: { ...slots }, lighting, job: done, finalImage: done.result.finalImage };
       setCurrent(gen);
       setHistory((h) => [gen, ...h]);
+      setSaveName(null);
       if (done.status === 'needs_review') setNotice({ kind: 'info', text: 'None of the three options passed every quality check. The best one is shown; try another variation or generate again.' });
     } catch (err: any) {
       if (err?.code !== 'CANCELLED') setNotice({ kind: 'error', text: err.message || 'Generation did not finish.' });
@@ -247,6 +234,40 @@ export const GeneratePage: React.FC = () => {
       setIsGenerating(false);
       abortRef.current = null;
     }
+  };
+
+  const defaultName = (g: Generation) => `${g.design.name} · ${g.design.areas.filter((a) => g.slots[a.id]).map((a) => g.slots[a.id]!.name).join(', ') || 'as photographed'}`;
+
+  /** Saves the current generation as a Design (once); returns its id. */
+  const saveCurrent = (name?: string): string | undefined => {
+    if (!current) return undefined;
+    if (current.designId) { if (name) updateDesign(current.designId, { name }); return current.designId; }
+    const g = current;
+    const saved = saveDesign({
+      brand_id: currentBrandId,
+      template_id: g.design.templateId || `upload-${g.id}`,
+      template_name: g.design.name,
+      name: (name || '').trim() || defaultName(g),
+      assignments: g.design.areas.filter((a) => g.slots[a.id]).map((a) => ({ region_id: a.id, fabric_id: g.slots[a.id]!.id, scale: 1, rotation: 0 })),
+      final_image_url: g.finalImage,
+      render_kind: 'photoreal',
+      created_by_user_id: 'usr-current',
+      room_previews: [],
+      render_candidates: g.job.candidates,
+      render_prompt: g.job.result?.prompt,
+      lighting: g.lighting,
+    });
+    const withId = { ...g, designId: saved.id };
+    setCurrent(withId);
+    setHistory((h) => h.map((x) => (x.id === withId.id ? withId : x)));
+    return saved.id;
+  };
+
+  const goToRoom = () => {
+    const id = saveCurrent();
+    if (!id) return;
+    setActiveDesignId(id);
+    setActiveView('room');
   };
 
   const handleChoose = async (candidateId: string) => {
@@ -258,40 +279,11 @@ export const GeneratePage: React.FC = () => {
       const gen = { ...current, job: updated, finalImage: updated.result.finalImage };
       setCurrent(gen);
       setHistory((h) => h.map((g) => (g.id === gen.id ? gen : g)));
-      updateDesign(current.designId, { final_image_url: updated.result.finalImage });
-      setResultTab('curtain');
+      if (current.designId) updateDesign(current.designId, { final_image_url: updated.result.finalImage });
     } catch (err: any) {
       setNotice({ kind: 'error', text: err.message || 'Could not switch to that variation.' });
     } finally {
       setIsChoosing(false);
-    }
-  };
-
-  const handleRoomFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file || !current) return;
-    const roomPhoto = await readFile(file);
-    cancelJob();
-    const controller = new AbortController();
-    abortRef.current = controller;
-    setIsStaging(true);
-    setNotice(null);
-    setResultTab('room');
-    try {
-      const body = { kind: 'room_stage' as const, brandId: currentBrandId, roomPhoto: await toDataUrl(roomPhoto), curtainImage: await toDataUrl(current.finalImage) };
-      const done = await pollRender(await startRender(body), setJob, { signal: controller.signal });
-      if (done.status === 'failed' || !done.result) throw new Error(done.error || 'Room placement did not finish.');
-      const gen = { ...current, roomPhoto, roomImage: done.result.finalImage };
-      setCurrent(gen);
-      setHistory((h) => h.map((g) => (g.id === gen.id ? gen : g)));
-      addRoomPreview(current.designId, { design_id: current.designId, brand_id: currentBrandId, room_source: 'uploaded', room_photo_url: roomPhoto, output_url: done.result.finalImage, provider_used: 'render_agent', candidates: done.candidates });
-    } catch (err: any) {
-      if (err?.code !== 'CANCELLED') setNotice({ kind: 'error', text: err.message || 'Room placement did not finish.' });
-      setResultTab('curtain');
-    } finally {
-      setIsStaging(false);
-      abortRef.current = null;
     }
   };
 
@@ -308,12 +300,13 @@ export const GeneratePage: React.FC = () => {
     setSlots(g.slots);
     setJob(g.job);
     setCurrent(g);
-    setResultTab(g.roomImage ? 'room' : 'curtain');
+    setLighting(g.lighting);
+    setSaveName(null);
     setNotice(null);
   };
 
-  const busy = isGenerating || isStaging;
-  const shownImage = resultTab === 'room' && current?.roomImage ? current.roomImage : current?.finalImage;
+  const busy = isGenerating;
+  const shownImage = current?.finalImage;
   const stageLine = job && busy ? `${STAGE_COPY[job.stage]}${job.round > 1 ? ` · round ${job.round}` : ''}` : busy ? 'Starting…' : '';
 
   return (
@@ -401,6 +394,16 @@ export const GeneratePage: React.FC = () => {
               })}
             </ul>
           )}
+          {design && (
+            <div>
+              <span className="text-[12px] font-semibold"><Sun className="mr-1.5 inline h-3.5 w-3.5 text-[var(--color-accent)]" />Light</span>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {LIGHTING_OPTIONS.map((o) => (
+                  <button key={o.id} type="button" title={o.hint} onClick={() => setLighting(o.id)} className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${lighting === o.id ? 'bg-[var(--color-accent)] text-white' : 'bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}>{o.label}</button>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="mt-auto pt-2">
             <button type="button" className="btn btn-primary btn-block" disabled={!design || busy || isAnalyzing || designTooSmall} onClick={handleGenerate}>
               <Sparkles className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />{isGenerating ? stageLine : current ? 'Generate again' : 'Generate'}
@@ -414,9 +417,9 @@ export const GeneratePage: React.FC = () => {
           <div className="flex items-center justify-between gap-2">
             <span className="text-[13px] font-semibold"><span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-accent)] text-[11px] text-white">3</span>Result</span>
             {current && (
-              <div className="flex items-center gap-1">
-                <button type="button" className={`btn btn-sm ${resultTab === 'curtain' ? 'btn-secondary' : 'btn-ghost'}`} onClick={() => setResultTab('curtain')}>Curtain</button>
-                {current.roomImage && <button type="button" className={`btn btn-sm ${resultTab === 'room' ? 'btn-secondary' : 'btn-ghost'}`} onClick={() => setResultTab('room')}>Room</button>}
+              <div className="flex items-center gap-2">
+                {current.lighting !== 'as_photographed' && <span className="badge badge-muted">{LIGHTING_OPTIONS.find((o) => o.id === current.lighting)?.label}</span>}
+                {current.designId ? <span className="badge badge-accent"><Check className="mr-1 inline h-3 w-3" />Saved</span> : <span className="badge badge-muted">Not saved</span>}
               </div>
             )}
           </div>
@@ -432,7 +435,7 @@ export const GeneratePage: React.FC = () => {
             {busy && shownImage && <span className="absolute top-3 left-3 rounded-[10px] bg-[var(--color-bg-surface)]/90 px-3 py-2 text-[12px] font-semibold shadow-[var(--shadow-ring)]">{stageLine}</span>}
           </div>
 
-          {current && resultTab === 'curtain' && current.job.candidates.length > 1 && (
+          {current && current.job.candidates.length > 1 && (
             <div className={`flex items-center gap-2 overflow-x-auto ${isChoosing ? 'pointer-events-none opacity-60' : ''}`}>
               <span className="shrink-0 text-[11px] text-[var(--color-text-tertiary)]">Variations</span>
               {current.job.candidates.map((c, i) => (
@@ -445,10 +448,20 @@ export const GeneratePage: React.FC = () => {
           )}
 
           {current && (
-            <div className="flex flex-wrap items-center gap-2">
-              <button type="button" className="btn btn-secondary btn-sm" onClick={() => download(shownImage!, resultTab)}><Download className="h-3.5 w-3.5" /> Download</button>
-              <label className={`btn btn-secondary btn-sm cursor-pointer ${busy ? 'pointer-events-none opacity-60' : ''}`}><Sofa className="h-3.5 w-3.5" /> {current.roomImage ? 'Place in another room' : 'Place in a room'}<input type="file" accept="image/*" className="hidden" onChange={handleRoomFile} /></label>
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setActiveDesignId(current.designId); setActiveView('design_detail'); }}>Open in Designs</button>
+            <div className="space-y-2">
+              {saveName !== null && !current.designId && (
+                <form className="flex items-center gap-2" onSubmit={(e) => { e.preventDefault(); saveCurrent(saveName); setSaveName(null); }}>
+                  <input autoFocus className="field h-9 flex-1 text-[13px]" value={saveName} onChange={(e) => setSaveName(e.target.value)} placeholder="Design name" aria-label="Design name" />
+                  <button type="submit" className="btn btn-primary btn-sm">Save</button>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setSaveName(null)}>Cancel</button>
+                </form>
+              )}
+              <div className="flex flex-wrap items-center gap-2">
+                {!current.designId && saveName === null && <button type="button" className="btn btn-primary btn-sm" onClick={() => setSaveName(defaultName(current))}><Save className="h-3.5 w-3.5" /> Save</button>}
+                <button type="button" className="btn btn-secondary btn-sm" disabled={busy} onClick={goToRoom}><Sofa className="h-3.5 w-3.5" /> Place in a room</button>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => download(shownImage!, 'curtain')}><Download className="h-3.5 w-3.5" /> Download</button>
+                {current.designId && <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setActiveDesignId(current.designId!); setActiveView('design_detail'); }}>Open in Designs</button>}
+              </div>
             </div>
           )}
         </section>
@@ -460,8 +473,8 @@ export const GeneratePage: React.FC = () => {
           <div className="flex items-stretch gap-3 overflow-x-auto pb-1">
             {history.map((g) => (
               <button key={g.id} type="button" onClick={() => restore(g)} className={`flex w-[200px] shrink-0 flex-col gap-1.5 rounded-[12px] p-2 text-left ${current?.id === g.id ? 'bg-[var(--color-accent-tint)] ring-1 ring-[var(--color-accent)]' : 'hover:bg-[var(--color-bg-sunken)]'}`}>
-                <img src={g.roomImage || g.finalImage} alt="" className="h-28 w-full rounded-[8px] object-cover" />
-                <span className="truncate text-[12px] font-semibold">{g.design.name}</span>
+                <img src={g.finalImage} alt="" className="h-28 w-full rounded-[8px] object-cover" />
+                <span className="truncate text-[12px] font-semibold">{g.designId ? '✓ ' : ''}{g.design.name}</span>
                 <span className="truncate text-[11px] text-[var(--color-text-tertiary)]">{(Object.values(g.slots) as Array<Fabric | undefined>).filter((f): f is Fabric => Boolean(f)).map((f) => f.name).join(', ') || 'no fabric change'} · {new Date(g.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </button>
             ))}

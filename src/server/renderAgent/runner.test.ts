@@ -116,6 +116,18 @@ describe('runRenderJob fabric_swap', () => {
   });
 });
 
+describe('runRenderJob lighting', () => {
+  it('skips the pixel lock when the image is relit', async () => {
+    const store = new JobStore();
+    const input = { ...(await fabricInput()), lighting: 'night' as const };
+    const job = store.create(input, 'k');
+    const blue = await solid(40, 50, [0, 0, 255]);
+    const out = await runRenderJob(job, { generate: async () => blue, ask: async () => gradeReply(9), sleep: async () => undefined });
+    expect(out.status).toBe('done');
+    expect(out.result?.finalImage).toBe(blue);
+  });
+});
+
 describe('runRenderJob room_stage', () => {
   it('detects the window, prompts with it, and locks with the bbox mask', async () => {
     const store = new JobStore();

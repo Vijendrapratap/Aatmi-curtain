@@ -7,6 +7,7 @@ import { OnboardingWizard } from './components/brand/OnboardingWizard';
 import { BrandHeader } from './components/brand/BrandHeader';
 import { BrandDashboard } from './components/brand/BrandDashboard';
 import { GeneratePage } from './components/brand/GeneratePage';
+import { RoomPage } from './components/brand/RoomPage';
 import { LibraryPage } from './components/brand/library/LibraryPage';
 import { DesignDetailView } from './components/brand/DesignDetailView';
 import { BrandSettingsView } from './components/brand/BrandSettingsView';
@@ -105,6 +106,7 @@ export default function App() {
         )}
 
         {activeView === 'editor' && <GeneratePage />}
+        {activeView === 'room' && <RoomPage />}
 
         {activeView === 'design_detail' && (
           <DesignDetailView onOpenSpecSheet={() => setIsSpecSheetOpen(true)} />

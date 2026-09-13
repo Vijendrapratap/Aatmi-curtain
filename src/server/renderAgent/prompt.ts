@@ -1,5 +1,16 @@
 // src/server/renderAgent/prompt.ts
-import type { BuiltPrompt, FabricSwapInput, RoomStageInput, Bbox, ZoneInput } from './types';
+import type { BuiltPrompt, FabricSwapInput, RoomStageInput, Bbox, ZoneInput, Lighting } from './types';
+
+export const LIGHTING_TEXT: Record<Exclude<Lighting, 'as_photographed'>, string> = {
+  daylight: 'bright natural daylight from the window, soft neutral shadows',
+  golden_hour: 'warm late-afternoon golden-hour sunlight streaming through the window, long soft shadows',
+  evening: 'evening interior light from warm lamps, the window dim, gentle pools of light on the fabric',
+  night: 'night time, the window dark, the room lit only by warm lamps, deep soft shadows',
+};
+
+export function isRelit(lighting?: Lighting): lighting is Exclude<Lighting, 'as_photographed'> {
+  return Boolean(lighting) && lighting !== 'as_photographed';
+}
 
 const PRESERVE_TAIL =
   'Keep the rod, wall, floor, window and everything outside the curtain exactly as in Image 1. No text, no watermark, no added objects, no change of camera angle or crop.';
@@ -26,19 +37,26 @@ export function buildFabricSwapPrompt(input: FabricSwapInput, previousProblems?:
     .concat(changed.map(({ zone }, i) => `Image ${i + 2}: fabric for the ${zone.display_name}.`))
     .join('\n');
 
+  const relit = isRelit(input.lighting);
+  const lightLine = relit ? 'Light the fabric consistently with the new lighting described below.' : 'Keep the original lighting, shadows and highlights.';
   const instructions = changed
     .map(({ change, zone }, i) =>
-      `Replace the ${zoneLabel(zone)} entirely with the fabric in Image ${i + 2} (${change.fabricName}, ${change.weave}, colour ${change.colorHex}). The fabric must fall into the existing pleats and folds. Pattern repeat about 1/20 of the curtain height. Keep the original lighting, shadows and highlights.`
+      `Replace the ${zoneLabel(zone)} entirely with the fabric in Image ${i + 2} (${change.fabricName}, ${change.weave}, colour ${change.colorHex}). The fabric must fall into the existing pleats and folds. Pattern repeat about 1/20 of the curtain height. ${lightLine}`
     )
     .join('\n\n');
 
   const untouchedClause = untouched.length
-    ? `Leave these zones exactly as they are in Image 1: ${untouched.map(zoneLabel).join('; ')}.\n`
+    ? `Leave these zones ${relit ? 'as they are in Image 1 apart from the lighting' : 'exactly as they are in Image 1'}: ${untouched.map(zoneLabel).join('; ')}.\n`
     : '';
+
+  const relightClause = relit
+    ? `Relight the whole photograph as ${LIGHTING_TEXT[input.lighting as Exclude<Lighting, 'as_photographed'>]}. Keep the geometry, framing and every surface the same; only the light changes.\n`
+    : '';
+  const preserve = relit ? PRESERVE_TAIL.replace('exactly as in Image 1', 'as in Image 1 apart from the lighting') : PRESERVE_TAIL;
 
   const text =
     `Edit Image 1, a photograph of a curtain, by changing the fabric of specific zones. Return one photograph with the same framing.\n\n` +
-    `${legend}\n\n${instructions}\n\n${untouchedClause}${PRESERVE_TAIL}` +
+    `${legend}\n\n${instructions}\n\n${untouchedClause}${relightClause}${preserve}` +
     problemsTail(previousProblems);
 
   return { text, images: [input.templatePhoto, ...changed.map(({ change }) => change.swatch)] };
@@ -48,11 +66,18 @@ export function buildRoomStagePrompt(input: RoomStageInput, windowBbox: Bbox, pr
   const r = (n: number) => Math.round(n);
   const x2 = r(windowBbox.x + windowBbox.width);
   const y2 = r(windowBbox.y + windowBbox.height);
+  const relit = isRelit(input.lighting);
+  const light = relit
+    ? `Relight the whole room as ${LIGHTING_TEXT[input.lighting as Exclude<Lighting, 'as_photographed'>]}, and light the curtains to match, with soft contact shadows on the floor.`
+    : `Match the room's daylight and cast soft contact shadows on the floor.`;
+  const keep = relit
+    ? `Keep the furniture, floor, walls, ceiling and everything outside the window as in Image 1 apart from the lighting.`
+    : `Keep the furniture, floor, walls, ceiling, lighting and everything outside the window exactly as in Image 1.`;
   const text =
     `Edit Image 1, a photograph of a real room, by hanging the curtains shown in Image 2 on its window. Return one photograph with the same framing.\n\n` +
     `Image 1: the room photograph.\nImage 2: the curtain design to hang.\n\n` +
-    `The window occupies roughly x ${r(windowBbox.x)}-${x2}%, y ${r(windowBbox.y)}-${y2}% of Image 1. Mount the curtains from Image 2 across that window from ceiling to floor at a plausible scale, keeping their fabrics, bands and pleats exactly as shown. Match the room's daylight and cast soft contact shadows on the floor.\n\n` +
-    `Keep the furniture, floor, walls, ceiling, lighting and everything outside the window exactly as in Image 1. No text, no watermark, no added objects, no change of camera angle or crop.` +
+    `The window occupies roughly x ${r(windowBbox.x)}-${x2}%, y ${r(windowBbox.y)}-${y2}% of Image 1. Mount the curtains from Image 2 across that window from ceiling to floor at a plausible scale, keeping their fabrics, bands and pleats exactly as shown. ${light}\n\n` +
+    `${keep} No text, no watermark, no added objects, no change of camera angle or crop.` +
     problemsTail(previousProblems);
   return { text, images: [input.roomPhoto, input.curtainImage] };
 }

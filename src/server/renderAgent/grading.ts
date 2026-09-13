@@ -26,7 +26,7 @@ export const RUBRICS: Record<RenderJobKind, Array<{ key: string; question: strin
 
 export function buildGradePrompt(
   kind: RenderJobKind,
-  context: { changes?: Array<{ zoneName: string; fabricName: string }> }
+  context: { changes?: Array<{ zoneName: string; fabricName: string }>; relitAs?: string }
 ): { text: string } {
   const changes = context.changes ?? [];
   const legend =
@@ -41,8 +41,11 @@ export function buildGradePrompt(
       : 'The curtains from Image 2 should hang on the window of Image 1.';
   const items = RUBRICS[kind].map((r) => `- "${r.key}": ${r.question}`).join('\n');
   const schema = JSON.stringify({ items: RUBRICS[kind].map((r) => ({ key: r.key, score: 0, reason: '' })) });
+  const relitNote = context.relitAs
+    ? ` The scene was intentionally relit as ${context.relitAs}: do not penalise changes in brightness, colour temperature or shadows anywhere; judge only that folds and pleats follow the original and that the lighting is consistent across the whole image.`
+    : '';
   const text =
-    `You are a strict photo retoucher grading an AI edit.\n\n${legend.join('\n')}\n\nExpected change: ${expectation}\n\n` +
+    `You are a strict photo retoucher grading an AI edit.\n\n${legend.join('\n')}\n\nExpected change: ${expectation}${relitNote}\n\n` +
     `Score each item from 0 (unacceptable) to 10 (perfect) and give a one-sentence reason:\n${items}\n\n` +
     `Reply with exactly this JSON shape: ${schema}\nOutput valid JSON only.`;
   return { text };

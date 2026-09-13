@@ -3,7 +3,7 @@ import type { Bbox, BuiltPrompt, Candidate, RenderJob } from './types';
 import type { GenerateRequest, VisionRequest } from './imageClient';
 import { generateImage, askVision } from './imageClient';
 import { detectWindow as defaultDetectWindow } from './windowDetect';
-import { buildFabricSwapPrompt, buildRoomStagePrompt, closestAspectRatio } from './prompt';
+import { buildFabricSwapPrompt, buildRoomStagePrompt, closestAspectRatio, isRelit, LIGHTING_TEXT } from './prompt';
 import { buildGradePrompt, gradeImages, parseGrade, passes, total, retryFeedback } from './grading';
 import { getImageSize, polygonMaskPng, bboxMaskPng, lockOutsideMask } from './lock';
 import { withRetry, FatalError } from './errors';
@@ -41,6 +41,11 @@ async function buildMask(job: RenderJob, width: number, height: number): Promise
 
 /** Re-runs the lock stage for another candidate of a finished job, rebuilding the mask the runner used. */
 export async function lockCandidate(job: RenderJob, candidateId: string): Promise<string> {
+  if (isRelit(job.input.lighting)) {
+    const relitCandidate = job.candidates.find((c) => c.id === candidateId);
+    if (!relitCandidate) throw new FatalError('Unknown candidate', 'BAD_REQUEST');
+    return relitCandidate.image; // a relit image cannot be locked against the original's lighting
+  }
   const candidate = job.candidates.find((c) => c.id === candidateId);
   if (!candidate) throw new FatalError('Unknown candidate for this render', 'BAD_REQUEST');
   const original = originalOf(job);
@@ -73,9 +78,11 @@ export async function runRenderJob(job: RenderJob, partial: Partial<RunnerDeps> 
     const gradeContext = job.input.kind === 'fabric_swap'
       ? { changes: job.input.changes.map((c) => ({ zoneName: zones.find((z) => z.id === c.regionId)?.display_name ?? c.regionId, fabricName: c.fabricName })) }
       : {};
-    const gradePrompt = buildGradePrompt(job.kind, gradeContext).text;
+    const relitAs = isRelit(job.input.lighting) ? LIGHTING_TEXT[job.input.lighting] : undefined;
+    const gradePrompt = buildGradePrompt(job.kind, { ...gradeContext, relitAs }).text;
 
-    const mask = await buildMask(job, width, height);
+    const relit = isRelit(job.input.lighting);
+    const mask = relit ? '' : await buildMask(job, width, height);
 
     let previousProblems: string[] | undefined;
     let lastPrompt: BuiltPrompt | undefined;
@@ -115,7 +122,7 @@ export async function runRenderJob(job: RenderJob, partial: Partial<RunnerDeps> 
       const winner = graded.filter((c) => c.passed).sort((a, b) => b.total - a.total)[0];
       if (winner) {
         update({ stage: 'lock' });
-        const finalImage = await lockOutsideMask(original, winner.image, mask);
+        const finalImage = relit ? winner.image : await lockOutsideMask(original, winner.image, mask);
         update({ stage: 'store', status: 'done', result: { finalImage, chosenId: winner.id, prompt: prompt.text } });
         return job;
       }
@@ -126,7 +133,7 @@ export async function runRenderJob(job: RenderJob, partial: Partial<RunnerDeps> 
     // No round passed: hand the best candidate back for review, still locked.
     const best = job.candidates.slice().sort((a, b) => b.total - a.total)[0];
     update({ stage: 'lock' });
-    const finalImage = await lockOutsideMask(original, best.image, mask);
+    const finalImage = relit ? best.image : await lockOutsideMask(original, best.image, mask);
     update({ stage: 'store', status: 'needs_review', result: { finalImage, chosenId: best.id, prompt: lastPrompt!.text } });
     return job;
   } catch (err: any) {
