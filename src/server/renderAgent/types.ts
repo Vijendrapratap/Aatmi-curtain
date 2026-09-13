@@ -52,11 +52,11 @@ export interface Candidate {
   passed: boolean;
 }
 
+/** The chosen, pixel-locked image. Candidates live on the job itself, never duplicated here. */
 export interface RenderResult {
   finalImage: string;
   chosenId: string;
   prompt: string;
-  candidates: Candidate[];
 }
 
 export interface RenderJob {
@@ -67,6 +67,8 @@ export interface RenderJob {
   stage: JobStage;
   round: number;
   candidates: Candidate[];
+  /** Detected window for a room_stage job; kept so a later candidate choice can rebuild the same mask. */
+  windowBbox?: Bbox;
   result?: RenderResult;
   error?: string;
   createdAt: number;

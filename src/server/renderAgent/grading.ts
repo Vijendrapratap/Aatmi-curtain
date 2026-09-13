@@ -48,8 +48,8 @@ export function buildGradePrompt(
   return { text };
 }
 
-export function gradeImages(kind: RenderJobKind, original: string, swatches: string[], candidate: string): string[] {
-  return kind === 'fabric_swap' ? [original, ...swatches, candidate] : [original, ...swatches, candidate];
+export function gradeImages(_kind: RenderJobKind, original: string, swatches: string[], candidate: string): string[] {
+  return [original, ...swatches, candidate];
 }
 
 export function parseGrade(raw: string, kind: RenderJobKind): GradeItem[] {
@@ -79,4 +79,18 @@ export function passes(items: GradeItem[]): boolean {
 
 export function reasonsBelowThreshold(items: GradeItem[]): string[] {
   return items.filter((i) => i.score < MIN_ITEM_SCORE).map((i) => `${i.key}: ${i.reason}`);
+}
+
+/**
+ * What to tell the model about the previous round. Below-threshold items when there are any;
+ * otherwise the two weakest items, so a candidate that only failed the total rule still gets feedback.
+ */
+export function retryFeedback(items: GradeItem[]): string[] {
+  const below = reasonsBelowThreshold(items);
+  if (below.length > 0) return below;
+  return items
+    .slice()
+    .sort((a, b) => a.score - b.score)
+    .slice(0, 2)
+    .map((i) => `${i.key}: ${i.reason}`);
 }

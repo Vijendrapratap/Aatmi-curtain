@@ -1,7 +1,7 @@
 // src/server/renderAgent/runner.test.ts
 import { describe, it, expect, vi } from 'vitest';
 import sharp from 'sharp';
-import { runRenderJob, CANDIDATES_PER_ROUND, MAX_ROUNDS } from './runner';
+import { runRenderJob, lockCandidate, CANDIDATES_PER_ROUND, MAX_ROUNDS } from './runner';
 import { JobStore } from './jobs';
 import { RUBRICS } from './grading';
 import { FatalError, RetryableError } from './errors';
@@ -37,8 +37,9 @@ describe('runRenderJob fabric_swap', () => {
     expect(out.status).toBe('done');
     expect(generate).toHaveBeenCalledTimes(CANDIDATES_PER_ROUND);
     expect(ask).toHaveBeenCalledTimes(CANDIDATES_PER_ROUND);
-    expect(out.result?.candidates).toHaveLength(3);
-    expect(out.result?.chosenId).toBe(out.result?.candidates[0].id);
+    expect(out.candidates).toHaveLength(3);
+    expect(out.result).not.toHaveProperty('candidates');
+    expect(out.result?.chosenId).toBe(out.candidates[0].id);
     expect(out.result?.prompt).toContain('Replace the Top');
     expect(stages).toEqual(expect.arrayContaining(['generate', 'grade', 'lock', 'store']));
     // seeds differ per candidate
@@ -81,8 +82,27 @@ describe('runRenderJob fabric_swap', () => {
     expect(generate).toHaveBeenCalledTimes(CANDIDATES_PER_ROUND * MAX_ROUNDS);
     const secondRoundPrompt = generate.mock.calls[CANDIDATES_PER_ROUND][0].prompt;
     expect(secondRoundPrompt).toContain('Previous attempt problems, avoid these: target_zones: bad zone');
-    expect(out.result?.candidates).toHaveLength(6);
+    expect(out.candidates).toHaveLength(6);
     expect(out.result?.finalImage).toBeTruthy(); // best candidate, locked
+  });
+
+  it('keeps the round going when one candidate never generates', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    try {
+      const store = new JobStore();
+      const job = store.create(await fabricInput(), 'k');
+      const blue = await solid(40, 50, [0, 0, 255]);
+      const generate = vi.fn<(req: GenerateRequest) => Promise<string>>(async (req) => {
+        if (req.seed === 102) throw new RetryableError('exhausted');
+        return blue;
+      });
+      const out = await runRenderJob(job, { generate, ask: async () => gradeReply(8), sleep: async () => undefined });
+      expect(out.status).toBe('done');
+      expect(out.candidates).toHaveLength(2);
+      expect(warn).toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+    }
   });
 
   it('picks the highest passing total, not the first', async () => {
@@ -92,7 +112,7 @@ describe('runRenderJob fabric_swap', () => {
     let g = 0;
     const scores = [7, 9, 8];
     const out = await runRenderJob(job, { generate: async () => blue, ask: async () => gradeReply(scores[g++]), sleep: async () => undefined });
-    expect(out.result?.chosenId).toBe(out.result?.candidates[1].id);
+    expect(out.result?.chosenId).toBe(out.candidates[1].id);
   });
 });
 
@@ -116,5 +136,18 @@ describe('runRenderJob room_stage', () => {
     const out = await runRenderJob(job, { generate: vi.fn(), ask: vi.fn(), detectWindow: async () => { throw new FatalError('no window', 'NO_WINDOW_DETECTED'); }, sleep: async () => undefined });
     expect(out.status).toBe('failed');
     expect(out.error).toBe('no window');
+  });
+});
+
+describe('lockCandidate', () => {
+  it('locks any candidate of a finished job against the same mask', async () => {
+    const store = new JobStore();
+    const job = store.create(await fabricInput(), 'k');
+    const blue = await solid(40, 50, [0, 0, 255]);
+    const out = await runRenderJob(job, { generate: async () => blue, ask: async () => gradeReply(8), sleep: async () => undefined });
+    const other = out.candidates[2];
+    const locked = await lockCandidate(out, other.id);
+    expect(locked.startsWith('data:image/png;base64,')).toBe(true);
+    await expect(lockCandidate(out, 'nope')).rejects.toBeInstanceOf(FatalError);
   });
 });

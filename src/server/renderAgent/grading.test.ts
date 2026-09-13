@@ -1,6 +1,6 @@
 // src/server/renderAgent/grading.test.ts
 import { describe, it, expect } from 'vitest';
-import { buildGradePrompt, gradeImages, parseGrade, passes, total, reasonsBelowThreshold, RUBRICS, MIN_ITEM_SCORE, MIN_TOTAL_SCORE } from './grading';
+import { buildGradePrompt, gradeImages, parseGrade, passes, total, reasonsBelowThreshold, retryFeedback, RUBRICS, MIN_ITEM_SCORE, MIN_TOTAL_SCORE } from './grading';
 import { RetryableError } from './errors';
 
 const good = RUBRICS.fabric_swap.map((r) => ({ key: r.key, score: 8, reason: 'fine' }));
@@ -24,6 +24,14 @@ describe('buildGradePrompt', () => {
     expect(text).toContain('Upper header should now show Denim Floral (Image 2)');
     expect(text).toContain('"items"');
     expect(text.trim().endsWith('Output valid JSON only.')).toBe(true);
+  });
+  it('numbers every swatch and the candidate last with two changes', () => {
+    const { text } = buildGradePrompt('fabric_swap', {
+      changes: [{ zoneName: 'Upper header', fabricName: 'A' }, { zoneName: 'Floor hem', fabricName: 'B' }],
+    });
+    expect(text).toContain('Image 2: swatch of A.');
+    expect(text).toContain('Image 3: swatch of B.');
+    expect(text).toContain('Image 4: the candidate render to grade.');
   });
   it('orders images original, swatches, candidate', () => {
     expect(gradeImages('fabric_swap', 'o', ['s1', 's2'], 'c')).toEqual(['o', 's1', 's2', 'c']);
@@ -61,5 +69,18 @@ describe('passes', () => {
   });
   it('fails on total below 35', () => {
     expect(passes(good.map((g) => ({ ...g, score: 6 })))).toBe(false);
+  });
+});
+
+describe('retryFeedback', () => {
+  it('uses the below-threshold reasons when there are any', () => {
+    const items = good.map((g, i) => (i === 0 ? { ...g, score: 3, reason: 'wrong zone' } : g));
+    expect(retryFeedback(items)).toEqual(['target_zones: wrong zone']);
+  });
+  it('falls back to the two lowest items, lowest first, when nothing is below threshold', () => {
+    const scores = [9, 6, 8, 7, 10];
+    const items = good.map((g, i) => ({ ...g, score: scores[i], reason: `r${i}` }));
+    expect(reasonsBelowThreshold(items)).toEqual([]);
+    expect(retryFeedback(items)).toEqual(['other_zones_unchanged: r1', 'no_artifacts: r3']);
   });
 });
