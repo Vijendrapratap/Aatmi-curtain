@@ -51,6 +51,8 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
     setGeneratedImageUrl(null);
     setHasCanvasFrame(false);
     setStatus(null);
+    setRenderJob(null);
+    setChosenCandidateId(null);
     setDesignName(`${currentTemplate.name} · ${new Date().toLocaleDateString()}`);
   }, [templateId]);
 
@@ -98,6 +100,8 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
     if (!activeRegionId) return;
     assignFabricToRegion(activeRegionId, fabricId);
     setGeneratedImageUrl(null);
+    setRenderJob(null);
+    setChosenCandidateId(null);
   }, [activeRegionId, assignFabricToRegion]);
 
   const safeRegions = currentTemplate?.regions ?? [];
@@ -105,6 +109,8 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ onOpenNewStyle }
     if (target === 'all') assignFabricToAllRegions(safeRegions.map((r) => r.id), fabricId);
     else assignFabricToRegion(target, fabricId);
     setGeneratedImageUrl(null);
+    setRenderJob(null);
+    setChosenCandidateId(null);
   }, [safeRegions, assignFabricToRegion, assignFabricToAllRegions]);
 
   const handleRender = async () => {

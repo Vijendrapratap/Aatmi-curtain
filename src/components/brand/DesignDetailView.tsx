@@ -202,11 +202,9 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
                 })}
               </ul>
             </div>
-            {design.render_kind !== 'photoreal' && (
-              <button type="button" disabled={isRendering || !template} title={template ? undefined : 'The curtain style for this design is no longer available'} onClick={handlePhotoreal} className="btn btn-primary btn-block">
-                <Sparkles className={`h-3.5 w-3.5 ${isRendering ? 'animate-spin' : ''}`} />{isRendering ? (activeJob ? STAGE_COPY[activeJob.stage] : 'Starting…') : 'Render'}
-              </button>
-            )}
+            <button type="button" disabled={isRendering || !template} title={template ? undefined : 'The curtain style for this design is no longer available'} onClick={handlePhotoreal} className="btn btn-primary btn-block">
+              <Sparkles className={`h-3.5 w-3.5 ${isRendering ? 'animate-spin' : ''}`} />{isRendering ? (activeJob ? STAGE_COPY[activeJob.stage] : 'Starting…') : design.render_kind === 'photoreal' ? 'Rerun render' : 'Render'}
+            </button>
             <p className="text-[11px] text-[var(--color-text-tertiary)]">Uses 1 monthly render · about a minute.</p>
           </div>
         </div>
