@@ -47,29 +47,45 @@ Size rules: images under 240 px wide are refused (the analyzer has nothing to wo
 ```mermaid
 flowchart TB
     subgraph Browser["Browser (React SPA)"]
-        GP["GeneratePage.tsx"]
+        SI["SignIn.tsx · InviteAccept.tsx"]
+        GP["GeneratePage.tsx\n(design · fabrics · light)"]
+        RP["RoomPage.tsx\n(room photo · light)"]
+        AP["AdminPage.tsx\n(brands · users · invites)"]
         RC["lib/renderClient.ts\nstartRender · pollRender · chooseCandidate"]
-        ST["zustand stores\nbrandStore (designs, fabrics, styles)\nstore (selected style)"]
+        AC["lib/accountClient.ts\nauth · admin · brand data"]
+        ST["brandStore (zustand)\nsession · designs · fabrics · styles\nwrite-through on every save"]
         GP --> RC
+        RP --> RC
         GP --> ST
+        RP --> ST
+        SI --> AC
+        AP --> AC
+        ST --> AC
     end
 
     subgraph Server["Express API (src/server)"]
+        AU["auth.ts + accountRoutes.ts\n/api/auth · /api/admin · /api/data\nscrypt passwords · cookie sessions · invites"]
+        DB[("db.ts · SQLite (node:sqlite)\nbrands · users · invites · sessions · documents")]
+        IS["imageStore.ts\nDATA_DIR/images → /images/…"]
         AN["POST /api/analyze-curtain\n(vision → areas)"]
-        RT["renderAgent/routes.ts\nPOST /api/render/jobs\nGET  /api/render/jobs/:id\nPOST /api/render/jobs/:id/choose"]
+        RT["renderAgent/routes.ts\nPOST /api/render/jobs (brand from session)\nGET  /api/render/jobs/:id\nPOST /api/render/jobs/:id/choose"]
         JS["renderAgent/jobs.ts\nin-memory JobStore, 30 min TTL"]
         RN["renderAgent/runner.ts"]
+        AU --> DB
+        AU --> IS
         RT --> JS
         RT --> RN
     end
 
     subgraph Pipeline["Render job (runner.ts)"]
-        P["prompt.ts\nzone descriptions → instruction"]
-        GEN["imageClient.generateImage ×3\n(parallel, distinct seeds)"]
-        GR["grading.ts + imageClient.askVision\n5-item rubric, 0–10 each"]
+        P["prompt.ts\narea descriptions + lighting → instruction"]
+        WD["windowDetect.ts\n(room_stage only)"]
+        GEN["imageClient.generateImage ×3\n(parallel, distinct seeds, 2K)"]
+        GR["grading.ts + imageClient.askVision\n5-item rubric, relight-aware"]
         SEL{"any pass?\n(no item < 6, total ≥ 35)"}
         RETRY["round 2 with grader's complaints\n(max 2 rounds)"]
-        LK["lock.ts (sharp)\ncomposite winner inside the curtain mask\nover the original"]
+        LK["lock.ts (sharp)\ncomposite winner inside the curtain / window mask\nskipped when relit"]
+        WD --> P
         P --> GEN --> GR --> SEL
         SEL -- no --> RETRY --> GEN
         SEL -- yes --> LK
@@ -80,10 +96,12 @@ flowchart TB
         CH["/api/v1/chat/completions\n(gemini-2.5-flash)"]
     end
 
+    AC -->|cookie session| AU
     RC -->|JSON, images as data URLs| RT
     GP -->|image| AN
     AN --> CH
     RN --> Pipeline
+    WD --> CH
     GEN --> IM
     GR --> CH
 ```
