@@ -1,5 +1,6 @@
 // src/server/renderAgent/windowDetect.ts
-import { askVision, VisionRequest } from './imageClient';
+import type { VisionRequest } from './imageClient';
+import { askVision } from './imageClient';
 import { FatalError, RetryableError } from './errors';
 import type { Bbox } from './types';
 
