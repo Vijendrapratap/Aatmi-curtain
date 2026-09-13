@@ -2,9 +2,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, Plus, Sparkles } from 'lucide-react';
 import { useBrandStore } from '../../lib/brandStore';
-import { useStudioStore } from '../../lib/store';
 import { deriveJourney } from '../../lib/journey';
-import { StylePickerModal } from './StylePickerModal';
 
 interface BrandDashboardProps {
   onOpenNewStyle: () => void;
@@ -12,8 +10,6 @@ interface BrandDashboardProps {
 
 export const BrandDashboard: React.FC<BrandDashboardProps> = ({ onOpenNewStyle }) => {
   const { brands, currentBrandId, currentUser, getModelConfig, designs, brandTemplates, brandFabrics, setActiveView, setActiveDesignId } = useBrandStore();
-  const { selectTemplate } = useStudioStore();
-  const [isPickerOpen, setIsPickerOpen] = useState(false);
 
   const brand = brands.find((b) => b.id === currentBrandId) || brands[0];
   const config = getModelConfig(brand.id);
@@ -40,15 +36,15 @@ export const BrandDashboard: React.FC<BrandDashboardProps> = ({ onOpenNewStyle }
       <div className="space-y-2">
         <p className="eyebrow-label">{brand.name}</p>
         <h1 className="page-title">Hello, {firstName}</h1>
-        <p className="page-lede">Pick a curtain style, dress each zone with a fabric, then see it in a real room.</p>
+        <p className="page-lede">Drop a curtain design, choose fabrics for its areas, and generate the client-ready image.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <button type="button" onClick={() => setIsPickerOpen(true)} className="brand-card brand-card-interactive flex flex-col items-start gap-3 p-6 text-left">
+        <button type="button" onClick={() => setActiveView('editor')} className="brand-card brand-card-interactive flex flex-col items-start gap-3 p-6 text-left">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-accent)] text-white"><Sparkles className="h-5 w-5" /></span>
           <span className="font-display text-[20px] font-semibold">Start a new design</span>
-          <span className="text-[13px] text-[var(--color-text-secondary)]">Choose one of {styles.length} curtain styles, then pick fabrics for its zones.</span>
-          <span className="mt-auto flex items-center gap-1 text-[13px] font-semibold text-[var(--color-accent)]">Choose a style <ArrowRight className="h-3.5 w-3.5" /></span>
+          <span className="text-[13px] text-[var(--color-text-secondary)]">Upload a curtain design or pick one of {styles.length} saved styles, choose fabrics, generate.</span>
+          <span className="mt-auto flex items-center gap-1 text-[13px] font-semibold text-[var(--color-accent)]">Open Generate <ArrowRight className="h-3.5 w-3.5" /></span>
         </button>
 
         {latest ? (
@@ -117,13 +113,6 @@ export const BrandDashboard: React.FC<BrandDashboardProps> = ({ onOpenNewStyle }
           </div>
         )}
       </section>
-
-      <StylePickerModal
-        isOpen={isPickerOpen}
-        onClose={() => setIsPickerOpen(false)}
-        onPick={(t) => { selectTemplate(t.id, brandTemplates); setActiveView('editor'); }}
-        onAddStyle={() => { setIsPickerOpen(false); onOpenNewStyle(); }}
-      />
     </div>
   );
 };

@@ -103,13 +103,20 @@ export const GeneratePage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTemplateId]);
 
-  const loadTemplate = (t: CurtainTemplate) => {
+  const [designTooSmall, setDesignTooSmall] = useState(false);
+
+  const loadTemplate = async (t: CurtainTemplate) => {
     cancelJob();
-    setDesign({ image: t.real_photo_url || t.original_image_url, name: t.name, areas: areasFromTemplate(t), templateId: t.id });
+    const image = t.real_photo_url || t.original_image_url;
+    setDesign({ image, name: t.name, areas: areasFromTemplate(t), templateId: t.id });
     setSlots({});
     setJob(null);
     setCurrent(null);
     setNotice(null);
+    const width = await probeWidth(image);
+    setDesignTooSmall(width > 0 && width < MIN_WIDTH);
+    if (width > 0 && width < MIN_WIDTH) setNotice({ kind: 'error', text: `"${t.name}" is only ${width} px wide, too small to generate from. Upload a photo of this curtain at ${GOOD_WIDTH} px or wider instead.` });
+    else if (width > 0 && width < GOOD_WIDTH) setNotice({ kind: 'info', text: `"${t.name}" is ${width} px wide. ${GOOD_WIDTH} px or wider gives a sharper result, but you can continue.` });
   };
 
   const analyze = async (image: string, name: string) => {
@@ -127,6 +134,7 @@ export const GeneratePage: React.FC = () => {
         polygon: Array.isArray(r.polygon_coords) && r.polygon_coords.length >= 3 ? r.polygon_coords : [{ x: 10, y: 5 + i * 30 }, { x: 90, y: 5 + i * 30 }, { x: 90, y: 30 + i * 30 }, { x: 10, y: 30 + i * 30 }],
       }));
       setDesign({ image, name, areas });
+      setDesignTooSmall(false);
       setSlots({});
       setJob(null);
       setCurrent(null);
@@ -391,10 +399,10 @@ export const GeneratePage: React.FC = () => {
             </ul>
           )}
           <div className="mt-auto pt-2">
-            <button type="button" className="btn btn-primary btn-block" disabled={!design || busy || isAnalyzing} onClick={handleGenerate}>
+            <button type="button" className="btn btn-primary btn-block" disabled={!design || busy || isAnalyzing || designTooSmall} onClick={handleGenerate}>
               <Sparkles className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />{isGenerating ? stageLine : current ? 'Generate again' : 'Generate'}
             </button>
-            <p className="mt-1.5 text-center text-[11px] text-[var(--color-text-tertiary)]">{changedAreas.length === 0 ? 'Choose at least one fabric' : `${changedAreas.length} of ${design?.areas.length} areas change · 3 variations · about a minute`}</p>
+            <p className="mt-1.5 text-center text-[11px] text-[var(--color-text-tertiary)]">{designTooSmall ? 'This design is too small to generate from' : changedAreas.length === 0 ? 'Choose at least one fabric' : `${changedAreas.length} of ${design?.areas.length} areas change · 3 variations · about a minute`}</p>
           </div>
         </section>
 

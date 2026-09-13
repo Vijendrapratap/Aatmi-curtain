@@ -35,7 +35,7 @@ export async function polygonMaskPng(zones: ZoneInput[], width: number, height: 
   return rasterizeMaskSvg(svg, featherPx);
 }
 
-export async function bboxMaskPng(bbox: Bbox, width: number, height: number, expandPct = 15, featherPx = 6): Promise<string> {
+export async function bboxMaskPng(bbox: Bbox, width: number, height: number, expandPct = 20, featherPx = 6): Promise<string> {
   const ex = (bbox.width * expandPct) / 100;
   const ey = (bbox.height * expandPct) / 100;
   const x1 = Math.max(0, bbox.x - ex);

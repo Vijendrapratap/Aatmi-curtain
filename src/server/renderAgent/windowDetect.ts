@@ -5,7 +5,7 @@ import { FatalError, RetryableError } from './errors';
 import type { Bbox } from './types';
 
 export const WINDOW_DETECT_PROMPT =
-  'Locate the window or curtain area in this room photo. If a window is visible, return a JSON object: {"hasWindow": true, "bbox": {"x": number, "y": number, "width": number, "height": number}} with values as percentages of the image from 0 to 100. If no window exists, return {"hasWindow": false}. Output valid JSON only.';
+  'Locate the window in this room photo. If a window is visible, return a JSON object: {"hasWindow": true, "bbox": {"x": number, "y": number, "width": number, "height": number}} where the box covers the whole window opening AND any existing curtains, drapes, sheers, rod, track or pelmet around it, from the top of the rod to where the curtains meet the floor, with values as percentages of the image from 0 to 100. If no window exists, return {"hasWindow": false}. Output valid JSON only.';
 
 export const NO_WINDOW_MESSAGE = "We couldn't find a window in this photo. Try a clearer shot of the wall with the window.";
 
