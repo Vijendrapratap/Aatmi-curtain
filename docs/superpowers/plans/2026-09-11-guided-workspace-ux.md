@@ -16,11 +16,7 @@
 - Nav is exactly: Home, Studio, Library, Designs. Settings and platform admin live in the account menu.
 - `activeView` union: `'dashboard' | 'editor' | 'library_styles' | 'library_fabrics' | 'design_detail' | 'settings_profile' | 'settings_models' | 'settings_team' | 'settings_billing' | 'platform_admin' | 'onboarding'`.
 - Every task ends with `npm run lint` (tsc) and `npm run build` passing, plus `npm test` once Task 1 exists.
-- Git identity is already `Vijendrapratap` / `44225657+Vijendrapratap@users.noreply.github.com`. Every commit message ends with:
-  ```
-  Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
-  Claude-Session: https://claude.ai/code/session_01QS1cmZ9VKXN6qTFtSypTTk
-  ```
+- Git identity is `Vijendrapratap` / `44225657+Vijendrapratap@users.noreply.github.com`.
 - A dev server may already be running on port 3000 or 3001. Scripts take the base URL from `APP_URL` (default `http://localhost:3000`).
 
 ## File Map
