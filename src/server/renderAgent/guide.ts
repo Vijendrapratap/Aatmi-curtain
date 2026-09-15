@@ -36,6 +36,24 @@ export async function drawAreaGuide(photo: string, zones: ZoneInput[]): Promise<
   return toDataUrl(out);
 }
 
+/** The image with a labelled 10% grid, so a vision model reads positions off the rulers instead of guessing them. */
+export async function drawPercentGrid(image: string): Promise<string> {
+  const { width, height } = await getImageSize(image);
+  const fs = Math.max(11, Math.round(Math.min(width, height) / 40));
+  const lines: string[] = [];
+  for (let p = 10; p < 100; p += 10) {
+    const x = (p / 100) * width, y = (p / 100) * height;
+    const w = p === 50 ? 2 : 1;
+    lines.push(`<line x1="${x}" y1="0" x2="${x}" y2="${height}" stroke="white" stroke-opacity="0.9" stroke-width="${w + 1}"/><line x1="${x}" y1="0" x2="${x}" y2="${height}" stroke="#FF2D55" stroke-width="${w}" stroke-dasharray="6 4"/>`);
+    lines.push(`<line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="white" stroke-opacity="0.9" stroke-width="${w + 1}"/><line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="#FF2D55" stroke-width="${w}" stroke-dasharray="6 4"/>`);
+    const label = (tx: number, ty: number, anchor: string) => `<text x="${tx}" y="${ty}" font-family="Arial, Helvetica, sans-serif" font-size="${fs}" font-weight="700" fill="#FF2D55" stroke="white" stroke-width="3" paint-order="stroke" text-anchor="${anchor}" dominant-baseline="central">${p}</text>`;
+    lines.push(label(x, fs * 0.8, 'middle'), label(x, height - fs * 0.8, 'middle'), label(fs * 0.4, y, 'start'), label(width - fs * 0.4, y, 'end'));
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">${lines.join('')}</svg>`;
+  const out = await sharp(toBuffer(image)).composite([{ input: Buffer.from(svg), blend: 'over' }]).png().toBuffer();
+  return toDataUrl(out);
+}
+
 /** A close-up of one area (its bounding box plus a small margin), upscaled so thin bands are legible. */
 export async function cropArea(image: string, zone: ZoneInput, padPct = 4, minWidth = 768): Promise<string> {
   const { width, height } = await getImageSize(image);

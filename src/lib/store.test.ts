@@ -6,6 +6,11 @@ const velvet = DEFAULT_TEMPLATES.find((t) => t.id === 'tpl-velvet-houndstooth')!
 const chevron = DEFAULT_TEMPLATES.find((t) => t.id === 'tpl-chevron-accent-band')!;
 
 describe('useStudioStore', () => {
+  it('starts with no style selected, so the Generate page opens empty', () => {
+    expect(useStudioStore.getInitialState().selectedTemplateId).toBe('');
+    expect(useStudioStore.getInitialState().assignments).toEqual([]);
+  });
+
   beforeEach(() => {
     useStudioStore.getState().selectTemplate(chevron.id, DEFAULT_TEMPLATES);
   });

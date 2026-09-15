@@ -3,7 +3,6 @@
 // and which fabric is assigned to each zone. Everything else lives in brandStore.
 import { create } from 'zustand';
 import { CurtainTemplate, FabricAssignment } from '../types/curtain';
-import { DEFAULT_TEMPLATES } from '../data/defaultCatalog';
 
 export interface StudioStoreState {
   selectedTemplateId: string;
@@ -32,13 +31,12 @@ function defaultAssignments(template: CurtainTemplate): FabricAssignment[] {
     }));
 }
 
-const initialTemplate = DEFAULT_TEMPLATES[0];
-
+// Nothing is selected until the user picks a style or uploads a photo; the Generate page opens empty.
 export const useStudioStore = create<StudioStoreState>((set, get) => ({
-  selectedTemplateId: initialTemplate.id,
-  activeRegionId: initialTemplate.regions[0]?.id ?? null,
+  selectedTemplateId: '',
+  activeRegionId: null,
   hoveredRegionId: null,
-  assignments: defaultAssignments(initialTemplate),
+  assignments: [],
 
   selectTemplate: (templateId, templates) => {
     const template = templates.find((t) => t.id === templateId);

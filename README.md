@@ -182,7 +182,7 @@ Tables: `brands`, `users`, `invites`, `sessions`, `documents(brand_id, collectio
 | Route | Purpose |
 | --- | --- |
 | `GET /api/health` | key presence and feature flags |
-| `POST /api/analyze-curtain` | `{ imageBase64, mimeType }` → `{ regions[] }` with `display_name`, `description`, `location`, `polygon_coords` |
+| `POST /api/analyze-curtain` | `{ imageBase64, mimeType }` → `{ regions[], source }` with `display_name`, `description`, `location`, `polygon_coords`; needs an OpenRouter key like rendering (`401 BAD_KEY`) |
 | `POST /api/render/jobs` | start a `fabric_swap` or `room_stage` job → `202 { jobId }`; `400` invalid, `401 BAD_KEY`, `402 QUOTA_EXCEEDED` |
 | `GET /api/render/jobs/:id` | `{ status, stage, round, candidates, result?, error? }`; poll every 2 s |
 | `POST /api/render/jobs/:id/choose` | `{ candidateId }` → re-locks that candidate and returns the updated job |
@@ -191,6 +191,8 @@ Tables: `brands`, `users`, `invites`, `sessions`, `documents(brand_id, collectio
 
 `fabric_swap` body: `{ kind, brandId, templateName, templatePhoto, zones[{ id, display_name, description, location, polygon_coords }], changes[{ regionId, fabricName, weave, colorHex, category, swatch }], curtainMask? }`.
 `room_stage` body: `{ kind, brandId, roomPhoto, curtainImage }`. All images are data URLs.
+
+Finding areas (`src/server/analyze.ts`) is two vision calls: the photo with a labelled 10% grid to propose areas, then the same photo plus the numbered outline guide to correct them. Results are clamped, tiny areas dropped, and seams within 3% snapped together. Model: `OPENROUTER_ANALYZE_MODEL`, default `google/gemini-3.7-flash` (on the chevron photo gemini-2.5-flash was 8 points off on seams, 3.7-flash within 2).
 
 Everything except `/api/health` and `/api/auth/*` requires a session, including `/images/…`. Render jobs are only visible to the brand that started them.
 

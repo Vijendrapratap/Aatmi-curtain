@@ -12,7 +12,7 @@ export const VISION_MODEL = process.env.OPENROUTER_VISION_MODEL || OPENROUTER_RE
 export const PROVIDER_TIMEOUT_MS = 120_000;
 
 export interface GenerateRequest { prompt: string; images: string[]; aspectRatio: string; seed: number; apiKey: string | null }
-export interface VisionRequest { prompt: string; images: string[]; apiKey: string | null }
+export interface VisionRequest { prompt: string; images: string[]; apiKey: string | null; model?: string }
 export interface ClientDeps { fetch?: typeof fetch; geminiFallback?: (req: GenerateRequest) => Promise<string> }
 
 function headers(key: string) {
@@ -103,7 +103,7 @@ export async function askVision(req: VisionRequest, deps: ClientDeps = {}): Prom
   const key = getEffectiveOpenRouterKey(req.apiKey);
   if (!key) throw new FatalError('OPENROUTER_API_KEY is not configured', 'BAD_KEY');
   const body = {
-    model: VISION_MODEL,
+    model: req.model || VISION_MODEL,
     temperature: 0.1,
     messages: [{ role: 'user', content: [{ type: 'text', text: req.prompt }, ...req.images.map((url) => ({ type: 'image_url', image_url: { url } }))] }],
   };
