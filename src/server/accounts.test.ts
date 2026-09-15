@@ -5,8 +5,10 @@ import os from 'node:os';
 import path from 'node:path';
 import { createDb, createBrand, listDocuments } from './db';
 import { hashPassword, verifyPassword, bootstrapAdmin, syncAdminFromEnv, login, createSession, getSessionUser, createInvite, acceptInvite, attachUser, getInviteStatus } from './auth';
-import { storeImage, externalizeImages } from './imageStore';
-import { createAuthRouter, createAdminRouter, createDataRouter } from './accountRoutes';
+import { storeImage, externalizeImages, removeOrphanImages } from './imageStore';
+import { createAuthRouter, createAdminRouter, createDataRouter, createModelConfigRouter } from './accountRoutes';
+import { SERVER_MODEL_CONFIGS } from './brandConfigs';
+import { putDocument } from './db';
 
 const PNG = 'data:image/png;base64,' + 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='.repeat(40);
 
@@ -86,6 +88,18 @@ describe('image store', () => {
     expect(storeImage(PNG, dir)).toBe(url);
     expect(storeImage('data:image/svg+xml;utf8,<svg/>', dir)).toBeNull();
   });
+  it('removes a deleted document\'s image files unless another document still uses them', () => {
+    const db = createDb(':memory:');
+    for (const n of ['a.png', 'b.png']) fs.writeFileSync(path.join(dir, n), 'x');
+    putDocument(db, 'b1', 'designs', 'd1', { image: '/images/a.png', previews: [{ image: '/images/b.png' }] });
+    putDocument(db, 'b1', 'fabrics', 'f1', { image_url: '/images/b.png' });
+    removeOrphanImages(db, { image: '/images/a.png', previews: [{ image: '/images/b.png' }] }, dir);
+    expect(fs.existsSync(path.join(dir, 'a.png'))).toBe(true); // d1 still references it
+    db.prepare('DELETE FROM documents WHERE id = ?').run('d1');
+    removeOrphanImages(db, { image: '/images/a.png', previews: [{ image: '/images/b.png' }] }, dir);
+    expect(fs.existsSync(path.join(dir, 'a.png'))).toBe(false);
+    expect(fs.existsSync(path.join(dir, 'b.png'))).toBe(true); // f1 still uses it
+  });
   it('externalizes nested images and leaves everything else alone', () => {
     const doc = { name: 'd', final_image_url: PNG, small: 'data:image/png;base64,AAAA', nested: [{ image: PNG }], n: 3 };
     const out = externalizeImages(doc, () => '/images/x.png');
@@ -114,6 +128,7 @@ describe('account routes', () => {
     app.use('/api/auth', createAuthRouter(db));
     app.use('/api/admin', createAdminRouter(db, { appUrl: () => 'https://app.test' }));
     app.use('/api/data', createDataRouter(db, (v) => externalizeImages(v, () => '/images/stored.png')));
+    app.use('/api/model-config', createModelConfigRouter());
     await new Promise<void>((r) => { server = app.listen(0, r); });
     base = `http://127.0.0.1:${server.address().port}`;
   });
@@ -170,6 +185,25 @@ describe('account routes', () => {
     expect((await call('staff', 'GET', '/api/data/nope')).status).toBe(404);
     expect((await call('staff', 'DELETE', '/api/data/designs/d1')).body.deleted).toBe(true);
     expect((await call('staff', 'GET', '/api/data/designs')).body.items).toHaveLength(0);
+  });
+
+  it('model config is per signed-in brand, never exposes the key, and ignores quota fields', async () => {
+    expect((await call('nobody', 'GET', '/api/model-config')).status).toBe(401);
+    const first = await call('staff', 'GET', '/api/model-config');
+    expect(first.status).toBe(200);
+    expect(first.body.config.byo_api_key_encrypted).toBeNull();
+    const brandId = first.body.config.brand_id;
+    const patched = await call('staff', 'PATCH', '/api/model-config', { key_mode: 'brand_byo_key', byo_provider: 'openrouter', byo_api_key_encrypted: 'sk-or-secret', monthly_generations_used: 0, monthly_generation_cap: 999999 });
+    expect(patched.status).toBe(200);
+    expect(patched.body.config.key_mode).toBe('brand_byo_key');
+    expect(JSON.stringify(patched.body)).not.toContain('sk-or-secret');
+    const stored = SERVER_MODEL_CONFIGS.get(brandId)!;
+    expect(stored.byo_api_key_encrypted).toBe('sk-or-secret');
+    expect(stored.monthly_generation_cap).not.toBe(999999);
+    // a patch without the key keeps the stored one
+    await call('staff', 'PATCH', '/api/model-config', { key_mode: 'brand_byo_key' });
+    expect(SERVER_MODEL_CONFIGS.get(brandId)!.byo_api_key_encrypted).toBe('sk-or-secret');
+    expect((await call('staff', 'PATCH', '/api/model-config', { key_mode: 'nope' })).status).toBe(400);
   });
 
   it('suspended brands cannot sign in; logout clears the session', async () => {

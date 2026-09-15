@@ -38,16 +38,18 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClos
 
   if (!isOpen) return null;
 
-  const handleFilesSelected = (files: FileList | null) => {
+  const handleFilesSelected = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
-    const newItems: UploadQueueItem[] = Array.from(files).map((file, i) => ({
+    // Data URLs, not object URLs: the server swaps them for stored /images/ files, so they survive a reload.
+    const readAsDataUrl = (file: File) => new Promise<string>((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(r.result as string); r.onerror = reject; r.readAsDataURL(file); });
+    const newItems: UploadQueueItem[] = await Promise.all(Array.from(files).map(async (file, i) => ({
       id: 'bulk-' + Date.now() + '-' + i,
       name: file.name.replace(/\.[^/.]+$/, ''),
       file,
-      previewUrl: URL.createObjectURL(file),
-      status: 'pending',
-    }));
+      previewUrl: await readAsDataUrl(file),
+      status: 'pending' as const,
+    })));
 
     setQueue((prev) => [...prev, ...newItems]);
   };

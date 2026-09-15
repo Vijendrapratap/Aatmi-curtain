@@ -11,7 +11,7 @@ import {
 } from '../types/brand';
 import { CurtainTemplate, Fabric, FabricAssignment } from '../types/curtain';
 import { DEFAULT_FABRICS, DEFAULT_TEMPLATES } from '../data/defaultCatalog';
-import { fetchMe, loginApi, logoutApi, acceptInviteApi, loadCollection, putDocumentApi, deleteDocumentApi, SessionInfo } from './accountClient';
+import { fetchMe, loginApi, logoutApi, acceptInviteApi, loadCollection, putDocumentApi, deleteDocumentApi, getModelConfigApi, patchModelConfigApi, SessionInfo } from './accountClient';
 
 export interface BrandStoreState {
   // Tenancy & Auth
@@ -29,7 +29,6 @@ export interface BrandStoreState {
   signOut: () => Promise<void>;
   acceptInvite: (token: string, name: string, password: string) => Promise<void>;
   updateBrand: (brandId: string, updates: Partial<Brand>) => Promise<Brand>;
-  createBrand: (brandData: Omit<Brand, 'id' | 'created_at' | 'activated_at' | 'status' | 'onboarding_step'>) => Promise<Brand>;
 
   // Model Configurations
   modelConfigs: Record<string, BrandModelConfig>;
@@ -124,10 +123,25 @@ export const useBrandStore = create<BrandStoreState>((set, get) => {
     applyRootTheme('#5B4FE0');
   }
 
-  /** Writes a brand-owned document through to the server; platform defaults are never persisted. */
+  /**
+   * Writes a brand-owned document through to the server; platform defaults are never persisted.
+   * Saves of the same document run one after another so a slow large save cannot overtake a later small one,
+   * and the server's copy (images swapped for /images/ URLs) replaces the local one unless it was edited meanwhile.
+   */
+  const saveChains = new Map<string, Promise<void>>();
+  const stateKey = { designs: 'designs', fabrics: 'brandFabrics', templates: 'brandTemplates' } as const;
   const persist = (collection: 'designs' | 'fabrics' | 'templates', doc: { id: string; brand_id?: string | null }) => {
     if (get().session !== 'signed_in' || !doc.brand_id || doc.brand_id !== get().currentBrandId) return;
-    putDocumentApi(collection, doc as any).catch((e) => console.warn(`Could not save ${collection}/${doc.id}:`, e?.message || e));
+    const key = `${collection}/${doc.id}`;
+    const run = (saveChains.get(key) ?? Promise.resolve())
+      .then(() => putDocumentApi(collection, doc as any))
+      .then((saved) => {
+        const k = stateKey[collection];
+        set((state) => ({ [k]: (state[k] as any[]).map((d) => (d === doc ? saved : d)) }) as any);
+      })
+      .catch((e) => console.warn(`Could not save ${collection}/${doc.id}:`, e?.message || e))
+      .finally(() => { if (saveChains.get(key) === run) saveChains.delete(key); });
+    saveChains.set(key, run);
   };
   const unpersist = (collection: 'designs' | 'fabrics' | 'templates', id: string) => {
     if (get().session !== 'signed_in') return;
@@ -150,7 +164,7 @@ export const useBrandStore = create<BrandStoreState>((set, get) => {
       brandFabrics: SEEDED_FABRICS,
     });
     if (brand) {
-      set((state) => ({ modelConfigs: { ...state.modelConfigs, [brand.id]: { id: `config-${brand.id}`, brand_id: brand.id, region_edit_provider: 'openrouter_unified', room_preview_provider: 'openrouter_unified', key_mode: 'platform_managed', monthly_generation_cap: (info as any).brand?.monthly_generation_cap ?? 200, monthly_generations_used: (info as any).brand?.monthly_generations_used ?? 0, updated_at: new Date().toISOString(), updated_by_user_id: 'server' } } }));
+      getModelConfigApi().then((config) => set((state) => ({ modelConfigs: { ...state.modelConfigs, [brand.id]: config } }))).catch((e) => console.warn('Could not load model settings:', e?.message || e));
       try {
         const [designs, fabrics, templates] = await Promise.all([loadCollection<Design>('designs'), loadCollection<Fabric>('fabrics'), loadCollection<CurtainTemplate>('templates')]);
         set({ designs: [...designs].reverse(), brandFabrics: [...fabrics.reverse(), ...SEEDED_FABRICS], brandTemplates: [...templates.reverse(), ...SEEDED_TEMPLATES], activeDesignId: designs.length ? designs[designs.length - 1].id : null });
@@ -205,64 +219,8 @@ export const useBrandStore = create<BrandStoreState>((set, get) => {
         brands: state.brands.map((b) => (b.id === brandId ? updatedBrand : b)),
       }));
 
-      // Persist to server if available
-      try {
-        fetch(`/api/brands/${brandId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updates),
-        });
-      } catch (e) {
-        // local state remains updated
-      }
-
+      // Brand name, accent and status are changed by the platform admin (PATCH /api/admin/brands/:id); this only updates the screen.
       return updatedBrand;
-    },
-
-    createBrand: async (brandData) => {
-      const id = 'brand-' + brandData.slug + '-' + Date.now().toString(36);
-      const newBrand: Brand = {
-        ...brandData,
-        id,
-        status: 'onboarding',
-        onboarding_step: 1,
-        created_at: new Date().toISOString(),
-        activated_at: null,
-      };
-
-      set((state) => ({
-        brands: [...state.brands, newBrand],
-        currentBrandId: id,
-      }));
-
-      applyRootTheme(newBrand.theme_accent_color);
-
-      // Create model config for new brand
-      const newConfig: BrandModelConfig = {
-        id: `config-${id}`,
-        brand_id: id,
-        region_edit_provider: 'flux_kontext',
-        room_preview_provider: 'nano_banana_pro',
-        key_mode: 'platform_managed',
-        monthly_generation_cap: 200,
-        monthly_generations_used: 0,
-        updated_at: new Date().toISOString(),
-        updated_by_user_id: get().currentUser?.id || 'system',
-      };
-
-      set((state) => ({
-        modelConfigs: { ...state.modelConfigs, [id]: newConfig },
-      }));
-
-      try {
-        await fetch('/api/brands', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newBrand),
-        });
-      } catch (e) {}
-
-      return newBrand;
     },
 
     modelConfigs: INITIAL_MODEL_CONFIGS,
@@ -297,14 +255,13 @@ export const useBrandStore = create<BrandStoreState>((set, get) => {
       }));
 
       try {
-        fetch(`/api/brands/${brandId}/model-config`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updates),
-        });
-      } catch (e) {}
-
-      return updated;
+        const saved = await patchModelConfigApi(updates as Record<string, unknown>);
+        set((state) => ({ modelConfigs: { ...state.modelConfigs, [brandId]: saved } }));
+        return saved;
+      } catch (e: any) {
+        console.warn('Could not save model settings:', e?.message || e);
+        return updated;
+      }
     },
 
     testProviderConnection: async (provider, apiKey, type = 'region_edit') => {

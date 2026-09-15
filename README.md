@@ -186,13 +186,13 @@ Tables: `brands`, `users`, `invites`, `sessions`, `documents(brand_id, collectio
 | `POST /api/render/jobs` | start a `fabric_swap` or `room_stage` job → `202 { jobId }`; `400` invalid, `401 BAD_KEY`, `402 QUOTA_EXCEEDED` |
 | `GET /api/render/jobs/:id` | `{ status, stage, round, candidates, result?, error? }`; poll every 2 s |
 | `POST /api/render/jobs/:id/choose` | `{ candidateId }` → re-locks that candidate and returns the updated job |
-| `GET/POST /api/brands…` | brand and model-config records (in-memory) |
-| `POST /api/test-provider` | checks a key against OpenRouter |
+| `GET/PATCH /api/model-config` | the signed-in brand's providers, key mode and BYO key (key is stored in memory, never returned; quota fields are admin-only) |
+| `POST /api/test-provider` | checks a key against OpenRouter (signed-in users) |
 
 `fabric_swap` body: `{ kind, brandId, templateName, templatePhoto, zones[{ id, display_name, description, location, polygon_coords }], changes[{ regionId, fabricName, weave, colorHex, category, swatch }], curtainMask? }`.
 `room_stage` body: `{ kind, brandId, roomPhoto, curtainImage }`. All images are data URLs.
 
-Routes under `/api/generate-curtain-*` and `/api/ai/*` are older paths kept for the settings screens; the Generate page does not use them.
+Everything except `/api/health` and `/api/auth/*` requires a session, including `/images/…`. Render jobs are only visible to the brand that started them.
 
 ---
 
@@ -234,7 +234,7 @@ Tests cover every pipeline stage with real behaviour and only the provider calls
 
 - Only photographed fabrics are offered in the picker; the drawn SVG tiles in the built-in catalog are filtered out because the model cannot reproduce them convincingly.
 - The built-in sample styles are 250–450 px wide. They generate, but a real photo at 1500 px or wider gives a sharper background. Add your own styles through the Library or straight into Generate.
-- Built-in styles carry hand-drawn area polygons in `src/data/defaultCatalog.ts`. Wrong polygons show up as piled-up labels and half-replaced borders; the Greek key style was redrawn from its photo on 2026-09-14, the others have not been audited. To see exactly what the model is told, render the guide with `drawAreaGuide` from `src/server/renderAgent/guide.ts`.
+- Built-in styles carry hand-drawn area polygons in `src/data/defaultCatalog.ts`. Wrong polygons show up as piled-up labels and half-replaced borders; the Greek key style was redrawn from its photo on 2026-09-14 and the chevron band style on 2026-09-15; the other four have not been audited. Each built-in style must have its own photo (`src/data/defaultCatalog.test.ts` enforces it): four placeholder styles that borrowed another style's photo were removed on 2026-09-15. To see exactly what the model is told, render the guide with `drawAreaGuide` from `src/server/renderAgent/guide.ts`.
 - The background outside the curtain (or outside the window box, for staging) is guaranteed pixel-identical to the source. A manually chosen runner-up is re-locked on the server before it is shown.
 - A job costs one image generation and one grading call per variation (default 1; up to 3), doubled if a retry round runs. About 25 s per variation.
 - Render jobs are in memory: a server restart drops running jobs. Saved designs, fabrics, styles and accounts persist in `DATA_DIR`; back that directory up.

@@ -105,4 +105,22 @@ describe('render routes', () => {
   it('404s an unknown job', async () => {
     expect((await fetch(`${base}/api/render/jobs/nope`)).status).toBe(404);
   });
+
+  it('hides a job from a user of another brand', async () => {
+    const jobId = await finishedJobId(); // created for brand-test
+    const asBrand = async (brandId: string) => {
+      const app = express();
+      app.use(express.json());
+      app.use((req: any, _res, next) => { req.user = { brand_id: brandId }; next(); });
+      app.use('/api/render', createRenderRouter({ store }));
+      const s = await new Promise<any>((r) => { const x = app.listen(0, () => r(x)); });
+      const b = `http://127.0.0.1:${s.address().port}`;
+      const get = (await fetch(`${b}/api/render/jobs/${jobId}`)).status;
+      const choose = (await fetch(`${b}/api/render/jobs/${jobId}/choose`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ candidateId: 'x' }) })).status;
+      s.close();
+      return { get, choose };
+    };
+    expect(await asBrand('brand-other')).toEqual({ get: 404, choose: 404 });
+    expect((await asBrand('brand-test')).get).toBe(200);
+  });
 });

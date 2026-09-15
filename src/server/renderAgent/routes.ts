@@ -68,16 +68,23 @@ export function createRenderRouter(opts: { store?: JobStore; deps?: Partial<Runn
     res.status(202).json({ jobId: job.id });
   });
 
-  router.get('/jobs/:id', (req, res) => {
+  // A job is only visible to the brand that started it. Admins (no brand) and unauthenticated test setups see every job.
+  const ownedJob = (req: express.Request, res: express.Response) => {
     const job = store.get(req.params.id);
-    if (!job) return res.status(404).json({ error: 'Job not found or expired' });
-    res.json(store.publicView(job));
+    const brand = (req as any).user?.brand_id as string | undefined;
+    if (!job || (brand && job.brandId !== brand)) { res.status(404).json({ error: 'Job not found or expired' }); return null; }
+    return job;
+  };
+
+  router.get('/jobs/:id', (req, res) => {
+    const job = ownedJob(req, res);
+    if (job) res.json(store.publicView(job));
   });
 
   // Picking a runner-up has to re-run the pixel lock, or the client would show an unlocked candidate.
   router.post('/jobs/:id/choose', async (req, res) => {
-    const job = store.get(req.params.id);
-    if (!job) return res.status(404).json({ error: 'Job not found or expired' });
+    const job = ownedJob(req, res);
+    if (!job) return;
     if (!TERMINAL_STATUSES.includes(job.status)) return res.status(409).json({ error: 'This render is still running.', code: 'NOT_FINISHED' });
     const parsed = chooseSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: 'candidateId is required' });

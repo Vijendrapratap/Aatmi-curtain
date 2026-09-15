@@ -142,6 +142,11 @@ export function putDocument(db: Db, brandId: string, collection: Collection, id:
     .run(brandId, collection, id, JSON.stringify(doc), now());
 }
 
+export function getDocument(db: Db, brandId: string, collection: Collection, id: string): unknown | undefined {
+  const r = db.prepare('SELECT json FROM documents WHERE brand_id = ? AND collection = ? AND id = ?').get(brandId, collection, id) as { json: string } | undefined;
+  return r ? JSON.parse(r.json) : undefined;
+}
+
 export function deleteDocument(db: Db, brandId: string, collection: Collection, id: string): boolean {
   const r = db.prepare('DELETE FROM documents WHERE brand_id = ? AND collection = ? AND id = ?').run(brandId, collection, id);
   return Number(r.changes) > 0;

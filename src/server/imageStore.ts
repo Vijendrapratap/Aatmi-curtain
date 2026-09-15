@@ -3,7 +3,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { DATA_DIR } from './db';
+import { DATA_DIR, Db } from './db';
 
 export const IMAGES_DIR = path.join(DATA_DIR, 'images');
 const EXT: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
@@ -38,4 +38,14 @@ export function externalizeImages<T>(value: T, store: (dataUrl: string) => strin
     return out as T;
   }
   return value;
+}
+
+/** After a document is deleted: unlink its image files unless another document still references them (files are shared by content hash). */
+export function removeOrphanImages(db: Db, deletedDoc: unknown, dir = IMAGES_DIR): void {
+  const names = new Set((JSON.stringify(deletedDoc ?? null).match(/\/images\/[\w.-]+/g) ?? []).map((u) => u.slice('/images/'.length)));
+  const inUse = db.prepare('SELECT 1 FROM documents WHERE json LIKE ? LIMIT 1');
+  for (const name of names) {
+    if (inUse.get(`%/images/${name}%`)) continue;
+    fs.rmSync(path.join(dir, name), { force: true });
+  }
 }

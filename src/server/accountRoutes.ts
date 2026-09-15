@@ -1,10 +1,12 @@
 // src/server/accountRoutes.ts
-// /api/auth (login, invites), /api/admin (brands, invites), /api/data (per-brand documents).
+// /api/auth (login, invites), /api/admin (brands, invites), /api/data (per-brand documents), /api/model-config (a brand's own model and key settings).
 import express from 'express';
 import { z } from 'zod';
-import { Db, COLLECTIONS, Collection, createBrand, getBrand, listBrands, listBrandUsers, listDocuments, putDocument, deleteDocument, updateBrand, getUserByEmail, insertUser } from './db';
+import { Db, COLLECTIONS, Collection, createBrand, getBrand, listBrands, listBrandUsers, listDocuments, putDocument, getDocument, deleteDocument, updateBrand, getUserByEmail, insertUser, now } from './db';
 import { AuthedRequest, acceptInvite, clearSessionCookie, createInvite, createSession, deleteSession, getInviteStatus, hashPassword, login, publicBrand, publicUser, requireAdmin, requireUser, setSessionCookie } from './auth';
-import { externalizeImages } from './imageStore';
+import { externalizeImages, removeOrphanImages } from './imageStore';
+import { SERVER_MODEL_CONFIGS, getOrCreateBrandConfig } from './brandConfigs';
+import { BrandModelConfig } from '../types/brand';
 
 export function createAuthRouter(db: Db): express.Router {
   const r = express.Router();
@@ -129,7 +131,46 @@ export function createDataRouter(db: Db, externalize: <T>(v: T) => T = externali
     if (!c) return res.status(404).json({ error: 'Unknown collection.' });
     const brandId = brandOf(req, res);
     if (!brandId) return;
-    res.json({ deleted: deleteDocument(db, brandId, c, req.params.id) });
+    const existing = getDocument(db, brandId, c, req.params.id);
+    const deleted = deleteDocument(db, brandId, c, req.params.id);
+    if (deleted) removeOrphanImages(db, existing);
+    res.json({ deleted });
+  });
+
+  return r;
+}
+
+/** A brand's own model / key settings. Quota fields are admin-only (PATCH /api/admin/brands/:id) and the key is never sent back. */
+export function createModelConfigRouter(): express.Router {
+  const r = express.Router();
+  r.use(requireUser);
+  const redact = (c: BrandModelConfig) => ({ ...c, byo_api_key_encrypted: c.byo_api_key_encrypted ? '••••' : null });
+  const brandOf = (req: AuthedRequest, res: express.Response): string | null => {
+    if (!req.user!.brand_id) { res.status(403).json({ error: 'Admins have no brand settings. Sign in as a brand user.', code: 'NO_BRAND' }); return null; }
+    return req.user!.brand_id;
+  };
+  const patchSchema = z.object({
+    region_edit_provider: z.string().min(1).optional(),
+    room_preview_provider: z.string().min(1).optional(),
+    key_mode: z.enum(['platform_managed', 'brand_byo_key']).optional(),
+    byo_provider: z.string().nullable().optional(),
+    byo_api_key_encrypted: z.string().min(1).nullable().optional(), // omitted = keep the stored key
+  });
+
+  r.get('/', (req: AuthedRequest, res) => {
+    const brandId = brandOf(req, res);
+    if (brandId) res.json({ config: redact(getOrCreateBrandConfig(brandId)) });
+  });
+
+  r.patch('/', (req: AuthedRequest, res) => {
+    const brandId = brandOf(req, res);
+    if (!brandId) return;
+    const parsed = patchSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: 'Invalid model settings.' });
+    const existing = getOrCreateBrandConfig(brandId);
+    const updated = { ...existing, ...parsed.data, updated_at: now(), updated_by_user_id: req.user!.id } as BrandModelConfig;
+    SERVER_MODEL_CONFIGS.set(brandId, updated);
+    res.json({ config: redact(updated) });
   });
 
   return r;

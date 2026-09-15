@@ -47,3 +47,6 @@ export type Collection = 'designs' | 'fabrics' | 'templates';
 export const loadCollection = async <T>(c: Collection) => (await call<{ items: T[] }>('GET', `/api/data/${c}`)).items;
 export const putDocumentApi = <T extends { id: string }>(c: Collection, doc: T) => call<{ item: T }>('PUT', `/api/data/${c}/${encodeURIComponent(doc.id)}`, doc).then((r) => r.item);
 export const deleteDocumentApi = (c: Collection, id: string) => call<{ deleted: boolean }>('DELETE', `/api/data/${c}/${encodeURIComponent(id)}`);
+
+export const getModelConfigApi = () => call<{ config: any }>('GET', '/api/model-config').then((r) => r.config);
+export const patchModelConfigApi = (patch: Record<string, unknown>) => call<{ config: any }>('PATCH', '/api/model-config', patch).then((r) => r.config);

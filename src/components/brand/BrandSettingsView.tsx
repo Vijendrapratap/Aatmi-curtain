@@ -108,8 +108,9 @@ export const BrandSettingsView: React.FC<BrandSettingsViewProps> = ({
       room_preview_provider: roomProvider,
       key_mode: keyMode,
       byo_provider: keyMode === 'brand_byo_key' ? byoProvider : null,
-      byo_api_key_encrypted: byoKeyInput ? byoKeyInput : initialConfig.byo_api_key_encrypted,
+      ...(byoKeyInput ? { byo_api_key_encrypted: byoKeyInput } : {}), // the server keeps the stored key and never returns it
     });
+    setByoKeyInput('');
 
     setSaveNotice('Settings updated successfully');
     setIsDirty(false);
