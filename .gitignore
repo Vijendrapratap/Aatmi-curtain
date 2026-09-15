@@ -8,4 +8,4 @@ dist-ssr
 .DS_Store
 *.log
 .superpowers/
-data/
+/data/
