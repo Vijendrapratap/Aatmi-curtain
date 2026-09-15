@@ -24,8 +24,6 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
 
   const [copied, setCopied] = useState(false);
   const [selectedPreviewIndex, setSelectedPreviewIndex] = useState(0);
-  const [sliderPos, setSliderPos] = useState(50);
-  const [isDragging, setIsDragging] = useState(false);
   const [isRendering, setIsRendering] = useState(false);
   const [activeJob, setActiveJob] = useState<RenderJobView | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -179,25 +177,9 @@ export const DesignDetailView: React.FC<DesignDetailViewProps> = ({ onOpenSpecSh
 
         {currentPreview ? (
           <div className="space-y-3">
-            <div
-              className="relative mx-auto aspect-[16/10] w-full max-w-4xl cursor-ew-resize touch-none overflow-hidden rounded-2xl bg-neutral-100 shadow-lg select-none"
-              onMouseDown={() => setIsDragging(true)}
-              onMouseUp={() => setIsDragging(false)}
-              onMouseLeave={() => setIsDragging(false)}
-              onMouseMove={(e) => { if (!isDragging) return; const r = e.currentTarget.getBoundingClientRect(); setSliderPos(Math.round((Math.max(0, Math.min(e.clientX - r.left, r.width)) / r.width) * 100)); }}
-              onTouchMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); const t = e.touches[0]; setSliderPos(Math.round((Math.max(0, Math.min(t.clientX - r.left, r.width)) / r.width) * 100)); }}
-            >
-              <img src={currentPreview.room_photo_url} alt="Room before" className="absolute inset-0 h-full w-full object-cover" />
-              <span className="absolute right-3 bottom-3 rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-semibold text-white">Before</span>
-              <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderPos}%` }}>
-                <img src={currentPreview.output_url} alt="Room with curtain" className="absolute inset-0 h-full w-full max-w-none object-cover" style={{ width: '100%', height: '100%' }} />
-                <span className="absolute bottom-3 left-3 rounded-full bg-[var(--color-accent)] px-2.5 py-1 text-[11px] font-semibold text-white">With your curtain</span>
-              </div>
-              <div className="pointer-events-none absolute top-0 bottom-0 w-0.5 bg-white shadow-xl" style={{ left: `${sliderPos}%` }}>
-                <div className="absolute top-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--color-border-subtle)] bg-white text-xs font-bold text-[var(--color-accent)] shadow-lg">↔</div>
-              </div>
+            <div className="media-frame mx-auto w-full max-w-4xl overflow-hidden rounded-2xl">
+              <img src={currentPreview.output_url} alt="Room with your curtain" className="block h-auto w-full" />
             </div>
-            <p className="text-center text-[12px] text-[var(--color-text-tertiary)]">Drag the handle to compare before and after.</p>
             <div className="flex items-center gap-3 overflow-x-auto pb-1">
               {roomPreviews.map((p, idx) => (
                 <button key={p.id} type="button" onClick={() => setSelectedPreviewIndex(idx)} className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border-2 ${selectedPreviewIndex === idx ? 'border-[var(--color-accent)]' : 'border-transparent opacity-70 hover:opacity-100'}`}>
